@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
 #include "Base32.h"
 
 #include <QHash>
-#include <QVariant>
 
 constexpr quint64 MASK_40BIT = quint64(0xF8) << 32;
 constexpr quint64 MASK_35BIT = quint64(0x7C0000000);
@@ -43,10 +42,10 @@ constexpr quint8 ASCII_a = static_cast<quint8>('a');
 constexpr quint8 ASCII_z = static_cast<quint8>('z');
 constexpr quint8 ASCII_EQ = static_cast<quint8>('=');
 
-QVariant Base32::decode(const QByteArray& encodedData)
+QByteArray Base32::decode(const QByteArray& encodedData)
 {
     if (encodedData.size() <= 0) {
-        return QVariant::fromValue(QByteArray(""));
+        return {};
     }
 
     if (encodedData.size() % 8 != 0) {
@@ -139,7 +138,7 @@ QVariant Base32::decode(const QByteArray& encodedData)
     Q_ASSERT(encodedData.size() == i);
     Q_ASSERT(nBytes == o);
 
-    return QVariant::fromValue(data);
+    return data;
 }
 
 QByteArray Base32::encode(const QByteArray& data)

@@ -1,8 +1,8 @@
 set(autotype_mac_SOURCES AutoTypeMac.cpp)
 
 add_library(keepassxc-autotype-cocoa MODULE ${autotype_mac_SOURCES})
-set_target_properties(keepassxc-autotype-cocoa PROPERTIES LINK_FLAGS "-framework Foundation -framework AppKit -framework Carbon -framework ScreenCaptureKit")
-target_link_libraries(keepassxc-autotype-cocoa ${PROGNAME} Qt5::Core Qt5::Widgets)
+set_target_properties(keepassxc-autotype-cocoa PROPERTIES LINK_FLAGS "-framework Foundation -framework AppKit -framework Carbon")
+target_link_libraries(keepassxc-autotype-cocoa ${PROGNAME} Qt6::Core Qt6::Widgets)
 
 install(TARGETS keepassxc-autotype-cocoa
         LIBRARY DESTINATION ${PLUGIN_INSTALL_DIR} COMPONENT Runtime)

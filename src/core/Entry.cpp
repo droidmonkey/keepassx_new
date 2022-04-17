@@ -28,6 +28,7 @@
 #include "core/Totp.h"
 
 #include <QDir>
+#include <QLatin1StringView>
 #include <QRegularExpression>
 #include <QStringBuilder>
 #include <QUrl>
@@ -439,11 +440,14 @@ QString Entry::attribute(const QString& key) const
 int Entry::size() const
 {
     int size = 0;
-    size += attributes()->attributesSize();
-    size += autoTypeAssociations()->associationsSize();
-    size += attachments()->attachmentsSize();
-    size += customData()->dataSize();
-    for (const QString& tag : tags().split(TagDelimiterRegex, Qt::SkipEmptyParts)) {
+    const QRegularExpression delimiter(",|:|;");
+
+    size += this->attributes()->attributesSize();
+    size += this->autoTypeAssociations()->associationsSize();
+    size += this->attachments()->attachmentsSize();
+    size += this->customData()->dataSize();
+    const QStringList tags = this->tags().split(delimiter, Qt::SkipEmptyParts);
+    for (const QString& tag : tags) {
         size += tag.toUtf8().size();
     }
 
@@ -677,39 +681,40 @@ void Entry::setOverrideUrl(const QString& url)
 
 void Entry::setTags(const QString& tags)
 {
-    auto taglist = tags.split(TagDelimiterRegex, Qt::SkipEmptyParts);
+    static QRegularExpression rx(R"(\\,|\\t|\\;)");
+    auto tagList = tags.split(rx, Qt::SkipEmptyParts);
     // Trim whitespace before/after tag text
-    for (auto& tag : taglist) {
-        tag = tag.trimmed();
+    for (auto itr = tagList.begin(); itr != tagList.end(); ++itr) {
+        *itr = itr->trimmed();
     }
     // Remove duplicates
-    taglist = Tools::asSet(taglist).values();
+    tagList = Tools::asSet(tagList).values();
     // Sort alphabetically
-    taglist.sort();
-    set(m_data.tags, taglist);
+    tagList.sort();
+    set(m_data.tags, tagList);
 }
 
 void Entry::addTag(const QString& tag)
 {
     auto cleanTag = tag.trimmed();
-    cleanTag.remove(TagDelimiterRegex);
+    cleanTag.remove(QRegularExpression(R"(\\,|\\t|\\;)"));
 
-    auto taglist = m_data.tags;
-    if (!taglist.contains(cleanTag)) {
-        taglist.append(cleanTag);
-        taglist.sort();
-        set(m_data.tags, taglist);
+    auto tagList = m_data.tags;
+    if (!tagList.contains(cleanTag)) {
+        tagList.append(cleanTag);
+        tagList.sort();
+        set(m_data.tags, tagList);
     }
 }
 
 void Entry::removeTag(const QString& tag)
 {
     auto cleanTag = tag.trimmed();
-    cleanTag.remove(TagDelimiterRegex);
+    cleanTag.remove(QRegularExpression(R"(\\,|\\t|\\;)"));
 
-    auto taglist = m_data.tags;
-    if (taglist.removeAll(tag) > 0) {
-        set(m_data.tags, taglist);
+    auto tagList = m_data.tags;
+    if (tagList.removeAll(tag) > 0) {
+        set(m_data.tags, tagList);
     }
 }
 
@@ -1391,7 +1396,9 @@ Database* Entry::database()
 
 QString Entry::maskPasswordPlaceholders(const QString& str) const
 {
-    return QString{str}.replace(QStringLiteral("{PASSWORD}"), QStringLiteral("******"), Qt::CaseInsensitive);
+    QString result = str;
+    result.replace(QRegularExpression(R"(\\{PASSWORD\\})", QRegularExpression::CaseInsensitiveOption), "******");
+    return result;
 }
 
 Entry* Entry::resolveReference(const QString& str) const
@@ -1460,10 +1467,10 @@ Entry::PlaceholderType Entry::placeholderType(const QString& placeholder) const
     if (!placeholder.startsWith(QStringLiteral("{")) || !placeholder.endsWith(QStringLiteral("}"))) {
         return PlaceholderType::NotPlaceholder;
     }
-    if (placeholder.startsWith(QStringLiteral("{S:"))) {
+    if (placeholder.startsWith(QLatin1StringView("{S:"))) {
         return PlaceholderType::CustomAttribute;
     }
-    if (placeholder.startsWith(QStringLiteral("{REF:"))) {
+    if (placeholder.startsWith(QLatin1StringView("{REF:"))) {
         return PlaceholderType::Reference;
     }
     if (placeholder.startsWith(QStringLiteral("{T-CONV:"), Qt::CaseInsensitive)) {
@@ -1515,8 +1522,8 @@ QString Entry::resolveUrl(const QString& url) const
 {
     QString newUrl = url;
 
-    static const QRegularExpression fileRegEx(R"(^(?:[A-Za-z]:)?[\\/])");
-    if (url.contains(fileRegEx)) {
+    QRegularExpression fileRegEx(R"(^([a-z]:)?[\\\\/])", QRegularExpression::CaseInsensitiveOption);
+    if (fileRegEx.match(newUrl).hasMatch()) {
         // Match possible file paths without the scheme and convert it to a file URL
         newUrl = QDir::fromNativeSeparators(newUrl);
         newUrl = QUrl::fromLocalFile(newUrl).toString();
@@ -1525,9 +1532,8 @@ QString Entry::resolveUrl(const QString& url) const
         for (int i = 1; i < cmdList.size(); ++i) {
             QString& cmd = cmdList[i];
             // Don't pass arguments to the resolveUrl function (they look like URL's)
-            if (!cmd.startsWith("-") && !cmd.startsWith("/")) {
-                static const QRegularExpression quotesRegEx("['\"]");
-                return resolveUrl(cmd.remove(quotesRegEx));
+            if (!cmdList[i].startsWith("-") && !cmdList[i].startsWith("/")) {
+                return resolveUrl(cmdList[i].remove(QRegularExpression("'|\"")));
             }
         }
 

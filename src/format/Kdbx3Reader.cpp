@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -70,7 +70,7 @@ bool Kdbx3Reader::readDatabaseImpl(QIODevice* device,
         raiseError(cipherStream.errorString());
         return false;
     }
-    if (!cipherStream.open(QIODevice::ReadOnly)) {
+    if (!cipherStream.open(QIODeviceBase::ReadOnly)) {
         raiseError(cipherStream.errorString());
         return false;
     }
@@ -84,7 +84,7 @@ bool Kdbx3Reader::readDatabaseImpl(QIODevice* device,
     }
 
     HashedBlockStream hashedStream(&cipherStream);
-    if (!hashedStream.open(QIODevice::ReadOnly)) {
+    if (!hashedStream.open(QIODeviceBase::ReadOnly)) {
         raiseError(hashedStream.errorString());
         return false;
     }
@@ -97,7 +97,7 @@ bool Kdbx3Reader::readDatabaseImpl(QIODevice* device,
     } else {
         ioCompressor.reset(new QtIOCompressor(&hashedStream));
         ioCompressor->setStreamFormat(QtIOCompressor::GzipFormat);
-        if (!ioCompressor->open(QIODevice::ReadOnly)) {
+        if (!ioCompressor->open(QIODeviceBase::ReadOnly)) {
             raiseError(ioCompressor->errorString());
             return false;
         }

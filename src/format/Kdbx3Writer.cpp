@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -66,7 +66,7 @@ bool Kdbx3Writer::writeDatabase(QIODevice* device, Database* db)
 
     // write header
     QBuffer header;
-    header.open(QIODevice::WriteOnly);
+    header.open(QIODeviceBase::WriteOnly);
 
     writeMagicNumbers(&header, KeePass2::SIGNATURE_1, KeePass2::SIGNATURE_2, db->formatVersion());
 
@@ -102,14 +102,14 @@ bool Kdbx3Writer::writeDatabase(QIODevice* device, Database* db)
     // write cipher stream
     SymmetricCipherStream cipherStream(device);
     cipherStream.init(mode, SymmetricCipher::Encrypt, finalKey, encryptionIV);
-    if (!cipherStream.open(QIODevice::WriteOnly)) {
+    if (!cipherStream.open(QIODeviceBase::WriteOnly)) {
         raiseError(cipherStream.errorString());
         return false;
     }
     CHECK_RETURN_FALSE(writeData(&cipherStream, startBytes));
 
     HashedBlockStream hashedStream(&cipherStream);
-    if (!hashedStream.open(QIODevice::WriteOnly)) {
+    if (!hashedStream.open(QIODeviceBase::WriteOnly)) {
         raiseError(hashedStream.errorString());
         return false;
     }
@@ -122,7 +122,7 @@ bool Kdbx3Writer::writeDatabase(QIODevice* device, Database* db)
     } else {
         ioCompressor.reset(new QtIOCompressor(&hashedStream));
         ioCompressor->setStreamFormat(QtIOCompressor::GzipFormat);
-        if (!ioCompressor->open(QIODevice::WriteOnly)) {
+        if (!ioCompressor->open(QIODeviceBase::WriteOnly)) {
             raiseError(ioCompressor->errorString());
             return false;
         }
@@ -141,7 +141,7 @@ bool Kdbx3Writer::writeDatabase(QIODevice* device, Database* db)
     xmlWriter.writeDatabase(outputDevice, db, &randomStream, headerHash);
 
     // Explicitly close/reset streams so they are flushed and we can detect
-    // errors. QIODevice::close() resets errorString() etc.
+    // errors. QIODeviceBase::close() resets errorString() etc.
     if (ioCompressor) {
         ioCompressor->close();
     }

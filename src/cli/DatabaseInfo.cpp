@@ -21,7 +21,6 @@
 #include "core/Clock.h"
 #include "core/DatabaseStats.h"
 #include "core/Global.h"
-#include "core/Group.h"
 #include "core/Metadata.h"
 
 #include <QCommandLineParser>

@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2016 Lennart Glauer <mail@lennart-glauer.de>
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
 #include <QtPlugin>
 #include <memory>
 
-#include "autotype/AutoTypePlatformPlugin.h"
 #include "autotype/AutoTypeAction.h"
+#include "autotype/AutoTypePlatformPlugin.h"
 
 class AutoTypePlatformMac : public QObject, public AutoTypePlatformInterface
 {
@@ -45,7 +45,7 @@ public:
     bool raiseOwnWindow() override;
 
     void sendChar(const QChar& ch, bool isKeyDown);
-    void sendKey(Qt::Key key, bool isKeyDown, Qt::KeyboardModifiers modifiers = 0);
+    void sendKey(Qt::Key key, bool isKeyDown, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
 
 private:
     static int windowLayer(CFDictionaryRef window);
@@ -65,4 +65,4 @@ private:
     AutoTypePlatformMac* const m_platform;
 };
 
-#endif  // KEEPASSX_AUTOTYPEMAC_H
+#endif // KEEPASSX_AUTOTYPEMAC_H

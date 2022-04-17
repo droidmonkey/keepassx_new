@@ -61,7 +61,7 @@ bool OpVaultReader::decryptBandEntry(const QJsonObject& bandEntry,
     QByteArray kBA = QByteArray::fromBase64(entKStr.toUtf8());
     const int wantKsize = 16 + 32 + 32 + 32;
     if (kBA.size() != wantKsize) {
-        qCritical("Malformed \"k\" size; expected %d got %d\n", wantKsize, kBA.size());
+        qCritical("Malformed \"k\" size; expected %d got %" PRIdQPTRDIFF "\n", wantKsize, kBA.size());
         return false;
     }
 
@@ -150,12 +150,12 @@ Entry* OpVaultReader::processBandEntry(const QJsonObject& bandEntry, const QDir&
     bool timeInfoOk = false;
     if (bandEntry.contains("created")) {
         auto createdTime = static_cast<uint>(bandEntry["created"].toInt());
-        ti.setCreationTime(QDateTime::fromTime_t(createdTime, Qt::UTC));
+        ti.setCreationTime(QDateTime::fromSecsSinceEpoch(createdTime, Qt::UTC));
         timeInfoOk = true;
     }
     if (bandEntry.contains("updated")) {
         auto updateTime = static_cast<uint>(bandEntry["updated"].toInt());
-        ti.setLastModificationTime(QDateTime::fromTime_t(updateTime, Qt::UTC));
+        ti.setLastModificationTime(QDateTime::fromSecsSinceEpoch(updateTime, Qt::UTC));
         timeInfoOk = true;
     }
     // "tx" is modified by sync, not by user; maybe a custom attribute?

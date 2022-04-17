@@ -40,6 +40,6 @@ if(WITH_XC_BROWSER)
                 PasskeyUtils.cpp)
     endif()
 
-    add_library(browser STATIC ${browser_SOURCES})
-    target_link_libraries(browser Qt5::Core Qt5::Concurrent Qt5::Widgets Qt5::Network ${BOTAN_LIBRARIES})
+    add_library(keepassxcbrowser STATIC ${keepassxcbrowser_SOURCES})
+    target_link_libraries(keepassxcbrowser Qt6::Core Qt6::Concurrent Qt6::Widgets Qt6::Network ${BOTAN_LIBRARIES})
 endif()

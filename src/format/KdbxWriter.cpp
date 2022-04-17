@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 KeePassXC Team <team@keepassxc.org>
+ * Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,9 +70,8 @@ void KdbxWriter::extractDatabase(QByteArray& xmlOutput, Database* db)
 {
     QBuffer buffer;
     buffer.setBuffer(&xmlOutput);
-    buffer.open(QIODevice::WriteOnly);
-    KdbxXmlWriter::BinaryIdxMap idxMap;
-    KdbxXmlWriter writer(db->formatVersion(), idxMap);
+    buffer.open(QIODeviceBase::WriteOnly);
+    KdbxXmlWriter writer(db->formatVersion());
     writer.disableInnerStreamProtection(true);
     writer.writeDatabase(&buffer, db);
 }

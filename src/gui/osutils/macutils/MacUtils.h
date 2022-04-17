@@ -24,8 +24,11 @@
 #include <Carbon/Carbon.h>
 
 #include <QColor>
+#include <QHash>
 #include <QPointer>
 #include <QScopedPointer>
+#include <QSharedPointer>
+#include <QString>
 #include <qwindowdefs.h>
 
 class MacUtils : public OSUtilsBase

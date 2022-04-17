@@ -1,4 +1,4 @@
-#  Copyright (C) 2019 KeePassXC Team
+#  Copyright (C) 2023 KeePassXC Team
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ set(cli_SOURCES
         Show.cpp)
 
 add_library(cli STATIC ${cli_SOURCES})
-target_link_libraries(cli ${ZXCVBN_LIBRARIES} Qt5::Core)
+target_link_libraries(cli Qt6::Core)
 
 find_package(Readline)
 

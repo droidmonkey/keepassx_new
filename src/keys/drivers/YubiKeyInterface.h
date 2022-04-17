@@ -22,6 +22,12 @@
 #include "YubiKey.h"
 #include <QMultiMap>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+#include <QRecursiveMutex>
+#else
+#include <QMutex>
+#endif
+
 /**
  * Abstract base class to manage the interfaces to hardware key(s)
  */

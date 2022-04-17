@@ -1,6 +1,6 @@
 
 /*
- * Copyright (C) 2018 KeePassXC Team <team@keepassxc.org>
+ * Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ bool KdbxReader::readDatabase(QIODevice* device, QSharedPointer<const CompositeK
     m_protectedStreamKey.clear();
 
     StoreDataStream headerStream(device);
-    headerStream.open(QIODevice::ReadOnly);
+    headerStream.open(QIODeviceBase::ReadOnly);
 
     // read KDBX magic numbers
     quint32 sig1, sig2, version;

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2012 Felix Geyer <debfx@fobos.de>
+ *  Copyright (C) 2023 Felix Geyer <debfx@fobos.de>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 
 #include <QFile>
 #include <QFileInfo>
+#include <QRegularExpression>
 #include <QTextCodec>
 
 #include "core/Endian.h"
@@ -468,7 +469,7 @@ Group* KeePass1Reader::readGroup(QIODevice* cipherStream)
             groupIdSet = true;
             break;
         case 0x0002:
-            group->setName(QString::fromUtf8(fieldData.constData()));
+            group->setName(QString::fromUtf8(fieldData.toStdString().c_str()));
             break;
         case 0x0003: {
             if (fieldSize != 5) {
@@ -617,19 +618,19 @@ Entry* KeePass1Reader::readEntry(QIODevice* cipherStream)
             break;
         }
         case 0x0004:
-            entry->setTitle(QString::fromUtf8(fieldData.constData()));
+            entry->setTitle(QString::fromUtf8(fieldData.toStdString().c_str()));
             break;
         case 0x0005:
-            entry->setUrl(QString::fromUtf8(fieldData.constData()));
+            entry->setUrl(QString::fromUtf8(fieldData.toStdString().c_str()));
             break;
         case 0x0006:
-            entry->setUsername(QString::fromUtf8(fieldData.constData()));
+            entry->setUsername(QString::fromUtf8(fieldData.toStdString().c_str()));
             break;
         case 0x0007:
-            entry->setPassword(QString::fromUtf8(fieldData.constData()));
+            entry->setPassword(QString::fromUtf8(fieldData.toStdString().c_str()));
             break;
         case 0x0008:
-            parseNotes(QString::fromUtf8(fieldData.constData()), entry.data());
+            parseNotes(QString::fromUtf8(fieldData.toStdString().c_str()), entry.data());
             break;
         case 0x0009: {
             if (fieldSize != 5) {
@@ -677,7 +678,7 @@ Entry* KeePass1Reader::readEntry(QIODevice* cipherStream)
             break;
         }
         case 0x000D:
-            binaryName = QString::fromUtf8(fieldData.constData());
+            binaryName = QString::fromUtf8(fieldData.toStdString().c_str());
             break;
         case 0x000E:
             if (fieldSize != 0) {
@@ -701,8 +702,8 @@ Entry* KeePass1Reader::readEntry(QIODevice* cipherStream)
 
 void KeePass1Reader::parseNotes(const QString& rawNotes, Entry* entry)
 {
-    QRegExp sequenceRegexp("Auto-Type(?:-(\\d+))?: (.+)", Qt::CaseInsensitive, QRegExp::RegExp2);
-    QRegExp windowRegexp("Auto-Type-Window(?:-(\\d+))?: (.+)", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QRegularExpression sequenceRegexp("Auto-Type(?:-(\\d+))?: (.+)", QRegularExpression::CaseInsensitiveOption);
+    QRegularExpression windowRegexp("Auto-Type-Window(?:-(\\d+))?: (.+)", QRegularExpression::CaseInsensitiveOption);
     QHash<int, QString> sequences;
     QMap<int, QStringList> windows;
 
@@ -713,23 +714,25 @@ void KeePass1Reader::parseNotes(const QString& rawNotes, Entry* entry)
     for (QString line : rawNotesLines) {
         line.remove("\r");
 
-        if (sequenceRegexp.exactMatch(line)) {
-            if (sequenceRegexp.cap(1).isEmpty()) {
-                entry->setDefaultAutoTypeSequence(sequenceRegexp.cap(2));
+        auto sequenceMatch = sequenceRegexp.match(line);
+        auto windowMatch = windowRegexp.match(line);
+        if (sequenceMatch.hasMatch()) {
+            if (sequenceMatch.captured(1).isEmpty()) {
+                entry->setDefaultAutoTypeSequence(sequenceMatch.captured(2));
             } else {
-                sequences[sequenceRegexp.cap(1).toInt()] = sequenceRegexp.cap(2);
+                sequences[sequenceMatch.captured(1).toInt()] = sequenceMatch.captured(2);
             }
 
             lastLineAutoType = true;
-        } else if (windowRegexp.exactMatch(line)) {
+        } else if (windowMatch.hasMatch()) {
             int nr;
-            if (windowRegexp.cap(1).isEmpty()) {
+            if (windowMatch.captured(1).isEmpty()) {
                 nr = -1; // special number that matches no other sequence
             } else {
-                nr = windowRegexp.cap(1).toInt();
+                nr = windowMatch.captured(1).toInt();
             }
 
-            windows[nr].append(windowRegexp.cap(2));
+            windows[nr].append(windowMatch.captured(2));
 
             lastLineAutoType = true;
         } else {

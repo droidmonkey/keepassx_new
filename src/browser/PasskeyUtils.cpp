@@ -158,18 +158,19 @@ QJsonArray PasskeyUtils::parseCredentialTypes(const QJsonArray& credentialTypes)
         }));
     } else {
         for (const auto current : credentialTypes) {
-            if (current["type"] != BrowserPasskeys::PUBLIC_KEY || current["alg"].isUndefined()) {
+            const auto currentObject = current.toObject();
+            if (currentObject["type"] != BrowserPasskeys::PUBLIC_KEY || currentObject["alg"].isUndefined()) {
                 continue;
             }
 
-            const auto currentAlg = current["alg"].toInt();
+            const auto currentAlg = currentObject["alg"].toInt();
             if (currentAlg != WebAuthnAlgorithms::ES256 && currentAlg != WebAuthnAlgorithms::RS256
                 && currentAlg != WebAuthnAlgorithms::EDDSA) {
                 continue;
             }
 
             credTypesAndPubKeyAlgs.push_back(QJsonObject({
-                {"type", current["type"]},
+                {"type", currentObject["type"]},
                 {"alg", currentAlg},
             }));
         }

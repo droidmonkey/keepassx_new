@@ -34,15 +34,15 @@ bool LayeredStream::isSequential() const
     return true;
 }
 
-bool LayeredStream::open(QIODevice::OpenMode mode)
+bool LayeredStream::open(QIODeviceBase::OpenMode mode)
 {
     if (isOpen()) {
         qWarning("LayeredStream::open: Device is already open.");
         return false;
     }
 
-    bool readMode = (mode & QIODevice::ReadOnly);
-    bool writeMode = (mode & QIODevice::WriteOnly);
+    bool readMode = (mode & QIODeviceBase::ReadOnly);
+    bool writeMode = (mode & QIODeviceBase::WriteOnly);
 
     if (readMode && writeMode) {
         qWarning("LayeredStream::open: Reading and writing at the same time is not supported.");

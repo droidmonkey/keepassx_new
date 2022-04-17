@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2017 Toni Spets <toni.spets@iki.fi>
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,10 +24,9 @@
 #include "core/Tools.h"
 
 #include <QCoreApplication>
-#include <QDebug>
 #include <QDir>
 #include <QProcessEnvironment>
-#include <QTextCodec>
+#include <QStringConverter>
 #include <QXmlStreamReader>
 
 KeeAgentSettings::KeeAgentSettings()
@@ -203,7 +202,7 @@ void KeeAgentSettings::setFileName(const QString& fileName)
 bool KeeAgentSettings::readBool(QXmlStreamReader& reader)
 {
     reader.readNext();
-    bool ret = (reader.text().startsWith("t", Qt::CaseInsensitive));
+    bool ret = (reader.text().toString().startsWith("t", Qt::CaseInsensitive));
     reader.readNext(); // tag end
     return ret;
 }
@@ -234,37 +233,37 @@ bool KeeAgentSettings::fromXml(const QByteArray& ba)
         return false;
     }
 
-    if (reader.qualifiedName() != "EntrySettings") {
+    if (reader.qualifiedName().toString() != "EntrySettings") {
         m_error = QCoreApplication::translate("KeeAgentSettings", "Invalid KeeAgent settings file structure.");
         return false;
     }
 
     while (!reader.error() && reader.readNextStartElement()) {
-        if (reader.name() == "AllowUseOfSshKey") {
+        if (reader.name().toString() == "AllowUseOfSshKey") {
             m_allowUseOfSshKey = readBool(reader);
-        } else if (reader.name() == "AddAtDatabaseOpen") {
+        } else if (reader.name().toString() == "AddAtDatabaseOpen") {
             m_addAtDatabaseOpen = readBool(reader);
-        } else if (reader.name() == "RemoveAtDatabaseClose") {
+        } else if (reader.name().toString() == "RemoveAtDatabaseClose") {
             m_removeAtDatabaseClose = readBool(reader);
-        } else if (reader.name() == "UseConfirmConstraintWhenAdding") {
+        } else if (reader.name().toString() == "UseConfirmConstraintWhenAdding") {
             m_useConfirmConstraintWhenAdding = readBool(reader);
-        } else if (reader.name() == "UseLifetimeConstraintWhenAdding") {
+        } else if (reader.name().toString() == "UseLifetimeConstraintWhenAdding") {
             m_useLifetimeConstraintWhenAdding = readBool(reader);
-        } else if (reader.name() == "LifetimeConstraintDuration") {
+        } else if (reader.name().toString() == "LifetimeConstraintDuration") {
             m_lifetimeConstraintDuration = readInt(reader);
-        } else if (reader.name() == "Location") {
+        } else if (reader.name().toString() == "Location") {
             while (!reader.error() && reader.readNextStartElement()) {
-                if (reader.name() == "SelectedType") {
+                if (reader.name().toString() == "SelectedType") {
                     reader.readNext();
                     m_selectedType = reader.text().toString();
                     reader.readNext();
-                } else if (reader.name() == "AttachmentName") {
+                } else if (reader.name().toString() == "AttachmentName") {
                     reader.readNext();
                     m_attachmentName = reader.text().toString();
                     reader.readNext();
-                } else if (reader.name() == "SaveAttachmentToTempFile") {
+                } else if (reader.name().toString() == "SaveAttachmentToTempFile") {
                     m_saveAttachmentToTempFile = readBool(reader);
-                } else if (reader.name() == "FileName") {
+                } else if (reader.name().toString() == "FileName") {
                     reader.readNext();
                     m_fileName = reader.text().toString();
                     reader.readNext();
@@ -292,8 +291,6 @@ QByteArray KeeAgentSettings::toXml() const
     QByteArray ba;
     QXmlStreamWriter writer(&ba);
 
-    // real KeeAgent can only read UTF-16
-    writer.setCodec(QTextCodec::codecForName("UTF-16"));
     writer.setAutoFormatting(true);
     writer.setAutoFormattingIndent(2);
 
@@ -331,7 +328,12 @@ QByteArray KeeAgentSettings::toXml() const
     writer.writeEndElement(); // EntrySettings
     writer.writeEndDocument();
 
-    return ba;
+    // Real KeeAgent can only read UTF-16
+    auto toDecUtf16 = QStringDecoder(QStringConverter::Utf8);
+    auto sUtf16 = toDecUtf16(ba);
+    auto toEncUtf16 = QStringEncoder(QStringEncoder::Utf16);
+    auto baUtf16 = toEncUtf16(sUtf16);
+    return baUtf16;
 }
 
 /**

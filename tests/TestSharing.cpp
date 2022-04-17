@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2018 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -83,7 +83,7 @@ void TestSharing::testKeySerialization()
     writer.writeEndDocument();
     QXmlStreamReader reader(buffer);
     reader.readNextStartElement();
-    QVERIFY(reader.name() == "Key");
+    QVERIFY(reader.name().compare("Key") == 0);
     KeeShareSettings::Key restored = KeeShareSettings::Key::deserialize(reader);
 
     QCOMPARE(restored.key->private_key_bits(), original.key->private_key_bits());

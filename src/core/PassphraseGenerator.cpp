@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 
 #include <QFile>
 #include <QSet>
+#include <QRegularExpression>
 #include <QTextStream>
 #include <cmath>
 
@@ -80,7 +81,8 @@ void PassphraseGenerator::setWordList(const QString& path)
             line = in.readLine();
         }
     }
-    QRegExp rx("^[0-9]+(-[0-9]+)*\\s+([^\\s]+)$");
+
+    QRegularExpression rx("^[0-9]+(-[0-9]+)*\\s+([^\\s]+)$");
     while (!line.isNull()) {
         if (isSigned && line.startsWith("-----BEGIN PGP SIGNATURE-----")) {
             break;

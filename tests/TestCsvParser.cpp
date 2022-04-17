@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2015 Enrico Mariotti <enricomariotti@yahoo.it>
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -330,7 +330,6 @@ void TestCsvParser::testUnicode()
     // ERROR QChar g("\u20AC");
     parser->setFieldSeparator(QChar('A'));
     QTextStream out(file.data());
-    out.setCodec("UTF-8");
     out << QString("€1A2śA\"3śAż\"Ażac");
 
     QVERIFY(parser->parse(file.data()));

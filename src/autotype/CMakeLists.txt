@@ -1,11 +1,9 @@
 if(WITH_XC_AUTOTYPE)
     if(UNIX AND NOT APPLE AND NOT HAIKU)
         find_package(X11 REQUIRED COMPONENTS Xi XTest)
-        find_package(Qt5X11Extras 5.2 REQUIRED)
         if(PRINT_SUMMARY)
             add_feature_info(libXi X11_Xi_FOUND "The X11 Xi Protocol library is required for auto-type")
             add_feature_info(libXtst X11_XTest_FOUND "The X11 XTEST Protocol library is required for auto-type")
-            add_feature_info(Qt5X11Extras Qt5X11Extras_FOUND "The Qt5X11Extras library is required for auto-type")
         endif()
 
         add_subdirectory(xcb)

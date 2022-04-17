@@ -235,7 +235,7 @@ if(UNIX AND NOT APPLE)
         list(APPEND gui_SOURCES
             gui/osutils/nixutils/X11Funcs.cpp)
     endif()
-    qt5_add_dbus_adaptor(gui_SOURCES
+    qt6_add_dbus_adaptor(keepassx_SOURCES
             gui/org.keepassxc.KeePassXC.MainWindow.xml
             gui/MainWindow.h
             MainWindow)
@@ -245,7 +245,7 @@ if(UNIX AND NOT APPLE)
         PROPERTIES
         INCLUDE "quickunlock/PolkitDbusTypes.h"
         )
-    qt5_add_dbus_interface(core_SOURCES
+    qt6_add_dbus_interface(keepassx_SOURCES
         quickunlock/dbus/org.freedesktop.PolicyKit1.Authority.xml
         polkit_dbus
     )
@@ -357,13 +357,25 @@ endif()
 configure_file(config-keepassx.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-keepassx.h)
 configure_file(git-info.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/git-info.h)
 
-# Core Library Definition
-add_library(keepassxc_core STATIC ${core_SOURCES})
-set_target_properties(keepassxc_core PROPERTIES COMPILE_DEFINITIONS KEEPASSX_BUILDING_CORE)
-target_link_libraries(keepassxc_core 
+add_library(autotype STATIC ${autotype_SOURCES})
+target_link_libraries(autotype Qt6::Core Qt6::Network Qt6::Widgets)
+
+add_library(keepassx_core STATIC ${keepassx_SOURCES})
+
+find_package(Qt6 REQUIRED COMPONENTS SvgWidgets)
+
+set_target_properties(keepassx_core PROPERTIES COMPILE_DEFINITIONS KEEPASSX_BUILDING_CORE)
+target_link_libraries(keepassx_core
+        autotype
+        ${keepassxcbrowser_LIB}
         ${qrcode_LIB}
-        Qt5::Core
-        Qt5::Concurrent
+        ${fdosecrets_LIB}
+        Qt6::Core
+        Qt6::Core5Compat
+        Qt6::Concurrent
+        Qt6::Network
+        Qt6::SvgWidgets
+        Qt6::Widgets
         ${BOTAN_LIBRARIES}
         ${PCSC_LIBRARIES}
         ${ZXCVBN_LIBRARIES}
@@ -387,20 +399,17 @@ target_link_libraries(keepassxc_gui
         ${sshagent_LIB})
 
 if(APPLE)
-    target_link_libraries(keepassxc_gui "-framework Foundation -framework AppKit -framework Carbon -framework Security -framework LocalAuthentication -framework ScreenCaptureKit")
-    if(Qt5MacExtras_FOUND)
-        target_link_libraries(keepassxc_gui Qt5::MacExtras)
-    endif()
+    target_link_libraries(keepassx_core "-framework Foundation -framework AppKit -framework Carbon -framework Security -framework LocalAuthentication -framework ScreenCaptureKit")
 endif()
 if(HAIKU)
     target_link_libraries(keepassxc_gui network)
 endif()
 if(UNIX AND NOT APPLE)
-    target_link_libraries(keepassxc_core Qt5::DBus ${LIBUSB_LIBRARIES})
+    target_link_libraries(keepassx_core Qt6::DBus ${LIBUSB_LIBRARIES})
     if(WITH_XC_X11)
-        target_link_libraries(keepassxc_gui Qt5::X11Extras X11)
+        target_link_libraries(keepassx_core Qt6::X11Extras X11)
     endif()
-    include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
+    include_directories(${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 endif()
 if(WIN32)
     target_link_libraries(keepassxc_gui Wtsapi32.lib Ws2_32.lib)
@@ -524,7 +533,7 @@ if(WIN32)
                 COMPONENT Runtime)
 
         # Use windeployqt.exe to setup Qt dependencies
-        if(Qt5Core_VERSION VERSION_LESS "5.14.1")
+        if(Qt6Core_VERSION VERSION_LESS "6.6.0") # TODO: Check this.
             set(WINDEPLOYQT_MODE "--release")
             if(CMAKE_BUILD_TYPE_LOWER STREQUAL "debug")
                 set(WINDEPLOYQT_MODE "--debug")
@@ -557,7 +566,7 @@ if(WIN32)
     endif()
 
     # install CA cert chains
-    find_file(SSL_CA_BUNDLE ca-bundle.crt PATHS "${Qt5_PREFIX}/ssl/certs")
+    find_file(SSL_CA_BUNDLE ca-bundle.crt PATHS "${Qt6_PREFIX}/ssl/certs")
     if(SSL_CA_BUNDLE)
         install(FILES ${SSL_CA_BUNDLE} DESTINATION "ssl/certs")
     else()

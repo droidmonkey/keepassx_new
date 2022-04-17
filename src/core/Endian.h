@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -30,9 +30,9 @@ namespace Endian
         Q_ASSERT(ba.size() == sizeof(SizedQInt));
 
         if (byteOrder == QSysInfo::LittleEndian) {
-            return qFromLittleEndian<SizedQInt>(reinterpret_cast<const uchar*>(ba.constData()));
+            return qFromLittleEndian<SizedQInt>(ba.constData());
         }
-        return qFromBigEndian<SizedQInt>(reinterpret_cast<const uchar*>(ba.constData()));
+        return qFromBigEndian<SizedQInt>(ba.constData());
     }
 
     template <typename SizedQInt> SizedQInt readSizedInt(QIODevice* device, QSysInfo::Endian byteOrder, bool* ok)
@@ -53,9 +53,9 @@ namespace Endian
         ba.resize(sizeof(SizedQInt));
 
         if (byteOrder == QSysInfo::LittleEndian) {
-            qToLittleEndian<SizedQInt>(num, reinterpret_cast<uchar*>(ba.data()));
+            qToLittleEndian<SizedQInt>(num, ba.data());
         } else {
-            qToBigEndian<SizedQInt>(num, reinterpret_cast<uchar*>(ba.data()));
+            qToBigEndian<SizedQInt>(num, ba.data());
         }
 
         return ba;

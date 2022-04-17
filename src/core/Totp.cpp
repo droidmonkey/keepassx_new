@@ -1,6 +1,6 @@
 /*
- *  Copyright (C) 2017 Weslly Honorato <weslly@protonmail.com>
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2017 Weslly Honorato <﻿weslly@protonmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -228,8 +228,8 @@ QString Totp::generateTotp(const QSharedPointer<Totp::Settings>& settings, const
         current = qToBigEndian(time / step);
     }
 
-    QVariant secret = Base32::decode(Base32::sanitizeInput(settings->key.toLatin1()));
-    if (secret.isNull()) {
+    const auto secret = Base32::decode(Base32::sanitizeInput(settings->key.toLatin1()));
+    if (secret.isEmpty()) {
         return QObject::tr("Invalid Key", "TOTP");
     }
 
@@ -246,7 +246,7 @@ QString Totp::generateTotp(const QSharedPointer<Totp::Settings>& settings, const
         break;
     }
     QMessageAuthenticationCode code(cryptoHash);
-    code.setKey(secret.toByteArray());
+    code.setKey(secret);
     code.addData(QByteArray(reinterpret_cast<char*>(&current), sizeof(current)));
     QByteArray hmac = code.result();
 

@@ -57,7 +57,7 @@ void NativeMessagingProxy::setupStandardInput()
 #endif
 #endif
 
-    QtConcurrent::run([this] {
+    auto res = QtConcurrent::run([this] {
         while (std::cin.good()) {
             if (std::cin.peek() != EOF) {
                 uint length = 0;
@@ -68,7 +68,7 @@ void NativeMessagingProxy::setupStandardInput()
                 QString msg;
                 msg.reserve(length);
                 for (uint i = 0; i < length; ++i) {
-                    msg.append(getchar());
+                    msg.append(QChar(getchar()));
                 }
 
                 if (msg.length() > 0) {

@@ -74,7 +74,7 @@ void TestCli::initTestCase()
 #ifdef Q_OS_WIN
     m_devNull->open(fopen("nul", "w"), QIODevice::WriteOnly);
 #else
-    m_devNull->open(fopen("/dev/null", "w"), QIODevice::WriteOnly);
+    m_devNull->open(fopen("/dev/null", "w"), QIODeviceBase::WriteOnly);
 #endif
     Utils::DEVNULL.setDevice(m_devNull.data());
 }
@@ -108,15 +108,15 @@ void TestCli::init()
     m_nonAsciiDbFile->copyFromFile(file.arg("NonAscii.kdbx"));
 
     m_stdout.reset(new QBuffer());
-    m_stdout->open(QIODevice::ReadWrite);
+    m_stdout->open(QIODeviceBase::ReadWrite);
     Utils::STDOUT.setDevice(m_stdout.data());
 
     m_stderr.reset(new QBuffer());
-    m_stderr->open(QIODevice::ReadWrite);
+    m_stderr->open(QIODeviceBase::ReadWrite);
     Utils::STDERR.setDevice(m_stderr.data());
 
     m_stdin.reset(new QBuffer());
-    m_stdin->open(QIODevice::ReadWrite);
+    m_stdin->open(QIODeviceBase::ReadWrite);
     Utils::STDIN.setDevice(m_stdin.data());
 }
 
@@ -457,7 +457,7 @@ void TestCli::testAttachmentExport()
     QVERIFY(attachmentExportCmd.getDescriptionLine().contains(attachmentExportCmd.name));
 
     TemporaryFile exportOutput;
-    exportOutput.open(QIODevice::WriteOnly);
+    exportOutput.open(QIODeviceBase::WriteOnly);
     exportOutput.close();
 
     // Try exporting an attachment of a non-existent entry
@@ -495,7 +495,7 @@ void TestCli::testAttachmentExport()
              QByteArray(qPrintable(QString("Successfully exported attachment %1 of entry %2 to %3.\n")
                                        .arg("Sample attachment.txt", "/Sample Entry", exportOutput.fileName()))));
 
-    exportOutput.open(QIODevice::ReadOnly);
+    exportOutput.open(QIODeviceBase::ReadOnly);
     QCOMPARE(exportOutput.readAll(), QByteArray("Sample content\n"));
 
     // Export an existing attachment to stdout
@@ -688,9 +688,9 @@ void TestCli::testClip()
     // Password with timeout
     setInput("a");
     // clang-format off
-    QFuture<void> future = QtConcurrent::run(&clipCmd,
-                                             static_cast<int(Clip::*)(const QStringList&)>(&DatabaseCommand::execute),
-                                             QStringList{"clip", m_dbFile->fileName(), "/Sample Entry", "1"});
+    auto future = QtConcurrent::run(static_cast<int(Clip::*)(const QStringList&)>(&DatabaseCommand::execute),
+                                    &clipCmd,
+                                    QStringList{"clip", m_dbFile->fileName(), "/Sample Entry", "1"});
     // clang-format on
 
     QTRY_COMPARE(clipboard->text(), QString("Password"));
@@ -700,8 +700,8 @@ void TestCli::testClip()
 
     // TOTP with timeout
     setInput("a");
-    future = QtConcurrent::run(&clipCmd,
-                               static_cast<int (Clip::*)(const QStringList&)>(&DatabaseCommand::execute),
+    future = QtConcurrent::run(static_cast<int (Clip::*)(const QStringList&)>(&DatabaseCommand::execute),
+                               &clipCmd,
                                QStringList{"clip", m_dbFile->fileName(), "/Sample Entry", "1", "-t"});
 
     QTRY_VERIFY(isTotp(clipboard->text()));
@@ -1279,7 +1279,7 @@ void TestCli::testExport()
     execCmd(exportCmd, {"export", m_dbFile->fileName()});
 
     TemporaryFile xmlOutput;
-    xmlOutput.open(QIODevice::WriteOnly);
+    xmlOutput.open(QIODeviceBase::WriteOnly);
     xmlOutput.write(m_stdout->readAll());
     xmlOutput.close();
 
@@ -1296,7 +1296,7 @@ void TestCli::testExport()
     execCmd(exportCmd, {"export", "-f", "xml", "-q", m_dbFile->fileName()});
     QCOMPARE(m_stderr->readAll(), QByteArray());
 
-    xmlOutput.open(QIODevice::WriteOnly);
+    xmlOutput.open(QIODeviceBase::WriteOnly);
     xmlOutput.write(m_stdout->readAll());
     xmlOutput.close();
 

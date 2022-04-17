@@ -28,6 +28,7 @@
 
 class QIODevice;
 class QRegularExpression;
+class QUrl;
 
 namespace Tools
 {

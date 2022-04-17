@@ -360,10 +360,10 @@ checkXcodeSetup() {
     fi
 }
 
-checkQt5LUpdateExists() {
+checkQt6LUpdateExists() {
     if cmdExists lupdate && ! $(lupdate -version | grep -q "lupdate version 5\."); then
-        if ! cmdExists lupdate-qt5; then
-            exitError "Qt Linguist tool (lupdate-qt5) is not installed! Please install using 'apt install qttools5-dev-tools'"
+        if ! cmdExists lupdate-qt6; then
+            exitError "Qt Linguist tool (lupdate-qt6) is not installed! Please install using 'apt install qttools6-dev-tools'"
         fi
     fi
 }
@@ -379,7 +379,7 @@ performChecks() {
     logInfo "Validating toolset and repository..."
 
     checkTransifexCommandExists
-    checkQt5LUpdateExists
+    checkQt6LUpdateExists
     checkGitRepository
     checkReleaseDoesNotExist
     checkWorkingTreeClean
@@ -955,7 +955,7 @@ build() {
             export MACOSX_DEPLOYMENT_TARGET
 
             logInfo "Configuring build..."
-            cmake -G "${CMAKE_GENERATOR}" -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="$(uname -m)" \
+            cmake -G "${CMAKE_GENERATOR}" -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
             -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" ${CMAKE_OPTIONS} "$SRC_DIR"
 
             logInfo "Compiling and packaging sources..."
@@ -1404,10 +1404,10 @@ i18n() {
             exit 1
         fi
 
-        checkQt5LUpdateExists
+        checkQt6LUpdateExists
 
         logInfo "Updating source translation file..."
-        LUPDATE=lupdate-qt5
+        LUPDATE=lupdate-qt6
         if ! command -v $LUPDATE > /dev/null; then
             LUPDATE=lupdate
         fi

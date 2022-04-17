@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,13 +25,12 @@
 #define BASE32_H
 
 #include <QByteArray>
-#include <QVariant>
 
 class Base32
 {
 public:
     Base32() = default;
-    Q_REQUIRED_RESULT static QVariant decode(const QByteArray&);
+    Q_REQUIRED_RESULT static QByteArray decode(const QByteArray&);
     Q_REQUIRED_RESULT static QByteArray encode(const QByteArray&);
     Q_REQUIRED_RESULT static QByteArray addPadding(const QByteArray&);
     Q_REQUIRED_RESULT static QByteArray removePadding(const QByteArray&);

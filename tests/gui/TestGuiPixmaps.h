@@ -19,6 +19,7 @@
 #define KEEPASSX_TESTGUIPIXMAPS_H
 
 #include <QImage>
+#include <QObject>
 
 class TestGuiPixmaps : public QObject
 {

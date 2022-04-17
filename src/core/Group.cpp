@@ -875,7 +875,7 @@ QList<QString> Group::usernamesRecursive(int topN) const
 
     // Take first topN usernames if set
     QList<QString> usernames;
-    int actualUsernames = topN < 0 ? sortedUsernames.size() : std::min(topN, sortedUsernames.size());
+    int actualUsernames = topN < 0 ? sortedUsernames.size() : qMin(topN, sortedUsernames.size());
     for (int i = 0; i < actualUsernames; i++) {
         usernames.append(sortedUsernames[i].first);
     }

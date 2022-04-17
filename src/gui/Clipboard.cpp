@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2012 Felix Geyer <debfx@fobos.de>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -23,12 +23,13 @@
 #include <QMimeData>
 #include <QProcess>
 #include <QTimer>
+#include <QUtiMimeConverter>
 
 #include "core/Config.h"
 
 Clipboard* Clipboard::m_instance(nullptr);
 #ifdef Q_OS_MACOS
-QPointer<MacPasteboard> Clipboard::m_pasteboard(nullptr);
+//QPointer<QUtiMimeConverter> Clipboard::m_pasteboard(nullptr);
 #endif
 
 Clipboard::Clipboard(QObject* parent)
@@ -36,9 +37,9 @@ Clipboard::Clipboard(QObject* parent)
     , m_timer(new QTimer(this))
 {
 #ifdef Q_OS_MACOS
-    if (!m_pasteboard) {
-        m_pasteboard = new MacPasteboard();
-    }
+    /*if (!m_pasteboard) {
+        m_pasteboard = new QUtiMimeConverter();
+    }*/
 #endif
     connect(m_timer, SIGNAL(timeout()), SLOT(countdownTick()));
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(clearCopiedText()));

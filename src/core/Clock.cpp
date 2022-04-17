@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2018 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,8 +32,7 @@ QDateTime Clock::currentDateTime()
 
 uint Clock::currentSecondsSinceEpoch()
 {
-    // TODO: change to toSecsSinceEpoch() when min Qt >= 5.8
-    return instance().currentDateTimeImpl().toTime_t();
+    return instance().currentDateTimeImpl().toSecsSinceEpoch();
 }
 
 qint64 Clock::currentMilliSecondsSinceEpoch()

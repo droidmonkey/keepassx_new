@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2011 Felix Geyer <debfx@fobos.de>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -301,7 +301,7 @@ bool FileKey::loadXml(QIODevice* device, QString* errorMsg)
     if (xmlReader.error()) {
         return false;
     }
-    if (xmlReader.readNextStartElement() && xmlReader.name() != "KeyFile") {
+    if (xmlReader.readNextStartElement() && xmlReader.name().toString() != "KeyFile") {
         return false;
     }
 
@@ -313,9 +313,9 @@ bool FileKey::loadXml(QIODevice* device, QString* errorMsg)
     } keyFileData;
 
     while (!xmlReader.error() && xmlReader.readNextStartElement()) {
-        if (xmlReader.name() == "Meta") {
+        if (xmlReader.name().toString() == "Meta") {
             while (!xmlReader.error() && xmlReader.readNextStartElement()) {
-                if (xmlReader.name() == "Version") {
+                if (xmlReader.name().toString() == "Version") {
                     keyFileData.version = xmlReader.readElementText();
                     if (keyFileData.version.startsWith("1.0")) {
                         m_type = KeePass2XML;
@@ -329,9 +329,9 @@ bool FileKey::loadXml(QIODevice* device, QString* errorMsg)
                     }
                 }
             }
-        } else if (xmlReader.name() == "Key") {
+        } else if (xmlReader.name().toString() == "Key") {
             while (!xmlReader.error() && xmlReader.readNextStartElement()) {
-                if (xmlReader.name() == "Data") {
+                if (xmlReader.name().toString() == "Data") {
                     keyFileData.hash = QByteArray::fromHex(xmlReader.attributes().value("Hash").toLatin1());
                     keyFileData.data = xmlReader.readElementText().simplified().replace(" ", "").toLatin1();
 
@@ -362,7 +362,7 @@ bool FileKey::loadXml(QIODevice* device, QString* errorMsg)
 
     bool ok = false;
     if (!xmlReader.error() && !keyFileData.data.isEmpty()) {
-        std::memcpy(m_key.data(), keyFileData.data.data(), std::min(SHA256_SIZE, keyFileData.data.size()));
+        std::memcpy(m_key.data(), keyFileData.data.data(), qMin(SHA256_SIZE, keyFileData.data.size()));
         ok = true;
     }
 
@@ -421,7 +421,7 @@ bool FileKey::loadHex(QIODevice* device)
         return false;
     }
 
-    std::memcpy(m_key.data(), data.data(), std::min(SHA256_SIZE, data.size()));
+    std::memcpy(m_key.data(), data.data(), qMin(SHA256_SIZE, data.size()));
     Botan::secure_scrub_memory(data.data(), static_cast<std::size_t>(data.capacity()));
 
     m_type = FixedBinaryHex;
@@ -447,7 +447,7 @@ bool FileKey::loadHashed(QIODevice* device)
     } while (!buffer.isEmpty());
 
     buffer = cryptoHash.result();
-    std::memcpy(m_key.data(), buffer.data(), std::min(SHA256_SIZE, buffer.size()));
+    std::memcpy(m_key.data(), buffer.data(), qMin(SHA256_SIZE, buffer.size()));
     Botan::secure_scrub_memory(buffer.data(), static_cast<std::size_t>(buffer.capacity()));
 
     m_type = Hashed;

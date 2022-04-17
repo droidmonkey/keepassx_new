@@ -1,6 +1,6 @@
 ﻿/*
+ *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2016 Enrico Mariotti <enricomariotti@yahoo.it>
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@ CsvParser::CsvParser()
     m_csv.setBuffer(&m_array);
     m_ts.setDevice(&m_csv);
     m_csv.open(QIODevice::ReadOnly);
-    m_ts.setCodec("UTF-8");
 }
 
 CsvParser::~CsvParser()
@@ -91,7 +90,7 @@ bool CsvParser::readFile(QFile* device)
 
 void CsvParser::reset()
 {
-    m_ch = 0;
+    m_ch = QChar(0);
     m_currCol = 1;
     m_currRow = 1;
     m_isEof = false;
@@ -348,7 +347,15 @@ void CsvParser::setComment(const QChar& c)
 
 void CsvParser::setCodec(const QString& s)
 {
-    m_ts.setCodec(QTextCodec::codecForName(s.toLocal8Bit()));
+    if (s.toLocal8Bit().compare(QByteArray("UTF-8"), Qt::CaseInsensitive) == 0) {
+        m_ts.setEncoding(QStringConverter::Utf8);
+    } else if (s.toLocal8Bit().compare(QByteArray("Windows-1252"), Qt::CaseInsensitive) == 0) {
+        m_ts.setEncoding(QStringConverter::System);
+    } else if (s.toLocal8Bit().compare(QByteArray("UTF-16"), Qt::CaseInsensitive) == 0) {
+        m_ts.setEncoding(QStringConverter::Utf16);
+    } else if (s.toLocal8Bit().compare(QByteArray("UTF-16LE"), Qt::CaseInsensitive) == 0) {
+        m_ts.setEncoding(QStringConverter::Utf16LE);
+    }
 }
 
 void CsvParser::setFieldSeparator(const QChar& c)
@@ -391,6 +398,6 @@ int CsvParser::getCsvRows() const
 
 void CsvParser::appendStatusMsg(const QString& s, bool isCritical)
 {
-    m_statusMsg += QObject::tr("%1: (row, col) %2,%3").arg(s, m_currRow, m_currCol).append("\n");
+    m_statusMsg += QObject::tr("%1: (row, col) %2,%3").arg(s, m_currRow, QChar(m_currCol)).append("\n");
     m_isGood = !isCritical;
 }

@@ -233,11 +233,11 @@ void TestTools::testConvertToRegex_data()
         << "^(?:" + Tools::escapeRegex(input) + ")$";
 
     // Exact match does not escape the pattern
-    QTest::newRow("Exact Match") << input << static_cast<int>(Tools::RegexConvertOpts::EXACT_MATCH)
+    QTest::newRow("Exact Match 1") << input << static_cast<int>(Tools::RegexConvertOpts::EXACT_MATCH)
                                  << QString(R"(^(?:te|st*t?[5]^(test);',.)$)");
 
     // Exact match with improper regex
-    QTest::newRow("Exact Match") << ")av(" << static_cast<int>(Tools::RegexConvertOpts::EXACT_MATCH)
+    QTest::newRow("Exact Match 2") << ")av(" << static_cast<int>(Tools::RegexConvertOpts::EXACT_MATCH)
                                  << QString(R"(^(?:)av()$)");
 
     QTest::newRow("Exact Match & Wildcard")

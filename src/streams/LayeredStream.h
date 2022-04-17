@@ -29,7 +29,7 @@ public:
     ~LayeredStream() override;
 
     bool isSequential() const override;
-    bool open(QIODevice::OpenMode mode) override;
+    bool open(QIODeviceBase::OpenMode mode) override;
 
 protected:
     qint64 readData(char* data, qint64 maxSize) override;

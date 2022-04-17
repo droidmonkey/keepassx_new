@@ -1,4 +1,4 @@
-#  Copyright (C) 2018 KeePassXC Team <team@keepassxc.org>
+#  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
 #  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -204,6 +204,9 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14.0")
     include(CheckPIESupported)
     check_pie_supported()
 endif()
+
+# Find Qt5 compatibility library
+find_package(Qt6 REQUIRED COMPONENTS Core5Compat)
 
 # Find Botan early since the version affects subsequent compiler options
 find_package(Botan REQUIRED)
@@ -496,31 +499,22 @@ if(UNIX AND NOT APPLE)
     if(WITH_XC_X11)
         list(APPEND QT_COMPONENTS X11Extras)
     endif()
-    find_package(Qt5 COMPONENTS ${QT_COMPONENTS} DBus REQUIRED)
+    find_package(Qt6 COMPONENTS ${QT_COMPONENTS} DBus REQUIRED)
 elseif(APPLE)
-    find_package(Qt5 COMPONENTS ${QT_COMPONENTS} REQUIRED HINTS
-            /usr/local/opt/qt@5/lib/cmake
-            /usr/local/Cellar/qt@5/*/lib/cmake
-            /opt/homebrew/opt/qt@5/lib/cmake
-            ENV PATH)
-    find_package(Qt5 COMPONENTS MacExtras HINTS
-            /usr/local/opt/qt@5/lib/cmake
-            /usr/local/Cellar/qt@5/*/lib/cmake
-            /opt/homebrew/opt/qt@5/lib/cmake
+    find_package(Qt6 COMPONENTS ${QT_COMPONENTS} REQUIRED HINTS
+            /usr/local/opt/qt/lib/cmake
+            /usr/local/Cellar/qt/*/lib/cmake
+            /opt/homebrew/opt/qt/lib/cmake
             ENV PATH)
 else()
-    find_package(Qt5 COMPONENTS ${QT_COMPONENTS} REQUIRED)
+    find_package(Qt6 COMPONENTS ${QT_COMPONENTS} REQUIRED)
 endif()
 
-if(Qt5Core_VERSION VERSION_LESS "5.12.0")
-    message(FATAL_ERROR "Qt version 5.12.0 or higher is required")
+if(Qt6Core_VERSION VERSION_LESS "6.6.0")
+    message(FATAL_ERROR "Qt version 6.6.0 or higher is required")
 endif()
 
-get_filename_component(Qt5_PREFIX ${Qt5_DIR}/../../.. REALPATH)
-if(APPLE)
-    # Add includes under Qt5 Prefix in case Qt6 is also installed
-    include_directories(SYSTEM ${Qt5_PREFIX}/include)
-endif()
+get_filename_component(Qt6_PREFIX ${Qt6_DIR}/../../.. REALPATH)
 
 # Process moc automatically
 set(CMAKE_AUTOMOC ON)
@@ -531,18 +525,18 @@ set(CMAKE_AUTORCC ON)
 
 if(APPLE)
     set(CMAKE_MACOSX_RPATH TRUE)
-    find_program(MACDEPLOYQT_EXE macdeployqt HINTS ${Qt5_PREFIX}/bin ${Qt5_PREFIX}/tools/qt5/bin ENV PATH)
+    find_program(MACDEPLOYQT_EXE macdeployqt6 HINTS ${Qt6_PREFIX}/bin ${Qt6_PREFIX}/tools/qt/bin ENV PATH)
     if(NOT MACDEPLOYQT_EXE)
-        message(FATAL_ERROR "macdeployqt is required to build on macOS")
+        message(FATAL_ERROR "macdeployqt6 is required to build on macOS")
     endif()
-    message(STATUS "Using macdeployqt: ${MACDEPLOYQT_EXE}")
+    message(STATUS "Using macdeployqt6: ${MACDEPLOYQT_EXE}")
     set(MACDEPLOYQT_EXTRA_BINARIES "")
 elseif(WIN32)
-    find_program(WINDEPLOYQT_EXE windeployqt HINTS ${Qt5_PREFIX}/bin ${Qt5_PREFIX}/tools/qt5/bin ENV PATH)
+    find_program(WINDEPLOYQT_EXE windeployqt6 HINTS ${Qt6_PREFIX}/bin ${Qt6_PREFIX}/tools/qt/bin ENV PATH)
     if(NOT WINDEPLOYQT_EXE)
-        message(FATAL_ERROR "windeployqt is required to build on Windows")
+        message(FATAL_ERROR "windeployqt6 is required to build on Windows")
     endif()
-    message(STATUS "Using windeployqt: ${WINDEPLOYQT_EXE}")
+    message(STATUS "Using windeployq6t: ${WINDEPLOYQT_EXE}")
 endif()
 
 # Debian sets the build type to None for package builds.

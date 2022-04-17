@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2012 Felix Geyer <debfx@fobos.de>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -22,8 +22,8 @@
 #include <QElapsedTimer>
 #include <QObject>
 #ifdef Q_OS_MACOS
-#include "gui/osutils/macutils/MacPasteboard.h"
 #include <QPointer>
+#include <QUtiMimeConverter>
 #endif
 
 class QTimer;
@@ -60,7 +60,7 @@ private:
 #ifdef Q_OS_MACOS
     // This object lives for the whole program lifetime and we cannot delete it on exit,
     // so ignore leak warnings. See https://bugreports.qt.io/browse/QTBUG-54832
-    static QPointer<MacPasteboard> m_pasteboard;
+    static QPointer<QUtiMimeConverter> m_pasteboard;
 #endif
     QString m_lastCopied;
 };

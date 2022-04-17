@@ -55,7 +55,7 @@ DatabaseSettingsWidgetDatabaseKey::DatabaseSettingsWidgetDatabaseKey(QWidget* pa
     vbox->addWidget(m_additionalKeyOptions);
     vbox->setSizeConstraint(QLayout::SetMinimumSize);
     m_additionalKeyOptions->setLayout(new QVBoxLayout());
-    m_additionalKeyOptions->layout()->setMargin(0);
+    m_additionalKeyOptions->layout()->setContentsMargins(0, 0, 0, 0);
     m_additionalKeyOptions->layout()->setSpacing(20);
     m_additionalKeyOptions->layout()->addWidget(m_keyFileEditWidget);
 #ifdef WITH_XC_YUBIKEY

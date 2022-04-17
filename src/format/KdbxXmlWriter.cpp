@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -55,7 +55,6 @@ void KdbxXmlWriter::writeDatabase(QIODevice* device,
 
     m_xml.setAutoFormatting(true);
     m_xml.setAutoFormattingIndent(-1); // 1 tab
-    m_xml.setCodec("UTF-8");
 
     if (m_kdbxVersion < KeePass2::FILE_VERSION_4) {
         fillBinaryIdxMap();
@@ -79,7 +78,7 @@ void KdbxXmlWriter::writeDatabase(QIODevice* device,
 void KdbxXmlWriter::writeDatabase(const QString& filename, Database* db)
 {
     QFile file(filename);
-    file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    file.open(QIODeviceBase::WriteOnly | QIODeviceBase::Truncate);
     writeDatabase(&file, db);
 }
 
@@ -237,11 +236,11 @@ void KdbxXmlWriter::writeBinaries()
             m_xml.writeAttribute("Compressed", "True");
 
             QBuffer buffer;
-            buffer.open(QIODevice::ReadWrite);
+            buffer.open(QIODeviceBase::ReadWrite);
 
             QtIOCompressor compressor(&buffer);
             compressor.setStreamFormat(QtIOCompressor::GzipFormat);
-            compressor.open(QIODevice::WriteOnly);
+            compressor.open(QIODeviceBase::WriteOnly);
 
             qint64 bytesWritten = compressor.write(i.value());
             Q_ASSERT(bytesWritten == i.value().size());
