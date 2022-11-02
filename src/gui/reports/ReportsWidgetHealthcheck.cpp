@@ -323,6 +323,11 @@ void ReportsWidgetHealthcheck::customMenuRequested(QPoint pos)
         });
     }
 
+    // Create the "Expire entry" menu item
+    const auto expEntry = new QAction(tr("Expire Entry(s)…", "", selected.size()), this);
+    menu->addAction(expEntry);
+    connect(expEntry, &QAction::triggered, this, &ReportsWidgetHealthcheck::expireSelectedEntries);
+
     // Create the "delete entry" menu item
     const auto delEntry = new QAction(icons()->icon("entry-delete"), tr("Delete Entry(s)…", "", selected.size()), this);
     menu->addAction(delEntry);
@@ -365,7 +370,7 @@ void ReportsWidgetHealthcheck::saveSettings()
     // nothing to do - the tab is passive
 }
 
-void ReportsWidgetHealthcheck::deleteSelectedEntries()
+QList<Entry*> ReportsWidgetHealthcheck::getSelectedEntries()
 {
     QList<Entry*> selectedEntries;
     for (auto index : m_ui->healthcheckTableView->selectionModel()->selectedRows()) {
@@ -375,7 +380,23 @@ void ReportsWidgetHealthcheck::deleteSelectedEntries()
             selectedEntries << entry;
         }
     }
+    return selectedEntries;
+}
 
+void ReportsWidgetHealthcheck::expireSelectedEntries()
+{
+    QList<Entry*> selectedEntries = getSelectedEntries();
+    if (selectedEntries.isEmpty()) {
+        return;
+    }
+    GuiTools::expireEntries(this, selectedEntries);
+
+    calculateHealth();
+}
+
+void ReportsWidgetHealthcheck::deleteSelectedEntries()
+{
+    QList<Entry*> selectedEntries = getSelectedEntries();
     bool permanent = !m_db->metadata()->recycleBinEnabled();
     if (GuiTools::confirmDeleteEntries(this, selectedEntries, permanent)) {
         GuiTools::deleteEntriesResolveReferences(this, selectedEntries, permanent);

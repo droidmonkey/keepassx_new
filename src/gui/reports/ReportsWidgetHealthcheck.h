@@ -53,6 +53,8 @@ public slots:
     void calculateHealth();
     void emitEntryActivated(const QModelIndex& index);
     void customMenuRequested(QPoint);
+    QList<Entry*> getSelectedEntries();
+    void expireSelectedEntries();
     void deleteSelectedEntries();
 
 private:

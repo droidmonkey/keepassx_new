@@ -53,6 +53,8 @@ public slots:
     void calculateBrowserStatistics();
     void emitEntryActivated(const QModelIndex& index);
     void customMenuRequested(QPoint);
+    QList<Entry*> getSelectedEntries();
+    void expireSelectedEntries();
     void deleteSelectedEntries();
     void deletePluginDataFromSelectedEntries();
 

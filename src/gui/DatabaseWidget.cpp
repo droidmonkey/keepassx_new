@@ -569,6 +569,22 @@ void DatabaseWidget::setupTotp()
     setupTotpDialog->open();
 }
 
+void DatabaseWidget::expireSelectedEntries()
+{
+    const QModelIndexList selected = m_entryView->selectionModel()->selectedRows();
+    if (selected.isEmpty()) {
+        return;
+    }
+
+    // Resolve entries from the selection model
+    QList<Entry*> selectedEntries;
+    for (const QModelIndex& index : selected) {
+        selectedEntries.append(m_entryView->entryFromIndex(index));
+    }
+
+    expireEntries(std::move(selectedEntries));
+}
+
 void DatabaseWidget::deleteSelectedEntries()
 {
     const QModelIndexList selected = m_entryView->selectionModel()->selectedRows();
@@ -603,6 +619,15 @@ void DatabaseWidget::restoreSelectedEntries()
             entry->setGroup(entry->previousParentGroup());
         }
     }
+}
+
+void DatabaseWidget::expireEntries(QList<Entry*> selectedEntries)
+{
+    if (selectedEntries.isEmpty()) {
+        return;
+    }
+
+    GuiTools::expireEntries(this, selectedEntries);
 }
 
 void DatabaseWidget::deleteEntries(QList<Entry*> selectedEntries, bool confirm)

@@ -2920,6 +2920,10 @@ Would you like to correct it?</source>
         </translation>
     </message>
     <message>
+        <source>Now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Failed to decrypt SSH key, ensure password is correct.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5951,6 +5955,14 @@ Expect some bugs and minor issues, this version is meant for testing purposes.</
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>&amp;Expire Entry…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remote S&amp;ync…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Quit Application</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6052,6 +6064,10 @@ Expect some bugs and minor issues, this version is meant for testing purposes.</
     </message>
     <message>
         <source>Show Password Generator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove Passkey From Entry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6199,23 +6215,15 @@ Expect some bugs and minor issues, this version is meant for testing purposes.</
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Remote S&amp;ync…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Remove Passkey From Entry</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Setup Remote Sync…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Show Group Panel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Toggle Show Group Panel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Setup Remote Sync…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -9281,6 +9289,13 @@ This option is deprecated, use --set-key-file instead.</source>
         <source>Exclude from reports</source>
         <translation type="unfinished"></translation>
     </message>
+    <message numerus="yes">
+        <source>Expire Entry(s)…</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
     <message>
         <source>Only show entries that have a URL</source>
         <translation type="unfinished"></translation>
@@ -9307,6 +9322,14 @@ This option is deprecated, use --set-key-file instead.</source>
 </context>
 <context>
     <name>ReportsWidgetHealthcheck</name>
+    <message>
+        <source>Show expired entries</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> (Expired)</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>Hover over reason to show additional details. Double-click entries to edit.</source>
         <translation type="unfinished"></translation>
@@ -9370,16 +9393,15 @@ This option is deprecated, use --set-key-file instead.</source>
         <source>Exclude from reports</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Show expired entries</source>
-        <translation type="unfinished"></translation>
+    <message numerus="yes">
+        <source>Expire Entry(s)…</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
     <message>
         <source>Show entries that have been excluded from reports</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source> (Expired)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -9479,6 +9501,13 @@ This option is deprecated, use --set-key-file instead.</source>
     <message>
         <source>Exclude from reports</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Expire Entry(s)…</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
