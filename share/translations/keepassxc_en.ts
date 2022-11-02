@@ -2920,10 +2920,6 @@ Would you like to correct it?</source>
         </translation>
     </message>
     <message>
-        <source>Now</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Failed to decrypt SSH key, ensure password is correct.</source>
         <translation type="unfinished"></translation>
     </message>
