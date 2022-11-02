@@ -131,7 +131,8 @@ Copyright: none
 License: CC0
 Comment: Taken from https://github.com/paomedia/small-n-flat
 
-Files: share/icons/badges/2_Expired.svg
+Files: share/icons/application/scalable/actions/entry-expire.svg
+       share/icons/badges/2_Expired.svg
        share/icons/database/C37_KPercentage.svg
        share/icons/database/C45_Cancel.svg
        share/icons/database/C46_Help.svg

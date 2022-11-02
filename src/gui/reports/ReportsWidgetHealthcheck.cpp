@@ -324,7 +324,7 @@ void ReportsWidgetHealthcheck::customMenuRequested(QPoint pos)
     }
 
     // Create the "Expire entry" menu item
-    const auto expEntry = new QAction(tr("Expire Entry(s)…", "", selected.size()), this);
+    const auto expEntry = new QAction(icons()->icon("entry-expire"), tr("Expire Entry(s)…", "", selected.size()), this);
     menu->addAction(expEntry);
     connect(expEntry, &QAction::triggered, this, &ReportsWidgetHealthcheck::expireSelectedEntries);
 
