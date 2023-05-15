@@ -88,6 +88,7 @@ MessageBox::Button MessageBox::messageBox(QWidget* parent,
 {
     if (m_nextAnswer == MessageBox::NoButton) {
         QMessageBox msgBox(parent);
+        msgBox.setTextFormat(Qt::RichText);
         msgBox.setIcon(icon);
         msgBox.setWindowTitle(title);
         msgBox.setText(text);
