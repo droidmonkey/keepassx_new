@@ -60,6 +60,8 @@ public:
         AutoTypeDelay,
         AutoTypeStartDelay,
         AutoTypeHideExpiredEntry,
+        AutoTypeDialogSortColumn,
+        AutoTypeDialogSortOrder,
         GlobalAutoTypeKey,
         GlobalAutoTypeModifiers,
         GlobalAutoTypeRetypeTime,
