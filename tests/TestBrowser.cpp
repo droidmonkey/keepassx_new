@@ -197,16 +197,19 @@ void TestBrowser::testSearchEntries()
     auto db = QSharedPointer<Database>::create();
     auto* root = db->rootGroup();
 
-    QStringList urls = {"https://github.com/login_page",
-                        "https://github.com/login",
-                        "https://github.com/",
-                        "github.com/login",
-                        "http://github.com",
-                        "http://github.com/login",
-                        "github.com",
-                        "github.com/login",
-                        "https://github", // Invalid URL
-                        "github.com"};
+    QStringList urls = {
+        "https://github.com/login_page",
+        "https://github.com/login",
+        "https://github.com/",
+        "github.com/login",
+        "http://github.com",
+        "http://github.com/login",
+        "github.com",
+        "github.com/login",
+        "https://github", // Invalid URL
+        "github.com",
+        "\"https://github.com\"" // Exact URL
+    };
 
     createEntries(urls, root);
 
@@ -214,7 +217,7 @@ void TestBrowser::testSearchEntries()
     auto result =
         m_browserService->searchEntries(db, "https://github.com", "https://github.com/session"); // db, url, submitUrl
 
-    QCOMPARE(result.length(), 9);
+    QCOMPARE(result.length(), 10);
     QCOMPARE(result[0]->url(), QString("https://github.com/login_page"));
     QCOMPARE(result[1]->url(), QString("https://github.com/login"));
     QCOMPARE(result[2]->url(), QString("https://github.com/"));
@@ -222,10 +225,10 @@ void TestBrowser::testSearchEntries()
     QCOMPARE(result[4]->url(), QString("http://github.com"));
     QCOMPARE(result[5]->url(), QString("http://github.com/login"));
 
-    // With matching there should be only 3 results + 4 without a scheme
+    // With matching there should be only 4 results + 4 without a scheme
     browserSettings()->setMatchUrlScheme(true);
     result = m_browserService->searchEntries(db, "https://github.com", "https://github.com/session");
-    QCOMPARE(result.length(), 7);
+    QCOMPARE(result.length(), 8);
     QCOMPARE(result[0]->url(), QString("https://github.com/login_page"));
     QCOMPARE(result[1]->url(), QString("https://github.com/login"));
     QCOMPARE(result[2]->url(), QString("https://github.com/"));
@@ -394,6 +397,109 @@ void TestBrowser::testSearchEntriesWithAdditionalURLs()
     auto additionalResult = m_browserService->searchEntries(db, "https://keepassxc.org", "https://keepassxc.org");
     QCOMPARE(additionalResult.length(), 1);
     QCOMPARE(additionalResult[0]->url(), QString("https://github.com/"));
+}
+
+void TestBrowser::testSearchEntriesWithWildcardURLs()
+{
+    auto db = QSharedPointer<Database>::create();
+    auto* root = db->rootGroup();
+
+    QStringList urls = {"https://github.com/login_page/*",
+                        "https://github.com/*/second",
+                        "https://github.com/*",
+                        "http://github.com/*",
+                        "github.com/*", // Defaults to https
+                        "https://*.github.com/*",
+                        "https://subdomain.*.github.com/*/second",
+                        "https://*.sub.github.com/*",
+                        "https://********", // Invalid wildcard URL
+                        "https://subdomain.yes.github.com/*",
+                        "https://example.com:8448/*",
+                        "https://example.com/*/*",
+                        "https://example.com/$/*",
+                        "https://127.128.129.*:8448/",
+                        "https://127.128.*/",
+                        "https://127.160.*.2/login",
+                        "http://[2001:db8:85a3:8d3:1319:8a2e:370:*]/",
+                        "https://[2001:db8:85a3:8d3:*]:443/",
+                        "fe80::1ff:fe23:4567:890a",
+                        "2001-db8-85a3-8d3-1319-8a2e-370-7348.ipv6-literal.net"};
+
+    createEntries(urls, root);
+    browserSettings()->setMatchUrlScheme(false);
+
+    auto result = m_browserService->searchEntries(
+        db, "https://github.com/login_page/second", "https://github.com/login_page/second");
+    QCOMPARE(result.length(), 6);
+    QCOMPARE(result[0]->url(), QString("https://github.com/login_page/*"));
+    QCOMPARE(result[1]->url(), QString("https://github.com/*/second"));
+    QCOMPARE(result[2]->url(), QString("https://github.com/*"));
+    QCOMPARE(result[3]->url(), QString("http://github.com/*"));
+    QCOMPARE(result[4]->url(), QString("github.com/*"));
+    QCOMPARE(result[5]->url(), QString("https://*.github.com/*"));
+
+    result = m_browserService->searchEntries(
+        db, "https://subdomain.sub.github.com/login_page/second", "https://subdomain.sub.github.com/login_page/second");
+    QCOMPARE(result.length(), 3);
+    QCOMPARE(result[0]->url(), QString("https://*.github.com/*"));
+    QCOMPARE(result[1]->url(), QString("https://subdomain.*.github.com/*/second"));
+    QCOMPARE(result[2]->url(), QString("https://*.sub.github.com/*"));
+
+    result = m_browserService->searchEntries(
+        db, "https://subdomain.sub.github.com/other_page", "https://subdomain.sub.github.com/other_page");
+    QCOMPARE(result.length(), 2);
+    QCOMPARE(result[0]->url(), QString("https://*.github.com/*"));
+    QCOMPARE(result[1]->url(), QString("https://*.sub.github.com/*"));
+
+    result = m_browserService->searchEntries(
+        db, "https://subdomain.yes.github.com/other_page/second", "https://subdomain.yes.github.com/other_page/second");
+    QCOMPARE(result.length(), 3);
+    QCOMPARE(result[0]->url(), QString("https://*.github.com/*"));
+    QCOMPARE(result[1]->url(), QString("https://subdomain.*.github.com/*/second"));
+    QCOMPARE(result[2]->url(), QString("https://subdomain.yes.github.com/*"));
+
+    result = m_browserService->searchEntries(
+        db, "https://example.com:8448/login/page", "https://example.com:8448/login/page");
+    QCOMPARE(result.length(), 2);
+    QCOMPARE(result[0]->url(), QString("https://example.com:8448/*"));
+    QCOMPARE(result[1]->url(), QString("https://example.com/*/*"));
+
+    result = m_browserService->searchEntries(
+        db, "https://example.com:8449/login/page", "https://example.com:8449/login/page");
+    QCOMPARE(result.length(), 1);
+    QCOMPARE(result[0]->url(), QString("https://example.com/*/*"));
+
+    result =
+        m_browserService->searchEntries(db, "https://example.com/$/login_page", "https://example.com/$/login_page");
+    QCOMPARE(result.length(), 2);
+    QCOMPARE(result[0]->url(), QString("https://example.com/*/*"));
+    QCOMPARE(result[1]->url(), QString("https://example.com/$/*"));
+
+    result = m_browserService->searchEntries(db, "https://127.128.129.130:8448/", "https://127.128.129.130:8448/");
+    QCOMPARE(result.length(), 2);
+
+    result = m_browserService->searchEntries(db, "https://127.128.129.130/", "https://127.128.129.130/");
+    QCOMPARE(result.length(), 1);
+    QCOMPARE(result[0]->url(), QString("https://127.128.*/"));
+
+    result = m_browserService->searchEntries(db, "https://127.1.129.130/", "https://127.1.129.130/");
+    QCOMPARE(result.length(), 0);
+
+    result = m_browserService->searchEntries(db, "https://127.160.8.2/login", "https://127.160.8.2/login");
+    QCOMPARE(result.length(), 1);
+    QCOMPARE(result[0]->url(), QString("https://127.160.*.2/login"));
+
+    // With scheme matching enabled
+    browserSettings()->setMatchUrlScheme(true);
+    result = m_browserService->searchEntries(
+        db, "https://github.com/login_page/second", "https://github.com/login_page/second");
+
+    QCOMPARE(result.length(), 5);
+    QCOMPARE(result[0]->url(), QString("https://github.com/login_page/*"));
+    QCOMPARE(result[1]->url(), QString("https://github.com/*/second"));
+    QCOMPARE(result[2]->url(), QString("https://github.com/*"));
+    QCOMPARE(result[3]->url(), QString("github.com/*")); // Defaults to https
+    QCOMPARE(result[4]->url(), QString("https://*.github.com/*"));
 }
 
 void TestBrowser::testInvalidEntries()

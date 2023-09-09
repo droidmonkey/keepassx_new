@@ -132,6 +132,7 @@ public:
     static const QString OPTION_ONLY_HTTP_AUTH;
     static const QString OPTION_NOT_HTTP_AUTH;
     static const QString OPTION_OMIT_WWW;
+    static const QString ADDITIONAL_URL;
     static const QString OPTION_RESTRICT_KEY;
 
 signals:
@@ -200,6 +201,7 @@ private:
                    const QString& siteUrl,
                    const QString& formUrl,
                    const bool omitWwwSubdomain = false);
+    bool handleURLWithWildcards(const QUrl& entryQUrl, const QString& siteUrl);
     QString getDatabaseRootUuid();
     QString getDatabaseRecycleBinUuid();
     void hideWindow() const;
