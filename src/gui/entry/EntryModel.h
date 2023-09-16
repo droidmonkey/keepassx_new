@@ -48,7 +48,8 @@ public:
         Attachments = 11,
         Totp = 12,
         Size = 13,
-        PasswordStrength = 14
+        PasswordStrength = 14,
+        Color = 15
     };
 
     explicit EntryModel(QObject* parent = nullptr);
@@ -67,6 +68,7 @@ public:
 
     void setGroup(Group* group);
     void setEntries(const QList<Entry*>& entries);
+    void setBackgroundColorVisible(bool visible);
 
 private slots:
     void entryAboutToAdd(Entry* entry);
@@ -85,6 +87,7 @@ private:
     void severConnections();
     void makeConnections(const Group* group);
 
+    bool m_backgroundColorVisible = true;
     Group* m_group;
     QList<Entry*> m_entries;
     QList<Entry*> m_orgEntries;

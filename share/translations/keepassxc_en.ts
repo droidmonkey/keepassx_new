@@ -4064,6 +4064,10 @@ Would you like to overwrite the existing attachment?</source>
         <source>Has TOTP</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Background Color</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>EntryPreviewWidget</name>
