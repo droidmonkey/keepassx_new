@@ -116,7 +116,7 @@ int EntryModel::columnCount(const QModelIndex& parent) const
         return 0;
     }
 
-    return 16;
+    return 17;
 }
 
 QVariant EntryModel::data(const QModelIndex& index, int role) const
@@ -444,6 +444,8 @@ QVariant EntryModel::headerData(int section, Qt::Orientation orientation, int ro
             return tr("Has TOTP");
         case Color:
             return tr("Background Color");
+        case ParentGroupPath:
+            return tr("Group full path");
         }
     }
 

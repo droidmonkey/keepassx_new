@@ -49,7 +49,8 @@ public:
         Totp = 12,
         Size = 13,
         PasswordStrength = 14,
-        Color = 15
+        Color = 15,
+        ParentGroupPath = 16
     };
 
     explicit EntryModel(QObject* parent = nullptr);
