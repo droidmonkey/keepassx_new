@@ -136,6 +136,11 @@ QVariant EntryModel::data(const QModelIndex& index, int role) const
                 return entry->group()->name();
             }
             break;
+        case ParentGroupPath:
+            if (entry->group()) {
+                return entry->group()->fullPath();
+            }
+            break;
         case Title:
             result = entry->resolveMultiplePlaceholders(entry->title());
             if (attr->isReference(EntryAttributes::TitleKey)) {
@@ -377,6 +382,8 @@ QVariant EntryModel::headerData(int section, Qt::Orientation orientation, int ro
         switch (section) {
         case ParentGroup:
             return tr("Group");
+        case ParentGroupPath:
+            return tr("Group full path");
         case Title:
             return tr("Title");
         case Username:
@@ -414,6 +421,8 @@ QVariant EntryModel::headerData(int section, Qt::Orientation orientation, int ro
         switch (section) {
         case ParentGroup:
             return tr("Group name");
+        case ParentGroupPath:
+            return tr("Group full path");
         case Title:
             return tr("Entry title");
         case Username:
@@ -444,8 +453,6 @@ QVariant EntryModel::headerData(int section, Qt::Orientation orientation, int ro
             return tr("Has TOTP");
         case Color:
             return tr("Background Color");
-        case ParentGroupPath:
-            return tr("Group full path");
         }
     }
 
