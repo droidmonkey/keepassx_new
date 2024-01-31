@@ -9647,6 +9647,10 @@ This option is deprecated, use --set-key-file instead.</source>
         <source>No agent running, cannot list identities.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Destination constraints are invalid or not supported by the agent (check options).</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SearchHelpWidget</name>

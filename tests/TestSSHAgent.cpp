@@ -27,6 +27,52 @@
 
 QTEST_GUILESS_MAIN(TestSSHAgent)
 
+static const QList<KeeAgentSettings::KeySpec> githubKeys = {
+    {
+        .key = "ssh-rsa "
+               "AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+"
+               "VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/"
+               "BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/"
+               "hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+"
+               "5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+"
+               "wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+"
+               "bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/"
+               "YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=",
+        .isCertificateAuthority = false,
+    },
+    {
+        .key = "ecdsa-sha2-nistp256 "
+               "AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N"
+               "87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=",
+        .isCertificateAuthority = false,
+    },
+    {
+        .key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl",
+        .isCertificateAuthority = false,
+    }};
+
+static const QList<KeeAgentSettings::KeySpec> gitlabKeys = {
+    {
+        .key = "ssh-rsa "
+               "AAAAB3NzaC1yc2EAAAADAQABAAABAQCsj2bNKTBSpIYDEGk9KxsGh3mySTRgMtXL583qmBpzeQ+jqCMRgBqB98u3z++"
+               "J1sKlXHWfM9dyhSevkMwSbhoR8XIq/U0tCNyokEi/"
+               "ueaBMCvbcTHhO7FcwzY92WK4Yt0aGROY5qX2UKSeOvuP4D6TPqKF1onrSzH9bx9XUf2lEdWT/ia1NEKjunUqu1xOB/"
+               "StKDHMoX4/OKyIzuS0q/"
+               "T1zOATthvasJFoPrAjkohTyaDUz2LN5JoH839hViyEG82yB+MjcFV5MU3N1l1QL3cVUCh93xSaua1N85qivl+"
+               "siMkPGbO5xR/En4iEY6K2XPASUEMaieWVNTRCtJ4S8H+9",
+        .isCertificateAuthority = false,
+    },
+    {
+        .key = "ecdsa-sha2-nistp256 "
+               "AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3H"
+               "w9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY=",
+        .isCertificateAuthority = false,
+    },
+    {
+        .key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf",
+        .isCertificateAuthority = false,
+    }};
+
 void TestSSHAgent::initTestCase()
 {
     QVERIFY(Crypto::init());
@@ -177,6 +223,41 @@ void TestSSHAgent::testKeeAgentSettings()
     QVERIFY(settings2.fromXml(settings.toXml()));
     QVERIFY(settings2.saveAttachmentToTempFile());
     QVERIFY(settings == settings2);
+
+    QVERIFY(!settings.useDestinationConstraintsWhenAdding());
+    settings.setUseDestinationConstraintsWhenAdding(true);
+    QVERIFY(settings2.fromXml(settings.toXml()));
+    QVERIFY(settings2.useDestinationConstraintsWhenAdding());
+    QVERIFY(settings == settings2);
+
+    QList<KeeAgentSettings::DestinationConstraint> destinationConstraints;
+
+    // ssh-add -h github.com <keyfile>
+    destinationConstraints.append({
+        .fromHost = "",
+        .fromHostKeys = {},
+        .toUser = "",
+        .toHost = "github.com",
+        .toHostKeys = githubKeys,
+    });
+    QVERIFY(settings.destinationConstraints().isEmpty());
+    settings.setDestinationConstraints(destinationConstraints);
+    QVERIFY(settings2.fromXml(settings.toXml()));
+    QVERIFY(settings2.destinationConstraints() == destinationConstraints);
+    QVERIFY(settings == settings2);
+
+    // ssh-add -h github.com -h "github.com>git@gitlab.com" <keyfile>
+    destinationConstraints.append({
+        .fromHost = "github.com",
+        .fromHostKeys = githubKeys,
+        .toUser = "git",
+        .toHost = "gitlab.com",
+        .toHostKeys = gitlabKeys,
+    });
+    settings.setDestinationConstraints(destinationConstraints);
+    QVERIFY(settings2.fromXml(settings.toXml()));
+    QVERIFY(settings2.destinationConstraints() == destinationConstraints);
+    QVERIFY(settings == settings2);
 }
 
 void TestSSHAgent::testIdentity()
@@ -275,6 +356,43 @@ void TestSSHAgent::testConfirmConstraint()
     QVERIFY(agent.addIdentity(m_key, settings, m_uuid));
 
     // we can't test confirmation itself is working but we can test the agent accepts the key
+    QVERIFY(agent.checkIdentity(m_key, keyInAgent) && keyInAgent);
+
+    QVERIFY(agent.removeIdentity(m_key));
+    QVERIFY(agent.checkIdentity(m_key, keyInAgent) && !keyInAgent);
+}
+
+void TestSSHAgent::testDestinationConstraints()
+{
+    SSHAgent agent;
+    agent.setEnabled(true);
+    agent.setAuthSockOverride(m_agentSocketFileName);
+
+    QVERIFY(agent.isAgentRunning());
+
+    KeeAgentSettings settings;
+    bool keyInAgent;
+
+    // ssh-add -h github.com -h "github.com>git@gitlab.com" <keyfile>
+    settings.setUseDestinationConstraintsWhenAdding(true);
+    settings.setDestinationConstraints({{
+                                            .fromHost = "",
+                                            .fromHostKeys = {},
+                                            .toUser = "",
+                                            .toHost = "github.com",
+                                            .toHostKeys = githubKeys,
+                                        },
+                                        {
+                                            .fromHost = "github.com",
+                                            .fromHostKeys = githubKeys,
+                                            .toUser = "git",
+                                            .toHost = "gitlab.com",
+                                            .toHostKeys = gitlabKeys,
+                                        }});
+
+    QVERIFY(agent.addIdentity(m_key, settings, m_uuid));
+
+    // we can't test destination constraints itself is working but we can test the agent accepts the key
     QVERIFY(agent.checkIdentity(m_key, keyInAgent) && keyInAgent);
 
     QVERIFY(agent.removeIdentity(m_key));

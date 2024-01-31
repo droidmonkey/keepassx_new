@@ -35,6 +35,29 @@ KeeAgentSettings::KeeAgentSettings()
     reset();
 }
 
+bool KeeAgentSettings::KeySpec::operator==(const KeeAgentSettings::KeySpec& other) const
+{
+    return (key == other.key && isCertificateAuthority == other.isCertificateAuthority);
+}
+
+QByteArray KeeAgentSettings::KeySpec::getKeyBlob() const
+{
+    // In KeeAgent the key data is the second word in the string. First is the
+    // key type. Third is the key comment which is optional.
+    auto words = key.split(" ");
+    if (words.length() >= 2) {
+        return QByteArray::fromBase64(words[1].toLatin1(), QByteArray::Base64Encoding);
+    } else {
+        return QByteArray();
+    }
+}
+
+bool KeeAgentSettings::DestinationConstraint::operator==(const KeeAgentSettings::DestinationConstraint& other) const
+{
+    return (fromHost == other.fromHost && fromHostKeys == other.fromHostKeys && toUser == other.toUser
+            && toHost == other.toHost && toHostKeys == other.toHostKeys);
+}
+
 bool KeeAgentSettings::operator==(const KeeAgentSettings& other) const
 {
     // clang-format off
@@ -43,6 +66,8 @@ bool KeeAgentSettings::operator==(const KeeAgentSettings& other) const
             && m_useConfirmConstraintWhenAdding == other.m_useConfirmConstraintWhenAdding
             && m_useLifetimeConstraintWhenAdding == other.m_useLifetimeConstraintWhenAdding
             && m_lifetimeConstraintDuration == other.m_lifetimeConstraintDuration
+            && m_useDestinationConstraintsWhenAdding == other.m_useDestinationConstraintsWhenAdding
+            && m_destinationConstraints == other.m_destinationConstraints
             && m_selectedType == other.m_selectedType
             && m_attachmentName == other.m_attachmentName
             && m_saveAttachmentToTempFile == other.m_saveAttachmentToTempFile
@@ -77,6 +102,8 @@ void KeeAgentSettings::reset()
     m_useConfirmConstraintWhenAdding = false;
     m_useLifetimeConstraintWhenAdding = false;
     m_lifetimeConstraintDuration = 600;
+    m_useDestinationConstraintsWhenAdding = false;
+    m_destinationConstraints.clear();
 
     m_selectedType = QStringLiteral("file");
     m_attachmentName.clear();
@@ -123,6 +150,16 @@ bool KeeAgentSettings::useLifetimeConstraintWhenAdding() const
 int KeeAgentSettings::lifetimeConstraintDuration() const
 {
     return m_lifetimeConstraintDuration;
+}
+
+bool KeeAgentSettings::useDestinationConstraintsWhenAdding() const
+{
+    return m_useDestinationConstraintsWhenAdding;
+}
+
+QList<KeeAgentSettings::DestinationConstraint> KeeAgentSettings::destinationConstraints() const
+{
+    return m_destinationConstraints;
 }
 
 const QString KeeAgentSettings::selectedType() const
@@ -180,6 +217,16 @@ void KeeAgentSettings::setLifetimeConstraintDuration(int lifetimeConstraintDurat
     m_lifetimeConstraintDuration = lifetimeConstraintDuration;
 }
 
+void KeeAgentSettings::setUseDestinationConstraintsWhenAdding(bool useDestinationConstraintsWhenAdding)
+{
+    m_useDestinationConstraintsWhenAdding = useDestinationConstraintsWhenAdding;
+}
+
+void KeeAgentSettings::setDestinationConstraints(const QList<DestinationConstraint>& destinationConstraints)
+{
+    m_destinationConstraints = destinationConstraints;
+}
+
 void KeeAgentSettings::setSelectedType(const QString& selectedType)
 {
     m_selectedType = selectedType;
@@ -229,6 +276,8 @@ bool KeeAgentSettings::fromXml(const QByteArray& ba)
     QXmlStreamReader reader;
     reader.addData(ba);
 
+    reset();
+
     if (reader.error() || !reader.readNextStartElement()) {
         m_error = reader.errorString();
         return false;
@@ -273,6 +322,88 @@ bool KeeAgentSettings::fromXml(const QByteArray& ba)
                     reader.skipCurrentElement();
                 }
             }
+            if (!reader.error())
+                reader.readNext();
+        } else if (reader.name() == "UseDestinationConstraintWhenAdding") {
+            m_useDestinationConstraintsWhenAdding = readBool(reader);
+        } else if (reader.name() == "DestinationConstraints") {
+            while (!reader.error() && reader.readNextStartElement()) {
+                if (reader.name() == "Constraint") {
+                    KeeAgentSettings::DestinationConstraint constraint;
+                    while (!reader.error() && reader.readNextStartElement()) {
+                        if (reader.name() == "FromHostKeys" || reader.name() == "ToHostKeys") {
+                            QString section = reader.name().toString();
+                            while (!reader.error() && reader.readNextStartElement()) {
+                                if (reader.name() == "KeySpec") {
+                                    KeeAgentSettings::KeySpec keyspec;
+                                    while (!reader.error() && reader.readNextStartElement()) {
+                                        if (reader.name() == "HostKey") {
+                                            reader.readNext();
+                                            keyspec.key = reader.text().toString();
+                                            reader.readNext();
+                                        } else if (reader.name() == "IsCA") {
+                                            keyspec.isCertificateAuthority = readBool(reader);
+                                        } else {
+                                            qWarning() << "Skipping KeySpec element" << reader.name();
+                                            reader.skipCurrentElement();
+                                        }
+                                    }
+
+                                    if (keyspec.getKeyBlob().isEmpty()) {
+                                        return false;
+                                    }
+
+                                    if (section == "FromHostKeys") {
+                                        constraint.fromHostKeys.append(std::move(keyspec));
+                                    } else {
+                                        constraint.toHostKeys.append(std::move(keyspec));
+                                    }
+                                    if (!reader.error())
+                                        reader.readNext();
+                                } else {
+                                    qWarning() << "Skipping " << section << " element" << reader.name();
+                                    reader.skipCurrentElement();
+                                }
+                            }
+                            if (!reader.error())
+                                reader.readNext();
+                        } else if (reader.name() == "FromHost") {
+                            reader.readNext();
+                            constraint.fromHost = reader.text().toString();
+                            reader.readNext();
+                        } else if (reader.name() == "ToUser") {
+                            reader.readNext();
+                            constraint.toUser = reader.text().toString();
+                            reader.readNext();
+                        } else if (reader.name() == "ToHost") {
+                            reader.readNext();
+                            constraint.toHost = reader.text().toString();
+                            reader.readNext();
+                        } else {
+                            qWarning() << "Skipping Constraint element" << reader.name();
+                            reader.skipCurrentElement();
+                        }
+                    }
+
+                    if ((constraint.fromHost.isEmpty() && !constraint.fromHostKeys.isEmpty())
+                        || (!constraint.fromHost.isEmpty() && constraint.fromHostKeys.isEmpty())) {
+                        return false;
+                    }
+                    if (constraint.toHost.isEmpty() || constraint.toHostKeys.isEmpty()) {
+                        return false;
+                    }
+
+                    m_destinationConstraints.append(std::move(constraint));
+
+                    if (!reader.error())
+                        reader.readNext();
+                } else {
+                    qWarning() << "Skipping DestinationConstraints element" << reader.name();
+                    reader.skipCurrentElement();
+                }
+            }
+            if (!reader.error())
+                reader.readNext();
         } else {
             qWarning() << "Skipping element" << reader.name();
             reader.skipCurrentElement();
@@ -309,6 +440,53 @@ QByteArray KeeAgentSettings::toXml() const
     writer.writeTextElement("UseConfirmConstraintWhenAdding", m_useConfirmConstraintWhenAdding ? "true" : "false");
     writer.writeTextElement("UseLifetimeConstraintWhenAdding", m_useLifetimeConstraintWhenAdding ? "true" : "false");
     writer.writeTextElement("LifetimeConstraintDuration", QString::number(m_lifetimeConstraintDuration));
+    writer.writeTextElement("UseDestinationConstraintWhenAdding",
+                            m_useDestinationConstraintsWhenAdding ? "true" : "false");
+
+    writer.writeStartElement("DestinationConstraints");
+
+    foreach (const auto& constraint, m_destinationConstraints) {
+        writer.writeStartElement("Constraint");
+
+        if (constraint.fromHost.isEmpty()) {
+            writer.writeEmptyElement("FromHost");
+        } else {
+            writer.writeTextElement("FromHost", constraint.fromHost);
+        }
+
+        writer.writeStartElement("FromHostKeys");
+        foreach (const auto& keyspec, constraint.fromHostKeys) {
+            writer.writeStartElement("KeySpec");
+            writer.writeTextElement("HostKey", keyspec.key);
+            writer.writeTextElement("IsCA", keyspec.isCertificateAuthority ? "true" : "false");
+            writer.writeEndElement(); // KeySpec
+        }
+        writer.writeEndElement(); // FromHostKeys
+
+        if (constraint.toUser.isEmpty()) {
+            writer.writeEmptyElement("ToUser");
+        } else {
+            writer.writeTextElement("ToUser", constraint.toUser);
+        }
+        if (constraint.toHost.isEmpty()) {
+            writer.writeEmptyElement("ToHost");
+        } else {
+            writer.writeTextElement("ToHost", constraint.toHost);
+        }
+
+        writer.writeStartElement("ToHostKeys");
+        foreach (const auto& keyspec, constraint.toHostKeys) {
+            writer.writeStartElement("KeySpec");
+            writer.writeTextElement("HostKey", keyspec.key);
+            writer.writeTextElement("IsCA", keyspec.isCertificateAuthority ? "true" : "false");
+            writer.writeEndElement(); // KeySpec
+        }
+        writer.writeEndElement(); // ToHostKeys
+
+        writer.writeEndElement(); // Constraint
+    }
+
+    writer.writeEndElement(); // DestinationConstraints
 
     writer.writeStartElement("Location");
     writer.writeTextElement("SelectedType", m_selectedType);
