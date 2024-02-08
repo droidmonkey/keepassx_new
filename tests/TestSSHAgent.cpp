@@ -110,6 +110,75 @@ void TestSSHAgent::testConfiguration()
     QCOMPARE(agent.socketPath(false), defaultSocketPath);
 }
 
+void TestSSHAgent::testKeeAgentSettings()
+{
+    KeeAgentSettings settings;
+    KeeAgentSettings settings2;
+
+    QVERIFY(settings2.fromXml(settings.toXml()));
+    QVERIFY(settings == settings2);
+
+    QVERIFY(!settings.allowUseOfSshKey());
+    settings.setAllowUseOfSshKey(true);
+    QVERIFY(settings2.fromXml(settings.toXml()));
+    QVERIFY(settings2.allowUseOfSshKey());
+    QVERIFY(settings == settings2);
+
+    QVERIFY(!settings.addAtDatabaseOpen());
+    settings.setAddAtDatabaseOpen(true);
+    QVERIFY(settings2.fromXml(settings.toXml()));
+    QVERIFY(settings2.addAtDatabaseOpen());
+    QVERIFY(settings == settings2);
+
+    QVERIFY(!settings.removeAtDatabaseClose());
+    settings.setRemoveAtDatabaseClose(true);
+    QVERIFY(settings2.fromXml(settings.toXml()));
+    QVERIFY(settings2.removeAtDatabaseClose());
+    QVERIFY(settings == settings2);
+
+    QVERIFY(!settings.useConfirmConstraintWhenAdding());
+    settings.setUseConfirmConstraintWhenAdding(true);
+    QVERIFY(settings2.fromXml(settings.toXml()));
+    QVERIFY(settings2.useConfirmConstraintWhenAdding());
+    QVERIFY(settings == settings2);
+
+    QVERIFY(!settings.useLifetimeConstraintWhenAdding());
+    settings.setUseLifetimeConstraintWhenAdding(true);
+    QVERIFY(settings2.fromXml(settings.toXml()));
+    QVERIFY(settings2.useLifetimeConstraintWhenAdding());
+    QVERIFY(settings == settings2);
+
+    QVERIFY(settings.lifetimeConstraintDuration() == 600);
+    settings.setLifetimeConstraintDuration(120);
+    QVERIFY(settings2.fromXml(settings.toXml()));
+    QVERIFY(settings2.lifetimeConstraintDuration());
+    QVERIFY(settings == settings2);
+
+    QVERIFY(settings.fileName().isEmpty());
+    settings.setFileName("dummy.pkey");
+    QVERIFY(settings2.fromXml(settings.toXml()));
+    QVERIFY(settings2.fileName() == "dummy.pkey");
+    QVERIFY(settings == settings2);
+
+    QVERIFY(settings.selectedType() == "file");
+    settings.setSelectedType(QStringLiteral("attachment"));
+    QVERIFY(settings2.fromXml(settings.toXml()));
+    QVERIFY(settings2.selectedType() == "attachment");
+    QVERIFY(settings == settings2);
+
+    QVERIFY(settings.attachmentName().isEmpty());
+    settings.setAttachmentName("dummy.pkey");
+    QVERIFY(settings2.fromXml(settings.toXml()));
+    QVERIFY(settings2.attachmentName() == "dummy.pkey");
+    QVERIFY(settings == settings2);
+
+    QVERIFY(!settings.saveAttachmentToTempFile());
+    settings.setSaveAttachmentToTempFile(true);
+    QVERIFY(settings2.fromXml(settings.toXml()));
+    QVERIFY(settings2.saveAttachmentToTempFile());
+    QVERIFY(settings == settings2);
+}
+
 void TestSSHAgent::testIdentity()
 {
     SSHAgent agent;
