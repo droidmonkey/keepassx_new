@@ -24,6 +24,7 @@
 #include "sshagent/SSHAgent.h"
 
 #include <QTest>
+#include <QVersionNumber>
 
 QTEST_GUILESS_MAIN(TestSSHAgent)
 
@@ -364,6 +365,21 @@ void TestSSHAgent::testConfirmConstraint()
 
 void TestSSHAgent::testDestinationConstraints()
 {
+    // ssh-agent does not support destination constraints before OpenSSH
+    // version 8.9. Therefore we want to skip this test on older versions.
+    // Unfortunately ssh-agent does not give us any way to retrieve its version
+    // number neither via protocol nor on the command line. Therefore we use
+    // the version number of the SSH client and assume it to be the same.
+    QProcess ssh;
+    ssh.setReadChannel(QProcess::StandardError);
+    ssh.start("ssh", QStringList() << "-V");
+    ssh.waitForFinished();
+    auto ssh_version = QString::fromUtf8(ssh.readLine());
+    ssh_version.remove(QRegExp("^OpenSSH_"));
+    if (QVersionNumber ::fromString(ssh_version) < QVersionNumber(8, 9)) {
+        QSKIP("Test requires ssh-agent >= 8.9");
+    }
+
     SSHAgent agent;
     agent.setEnabled(true);
     agent.setAuthSockOverride(m_agentSocketFileName);
