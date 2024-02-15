@@ -30,6 +30,7 @@ endif()
 
 set(core_SOURCES
         core/Alloc.cpp
+        core/AuthenticationFactorUserData.cpp
         core/AutoTypeAssociations.cpp
         core/Base32.cpp
         core/Bootstrap.cpp
@@ -68,6 +69,13 @@ set(core_SOURCES
         crypto/kdf/Kdf.cpp
         crypto/kdf/AesKdf.cpp
         crypto/kdf/Argon2Kdf.cpp
+        format/multifactor/AESCBCFactorKeyDerivation.cpp
+        format/multifactor/AuthenticationFactor.cpp
+        format/multifactor/AuthenticationFactorGroup.cpp
+        format/multifactor/AuthenticationFactorInfo.cpp
+        format/multifactor/FactorKeyDerivation.cpp
+        format/multifactor/FidoAuthenticationFactor.cpp
+        format/multifactor/PasswordAuthenticationFactor.cpp
         format/BitwardenReader.cpp
         format/CsvExporter.cpp
         format/CsvParser.cpp
@@ -77,6 +85,7 @@ set(core_SOURCES
         format/KdbxReader.cpp
         format/KdbxWriter.cpp
         format/KdbxXmlReader.cpp
+        format/KdbxXmlAuthenticationFactorReader.cpp
         format/KeePass2Reader.cpp
         format/KeePass2Writer.cpp
         format/Kdbx3Reader.cpp
@@ -94,6 +103,7 @@ set(core_SOURCES
         keys/FileKey.cpp
         keys/PasswordKey.cpp
         keys/ChallengeResponseKey.cpp
+        keys/MultiAuthenticationHeaderKey.cpp
         streams/HashedBlockStream.cpp
         streams/HmacBlockStream.cpp
         streams/LayeredStream.cpp

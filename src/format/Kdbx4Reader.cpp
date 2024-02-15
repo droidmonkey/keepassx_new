@@ -16,9 +16,9 @@
  */
 
 #include "Kdbx4Reader.h"
+#include "KdbxXmlAuthenticationFactorReader.h"
 
 #include <QBuffer>
-#include <QJsonObject>
 
 #include "core/AsyncTask.h"
 #include "core/Endian.h"
@@ -224,6 +224,24 @@ bool Kdbx4Reader::readHeaderField(StoreDataStream& device, Database* db)
         variantBuffer.open(QBuffer::ReadOnly);
         QVariantMap data = readVariantMap(&variantBuffer);
         db->setPublicCustomData(data);
+
+        auto it = data.constFind(AUTHENTICATION_FACTORS_HEADER_KEY);
+        if (it != data.constEnd()) {
+            qDebug() << tr("Parsing authentication factors");
+
+            auto authFactorReader =
+                QScopedPointer<KdbxXmlAuthenticationFactorReader>(new KdbxXmlAuthenticationFactorReader());
+            authFactorReader->readAuthenticationFactors(db, it.value().toString());
+
+            if (authFactorReader->hasError()) {
+                raiseError(authFactorReader->errorString());
+                return false;
+            }
+
+            qDebug() << tr("Parsed authentication factors, got %1 group")
+                            .arg(db->authenticationFactorInfo()->getGroups().size());
+        }
+
         break;
     }
 

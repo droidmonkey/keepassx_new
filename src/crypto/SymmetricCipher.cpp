@@ -201,6 +201,8 @@ QString SymmetricCipher::modeToString(const Mode mode)
         return QStringLiteral("AES-128/CBC");
     case Aes256_CBC:
         return QStringLiteral("AES-256/CBC");
+    case Aes256_CBC_UNPADDED:
+        return QStringLiteral("AES-256/CBC/NoPadding");
     case Aes128_CTR:
         return QStringLiteral("CTR(AES-128)");
     case Aes256_CTR:

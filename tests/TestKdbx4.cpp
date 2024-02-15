@@ -140,6 +140,7 @@ void TestKdbx4Format::testFormat400()
     QCOMPARE(db->rootGroup()->name(), QString("Format400"));
     QCOMPARE(db->metadata()->name(), QString("Format400"));
     QCOMPARE(db->rootGroup()->entries().size(), 1);
+    QVERIFY(db->authenticationFactorInfo().isNull());
     auto entry = db->rootGroup()->entries().at(0);
 
     QCOMPARE(entry->title(), QString("Format400"));
@@ -605,4 +606,31 @@ void TestKdbx4Format::testCustomData()
     auto* newEntry = newDb->rootGroup()->children()[0]->entries()[0];
     QCOMPARE(newEntry->customData()->value(customDataKey1), customData1);
     QCOMPARE(newEntry->customData()->value(customDataKey2), customData2);
+}
+
+void TestKdbx4Format::testMultiFactorHeaderRead()
+{
+    QString filename = QString(KEEPASSX_TEST_DATA_DIR).append("/MultiFactorPasswordOnly.kdbx");
+
+    auto key = QSharedPointer<CompositeKey>::create();
+    auto passwordKey = QSharedPointer<PasswordKey>::create();
+    passwordKey->setPassword(QByteArray::fromStdString("somepassword"));
+    key->addKey(QSharedPointer<PasswordKey>(passwordKey));
+
+    KeePass2Reader reader;
+    auto db = QSharedPointer<Database>::create();
+    reader.readDatabase(filename, key, db.data());
+
+    QVERIFY(!reader.hasError());
+    QVERIFY(db->authenticationFactorInfo() != nullptr);
+    QCOMPARE(db->authenticationFactorInfo()->isComprehensive(), true);
+
+    auto groups = db->authenticationFactorInfo()->getGroups();
+
+    QCOMPARE(groups.size(), 1);
+    auto group = groups.first();
+    QCOMPARE(group->getFactors().size(), 1);
+    auto factor = group->getFactors().first();
+    QCOMPARE(factor->getName(), QString("SomePassword"));
+    QCOMPARE(factor->getFactorType(), QString(FACTOR_TYPE_PASSWORD_SHA256));
 }

@@ -100,6 +100,9 @@ set(testsupport_SOURCES
 add_library(testsupport STATIC ${testsupport_SOURCES})
 target_link_libraries(testsupport Qt5::Core Qt5::Concurrent Qt5::Widgets Qt5::Test)
 
+add_unit_test(NAME testauthenticationfactorparsing SOURCES TestAuthenticationFactorParsing.cpp
+        LIBS testsupport ${TEST_LIBRARIES})
+
 add_unit_test(NAME testgroup SOURCES TestGroup.cpp
         LIBS testsupport ${TEST_LIBRARIES})
 

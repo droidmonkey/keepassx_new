@@ -18,6 +18,8 @@
 #ifndef KEEPASSX_KDBX4READER_H
 #define KEEPASSX_KDBX4READER_H
 
+#define AUTHENTICATION_FACTORS_HEADER_KEY "authentication_factors"
+
 #include "format/KdbxReader.h"
 
 /**
