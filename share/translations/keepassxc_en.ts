@@ -3348,6 +3348,42 @@ Would you like to correct it?</source>
         <source> seconds</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Enable destination constraints</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Destination contraints</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>-</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Origin host:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Origin host keys:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Destination user:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Destination host:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Destination host keys:</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>EditGroupWidget</name>

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>452</width>
-    <height>618</height>
+    <width>595</width>
+    <height>752</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,23 +26,6 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="1" column="1" colspan="4">
-    <widget class="QCheckBox" name="removeKeyFromAgentCheckBox">
-     <property name="text">
-      <string>Remove key from agent when database is closed/locked</string>
-     </property>
-    </widget>
-   </item>
-   <item row="14" column="1">
-    <widget class="QLabel" name="commentLabel">
-     <property name="text">
-      <string>Comment</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="1" colspan="4">
     <widget class="QCheckBox" name="addKeyToAgentCheckBox">
      <property name="text">
@@ -50,7 +33,14 @@
      </property>
     </widget>
    </item>
-   <item row="15" column="3" colspan="2">
+   <item row="1" column="1" colspan="4">
+    <widget class="QCheckBox" name="removeKeyFromAgentCheckBox">
+     <property name="text">
+      <string>Remove key from agent when database is closed/locked</string>
+     </property>
+    </widget>
+   </item>
+   <item row="16" column="3" colspan="2">
     <widget class="QPlainTextEdit" name="publicKeyEdit">
      <property name="font">
       <font>
@@ -62,15 +52,15 @@
      </property>
     </widget>
    </item>
-   <item row="14" column="4">
-    <widget class="QPushButton" name="decryptButton">
+   <item row="17" column="3" colspan="2">
+    <widget class="QPushButton" name="copyToClipboardButton">
      <property name="text">
-      <string>Decrypt</string>
+      <string>Copy to clipboard</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="1">
-    <spacer name="verticalSpacer">
+   <item row="13" column="3">
+    <spacer name="verticalSpacer_2">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -85,34 +75,14 @@
      </property>
     </spacer>
    </item>
-   <item row="13" column="1">
-    <widget class="QLabel" name="fingerprintLabel">
+   <item row="15" column="4">
+    <widget class="QPushButton" name="decryptButton">
      <property name="text">
-      <string>Fingerprint</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      <string>Decrypt</string>
      </property>
     </widget>
    </item>
-   <item row="16" column="3" colspan="2">
-    <widget class="QPushButton" name="copyToClipboardButton">
-     <property name="text">
-      <string>Copy to clipboard</string>
-     </property>
-    </widget>
-   </item>
-   <item row="15" column="1">
-    <widget class="QLabel" name="publicKeyLabel">
-     <property name="text">
-      <string>Public key</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="1" colspan="4">
+   <item row="6" column="1" colspan="4">
     <widget class="QGroupBox" name="privateKeyGroupBox">
      <property name="title">
       <string>Private key</string>
@@ -199,6 +169,13 @@
      </layout>
     </widget>
    </item>
+   <item row="4" column="1" colspan="4">
+    <widget class="QCheckBox" name="enableDestinationConstraintsCheckBox">
+     <property name="text">
+      <string>Enable destination constraints</string>
+     </property>
+    </widget>
+   </item>
    <item row="2" column="1" colspan="4">
     <widget class="QCheckBox" name="requireUserConfirmationCheckBox">
      <property name="text">
@@ -206,10 +183,46 @@
      </property>
     </widget>
    </item>
-   <item row="14" column="3">
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
+   <item row="5" column="1">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>10</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="14" column="1">
+    <widget class="QLabel" name="fingerprintLabel">
+     <property name="text">
+      <string>Fingerprint</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="16" column="1">
+    <widget class="QLabel" name="publicKeyLabel">
+     <property name="text">
+      <string>Public key</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTop|Qt::AlignTrailing</set>
+     </property>
+    </widget>
+   </item>
+   <item row="14" column="3" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="commentTextLabel">
+      <widget class="QLabel" name="fingerprintTextLabel">
        <property name="font">
         <font>
          <family>Monospace</family>
@@ -224,7 +237,7 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer">
+      <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -275,10 +288,20 @@
      </item>
     </layout>
    </item>
-   <item row="13" column="3" colspan="2">
-    <layout class="QHBoxLayout" name="horizontalLayout">
+   <item row="15" column="1">
+    <widget class="QLabel" name="commentLabel">
+     <property name="text">
+      <string>Comment</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="15" column="3">
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
-      <widget class="QLabel" name="fingerprintTextLabel">
+      <widget class="QLabel" name="commentTextLabel">
        <property name="font">
         <font>
          <family>Monospace</family>
@@ -293,7 +316,7 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_2">
+      <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -307,21 +330,158 @@
      </item>
     </layout>
    </item>
-   <item row="12" column="3">
-    <spacer name="verticalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
+   <item row="18" column="1" colspan="4">
+    <widget class="QGroupBox" name="destinationConstraintsGroupBox">
+     <property name="title">
+      <string>Destination contraints</string>
      </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>10</height>
-      </size>
-     </property>
-    </spacer>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QTreeView" name="treeView"/>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="destinationConstraintAddButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>+</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="destinationConstraintRemoveButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>-</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="originHostLabel">
+              <property name="text">
+               <string>Origin host:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="originHostEdit"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="originHostKeysLabel">
+            <property name="text">
+             <string>Origin host keys:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="plainTextEdit"/>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="destinationUserLabel">
+              <property name="text">
+               <string>Destination user:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="destinationUserEdit"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="destinationHostLabel">
+              <property name="text">
+               <string>Destination host:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="destinationHostEdit"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="destinationHostKeysLabel">
+            <property name="text">
+             <string>Destination host keys:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="plainTextEdit_2"/>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
    </item>
   </layout>
  </widget>
