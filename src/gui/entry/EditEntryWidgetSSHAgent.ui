@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>595</width>
-    <height>752</height>
+    <height>826</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -332,6 +332,9 @@
    </item>
    <item row="18" column="1" colspan="4">
     <widget class="QGroupBox" name="destinationConstraintsGroupBox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="title">
       <string>Destination contraints</string>
      </property>
@@ -339,7 +342,7 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QTreeView" name="treeView"/>
+         <widget class="QTreeView" name="destinationConstraintsView"/>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -427,7 +430,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPlainTextEdit" name="plainTextEdit"/>
+           <widget class="QPlainTextEdit" name="originHostKeysEdit"/>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -474,7 +477,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPlainTextEdit" name="plainTextEdit_2"/>
+           <widget class="QPlainTextEdit" name="destinationHostKeysEdit"/>
           </item>
          </layout>
         </item>
