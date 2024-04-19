@@ -275,7 +275,7 @@ bool Database::saveAs(const QString& filePath, SaveAction action, const QString&
         return false;
     }
 
-    // Make sure we don't overwrite external modifications unless explicitly requested
+    // Make sure we don't overwrite external modifications unless explicitly allowed
     if (!m_ignoreFileChangesUntilSaved && !m_fileBlockHash.isEmpty() && filePath == m_data.filePath) {
         QFile dbFile(filePath);
         if (dbFile.exists()) {
@@ -292,7 +292,7 @@ bool Database::saveAs(const QString& filePath, SaveAction action, const QString&
                     if (error) {
                         *error = tr("Database file has unmerged changes.");
                     }
-                    // trigger a reload (async)
+                    // emit the databaseFileChanged(true) signal async
                     QMetaObject::invokeMethod(this, "databaseFileChanged", Qt::QueuedConnection, Q_ARG(bool, true));
                     return false;
                 }
