@@ -164,7 +164,7 @@ void TestDatabase::testSignals()
     // Short delay to allow file system settling to reduce test failures
     Tools::wait(100);
 
-    QSignalSpy spyFileChanged(db.data(), SIGNAL(databaseFileChanged()));
+    QSignalSpy spyFileChanged(db.data(), &Database::databaseFileChanged);
     QVERIFY(tempFile.copyFromFile(dbFileName));
     QTRY_COMPARE(spyFileChanged.count(), 1);
     QTRY_VERIFY(!db->isModified());
