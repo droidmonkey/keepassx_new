@@ -56,6 +56,7 @@ private:
     QTimer m_fileChecksumTimer;
     int m_fileChecksumSizeBytes = -1;
     bool m_ignoreFileChange = false;
+    bool m_paused = false;
 };
 
 #endif // KEEPASSXC_FILEWATCHER_H

@@ -79,17 +79,18 @@ void FileWatcher::stop()
     m_fileChecksum.clear();
     m_fileChecksumTimer.stop();
     m_fileChangeDelayTimer.stop();
+    m_paused = false;
 }
 
 void FileWatcher::pause()
 {
-    m_ignoreFileChange = true;
+    m_paused = true;
     m_fileChangeDelayTimer.stop();
 }
 
 void FileWatcher::resume()
 {
-    m_ignoreFileChange = false;
+    m_paused = false;
     // Add a short delay to start in the next event loop
     if (!m_fileIgnoreDelayTimer.isActive()) {
         m_fileIgnoreDelayTimer.start(0);
@@ -98,7 +99,7 @@ void FileWatcher::resume()
 
 bool FileWatcher::shouldIgnoreChanges()
 {
-    return m_filePath.isEmpty() || m_ignoreFileChange || m_fileIgnoreDelayTimer.isActive()
+    return m_filePath.isEmpty() || m_ignoreFileChange || m_paused || m_fileIgnoreDelayTimer.isActive()
            || m_fileChangeDelayTimer.isActive();
 }
 
