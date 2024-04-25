@@ -2498,6 +2498,11 @@ bool DatabaseWidget::saveAs()
         return true;
     }
 
+    // Do no try to save if the database is being reloaded
+    if (m_reloading) {
+        return false;
+    }
+
     QString oldFilePath = m_db->filePath();
     if (!QFileInfo::exists(oldFilePath)) {
         QString defaultFileName = config()->get(Config::DefaultDatabaseFileName).toString();
