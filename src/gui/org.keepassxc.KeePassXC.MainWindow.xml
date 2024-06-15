@@ -21,6 +21,11 @@
     <method name="refreshHardwareKeys">
       <arg name="found" type="b" direction="out"/>
     </method>
+    <method name="requestGlobalAutoType">
+    </method>
+    <method name="requestGlobalAutoType">
+      <arg name="search" type="s" direction="in"/>
+    </method>
     <method name="lockAllDatabases">
     </method>
     <method name="closeAllDatabases">

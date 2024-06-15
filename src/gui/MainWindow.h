@@ -92,6 +92,7 @@ public slots:
     void toggleWindow();
     void bringToFront();
     void closeAllDatabases();
+    void requestGlobalAutoType(const QString& search = "");
     void lockAllDatabases();
     void closeModalWindow();
     void displayDesktopNotification(const QString& msg, QString title = "", int msTimeoutHint = 10000);

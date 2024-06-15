@@ -1898,6 +1898,11 @@ void MainWindow::lockAllDatabases()
     lockDatabasesAfterInactivity();
 }
 
+void MainWindow::requestGlobalAutoType(const QString& search)
+{
+    emit osUtils->globalShortcutTriggered("autotype", search);
+}
+
 void MainWindow::displayDesktopNotification(const QString& msg, QString title, int msTimeoutHint)
 {
     if (!m_trayIcon || !QSystemTrayIcon::supportsMessages()) {

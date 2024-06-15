@@ -1,0 +1,6 @@
+
+find_package(PkgConfig)
+pkg_check_modules(Xkbcommon xkbcommon)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Xkbcommon DEFAULT_MSG Xkbcommon_LIBRARIES Xkbcommon_INCLUDE_DIRS)
