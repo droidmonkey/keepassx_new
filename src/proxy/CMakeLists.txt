@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if(WITH_XC_BROWSER)
+if(KPXC_FEATURE_BROWSER)
     set(proxy_SOURCES
         ../browser/BrowserShared.cpp
         keepassxc-proxy.cpp

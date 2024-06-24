@@ -1,4 +1,4 @@
-if(WITH_XC_SSHAGENT)
+if(KPXC_FEATURE_SSHAGENT)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
     set(sshagent_SOURCES

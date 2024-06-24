@@ -23,7 +23,7 @@
 
 #include <QWidget>
 
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
 #include "networking/HibpDownloader.h"
 #endif
 
@@ -76,7 +76,7 @@ private:
     QString m_editedPassword; // The old password of the entry we're editing
     bool m_editedExcluded; // The old "known bad" flag of the entry we're editing
 
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
     HibpDownloader m_downloader; // This performs the actual HIBP online query
 #endif
 };

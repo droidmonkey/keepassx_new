@@ -51,9 +51,7 @@ namespace Tools
     {
         QString debugInfo = "KeePassXC - ";
         debugInfo.append(QObject::tr("Version %1").arg(KEEPASSXC_VERSION).append("\n"));
-#ifndef KEEPASSXC_BUILD_TYPE_RELEASE
         debugInfo.append(QObject::tr("Build Type: %1").arg(KEEPASSXC_BUILD_TYPE).append("\n"));
-#endif
 
         QString commitHash;
         if (!QString(GIT_HEAD).isEmpty()) {
@@ -63,9 +61,7 @@ namespace Tools
             debugInfo.append(QObject::tr("Revision: %1").arg(commitHash.left(7)).append("\n"));
         }
 
-#ifdef KEEPASSXC_DIST
         debugInfo.append(QObject::tr("Distribution: %1").arg(KEEPASSXC_DIST_TYPE).append("\n"));
-#endif
 
         // Qt related debugging information.
         debugInfo.append("\n");
@@ -86,34 +82,22 @@ namespace Tools
         debugInfo.append("\n\n");
 
         QString extensions;
-#ifdef WITH_XC_AUTOTYPE
         extensions += "\n- " + QObject::tr("Auto-Type");
-#endif
-#ifdef WITH_XC_BROWSER
-        extensions += "\n- " + QObject::tr("Browser Integration");
-#endif
-#ifdef WITH_XC_BROWSER_PASSKEYS
-        extensions += "\n- " + QObject::tr("Passkeys");
-#endif
-#ifdef WITH_XC_SSHAGENT
-        extensions += "\n- " + QObject::tr("SSH Agent");
-#endif
-#ifdef WITH_XC_KEESHARE
         extensions += "\n- " + QObject::tr("KeeShare");
-#endif
-#ifdef WITH_XC_YUBIKEY
-        extensions += "\n- " + QObject::tr("YubiKey");
-#endif
+        extensions += "\n- " + QObject::tr("Hardware Keys");
 #if defined(Q_OS_MACOS) || defined(Q_CC_MSVC)
         extensions += "\n- " + QObject::tr("Quick Unlock");
 #endif
-#ifdef WITH_XC_FDOSECRETS
+#ifdef KPXC_FEATURE_BROWSER
+        extensions += "\n- " + QObject::tr("Browser Integration");
+        extensions += "\n- " + QObject::tr("Passkeys");
+#endif
+#ifdef KPXC_FEATURE_SSHAGENT
+        extensions += "\n- " + QObject::tr("SSH Agent");
+#endif
+#ifdef KPXC_FEATURE_FDOSECRETS
         extensions += "\n- " + QObject::tr("Secret Service Integration");
 #endif
-
-        if (extensions.isEmpty()) {
-            extensions = " " + QObject::tr("None");
-        }
 
         debugInfo.append(QObject::tr("Enabled extensions:").append(extensions).append("\n"));
         return debugInfo;

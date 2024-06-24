@@ -239,7 +239,7 @@ namespace Crypto
 {
     bool init()
     {
-#ifdef WITH_XC_BOTAN3
+#ifdef WITH_BOTAN3
         unsigned int version_major = 3, min_version_minor = 0;
         QString versionString = "3.x";
 #else

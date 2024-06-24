@@ -30,7 +30,7 @@
 #include <QStandardPaths>
 #include <QStyle>
 #include <QTextStream>
-#ifdef WITH_XC_X11
+#ifdef WITH_X11
 #include <QX11Info>
 
 #include <qpa/qplatformnativeinterface.h>
@@ -67,7 +67,7 @@ NixUtils* NixUtils::instance()
 NixUtils::NixUtils(QObject* parent)
     : OSUtilsBase(parent)
 {
-#ifdef WITH_XC_X11
+#ifdef WITH_X11
     dpy = QX11Info::display();
     rootWindow = QX11Info::appRootWindow();
 #endif
@@ -214,7 +214,7 @@ void NixUtils::launchAtStartupRequested(uint response, const QVariantMap& result
 
 bool NixUtils::isCapslockEnabled()
 {
-#ifdef WITH_XC_X11
+#ifdef WITH_X11
     QPlatformNativeInterface* native = QGuiApplication::platformNativeInterface();
     auto* display = native->nativeResourceForWindow("display", nullptr);
     if (!display) {
@@ -242,7 +242,7 @@ void NixUtils::registerNativeEventFilter()
 
 bool NixUtils::nativeEventFilter(const QByteArray& eventType, void* message, long*)
 {
-#ifdef WITH_XC_X11
+#ifdef WITH_X11
     if (eventType != QByteArrayLiteral("xcb_generic_event_t")) {
         return false;
     }
@@ -264,7 +264,7 @@ bool NixUtils::nativeEventFilter(const QByteArray& eventType, void* message, lon
 
 bool NixUtils::triggerGlobalShortcut(uint keycode, uint modifiers)
 {
-#ifdef WITH_XC_X11
+#ifdef WITH_X11
     QHashIterator<QString, QSharedPointer<globalShortcut>> i(m_globalShortcuts);
     while (i.hasNext()) {
         i.next();
@@ -282,7 +282,7 @@ bool NixUtils::triggerGlobalShortcut(uint keycode, uint modifiers)
 
 bool NixUtils::registerGlobalShortcut(const QString& name, Qt::Key key, Qt::KeyboardModifiers modifiers, QString* error)
 {
-#ifdef WITH_XC_X11
+#ifdef WITH_X11
     auto keycode = XKeysymToKeycode(dpy, qcharToNativeKeyCode(key));
     auto modifierscode = qtToNativeModifiers(modifiers);
 
@@ -334,7 +334,7 @@ bool NixUtils::registerGlobalShortcut(const QString& name, Qt::Key key, Qt::Keyb
 
 bool NixUtils::unregisterGlobalShortcut(const QString& name)
 {
-#ifdef WITH_XC_X11
+#ifdef WITH_X11
     if (!m_globalShortcuts.contains(name)) {
         return false;
     }

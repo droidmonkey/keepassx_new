@@ -5835,17 +5835,6 @@ Are you sure you want to continue with this file?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>WARNING: You are using an unstable build of KeePassXC.
-There is a high risk of corruption, maintain a backup of your databases.
-This version is not meant for production use.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>NOTE: You are using a pre-release version of KeePassXC.
-Expect some bugs and minor issues, this version is meant for testing purposes.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>No Tags</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6184,11 +6173,9 @@ Expect some bugs and minor issues, this version is meant for testing purposes.</
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Show Group Panel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Toggle Show Group Panel</source>
+        <source>WARNING: You are using a development snapshot build of KeePassXC.
+Maintain a backup of your databases in the event of unknown bugs.
+This version is not meant for production use.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -8426,19 +8413,11 @@ Kernel: %3 %4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>YubiKey</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Quick Unlock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Secret Service Integration</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>None</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -9035,42 +9014,7 @@ This option is deprecated, use --set-key-file instead.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Reset Shortcuts</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Double click an action to change its shortcut</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Filter...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Shortcut Conflict</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Shortcut %1 conflicts with &apos;%2&apos;. Overwrite shortcut?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cannot generate valid passphrases because the wordlist is too short</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Delete plugin data?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message numerus="yes">
-        <source>Delete plugin data from Entry(s)?</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message>
-        <source>Passkey</source>
+        <source>Hardware Keys</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

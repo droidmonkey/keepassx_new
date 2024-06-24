@@ -34,7 +34,7 @@ bool SymmetricCipher::init(Mode mode, Direction direction, const QByteArray& key
     try {
         auto botanMode = modeToString(mode);
         auto botanDirection =
-#ifdef WITH_XC_BOTAN3
+#ifdef WITH_BOTAN3
             (direction == SymmetricCipher::Encrypt ? Botan::Cipher_Dir::Encryption : Botan::Cipher_Dir::Decryption);
 #else
             (direction == SymmetricCipher::Encrypt ? Botan::Cipher_Dir::ENCRYPTION : Botan::Cipher_Dir::DECRYPTION);

@@ -20,15 +20,13 @@
 #include "DatabaseSettingsWidgetDatabaseKey.h"
 #include "DatabaseSettingsWidgetEncryption.h"
 #include "DatabaseSettingsWidgetGeneral.h"
-#ifdef WITH_XC_BROWSER
+#ifdef KPXC_FEATURE_BROWSER
 #include "DatabaseSettingsWidgetBrowser.h"
 #endif
 #include "../remote/DatabaseSettingsWidgetRemote.h"
 #include "DatabaseSettingsWidgetMaintenance.h"
-#ifdef WITH_XC_KEESHARE
 #include "keeshare/DatabaseSettingsWidgetKeeShare.h"
-#endif
-#ifdef WITH_XC_FDOSECRETS
+#ifdef KPXC_FEATURE_FDOSECRETS
 #include "fdosecrets/widgets/DatabaseSettingsWidgetFdoSecrets.h"
 #endif
 
@@ -44,13 +42,11 @@ DatabaseSettingsDialog::DatabaseSettingsDialog(QWidget* parent)
     , m_securityTabWidget(new QTabWidget(this))
     , m_databaseKeyWidget(new DatabaseSettingsWidgetDatabaseKey(this))
     , m_encryptionWidget(new DatabaseSettingsWidgetEncryption(this))
-#ifdef WITH_XC_BROWSER
+#ifdef KPXC_FEATURE_BROWSER
     , m_browserWidget(new DatabaseSettingsWidgetBrowser(this))
 #endif
-#ifdef WITH_XC_KEESHARE
     , m_keeShareWidget(new DatabaseSettingsWidgetKeeShare(this))
-#endif
-#ifdef WITH_XC_FDOSECRETS
+#ifdef KPXC_FEATURE_FDOSECRETS
     , m_fdoSecretsWidget(new DatabaseSettingsWidgetFdoSecrets(this))
 #endif
     , m_maintenanceWidget(new DatabaseSettingsWidgetMaintenance(this))
@@ -78,15 +74,13 @@ DatabaseSettingsDialog::DatabaseSettingsDialog(QWidget* parent)
 
     addPage(tr("Remote Sync"), icons()->icon("remote-sync"), m_remoteWidget);
 
-#ifdef WITH_XC_BROWSER
+#ifdef KPXC_FEATURE_BROWSER
     addPage(tr("Browser Integration"), icons()->icon("internet-web-browser"), m_browserWidget);
 #endif
 
-#ifdef WITH_XC_KEESHARE
     addPage(tr("KeeShare"), icons()->icon("preferences-system-network-sharing"), m_keeShareWidget);
-#endif
 
-#ifdef WITH_XC_FDOSECRETS
+#ifdef KPXC_FEATURE_FDOSECRETS
     addPage(tr("Secret Service Integration"), icons()->icon(QStringLiteral("freedesktop")), m_fdoSecretsWidget);
 #endif
 
@@ -105,13 +99,11 @@ void DatabaseSettingsDialog::load(const QSharedPointer<Database>& db)
     m_databaseKeyWidget->loadSettings(db);
     m_encryptionWidget->loadSettings(db);
     m_remoteWidget->loadSettings(db);
-#ifdef WITH_XC_BROWSER
+#ifdef KPXC_FEATURE_BROWSER
     m_browserWidget->loadSettings(db);
 #endif
-#ifdef WITH_XC_KEESHARE
     m_keeShareWidget->loadSettings(db);
-#endif
-#ifdef WITH_XC_FDOSECRETS
+#ifdef KPXC_FEATURE_FDOSECRETS
     m_fdoSecretsWidget->loadSettings(db);
 #endif
     m_maintenanceWidget->loadSettings(db);
@@ -159,10 +151,8 @@ void DatabaseSettingsDialog::save()
 
     // Browser settings don't have anything to save
 
-#ifdef WITH_XC_KEESHARE
     m_keeShareWidget->saveSettings();
-#endif
-#ifdef WITH_XC_FDOSECRETS
+#ifdef KPXC_FEATURE_FDOSECRETS
     m_fdoSecretsWidget->saveSettings();
 #endif
 
@@ -175,7 +165,7 @@ void DatabaseSettingsDialog::reject()
     m_databaseKeyWidget->discard();
     m_encryptionWidget->discard();
     m_remoteWidget->discard();
-#ifdef WITH_XC_BROWSER
+#ifdef KPXC_FEATURE_BROWSER
     m_browserWidget->discard();
 #endif
 

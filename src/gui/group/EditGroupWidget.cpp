@@ -18,7 +18,7 @@
 
 #include "EditGroupWidget.h"
 #include "ui_EditGroupWidgetMain.h"
-#if defined(WITH_XC_BROWSER)
+#if defined(KPXC_FEATURE_BROWSER)
 #include "browser/BrowserService.h"
 #include "ui_EditGroupWidgetBrowser.h"
 #endif
@@ -30,10 +30,7 @@
 #include "gui/Font.h"
 #include "gui/Icons.h"
 #include "gui/MessageBox.h"
-
-#if defined(WITH_XC_KEESHARE)
 #include "keeshare/group/EditGroupPageKeeShare.h"
-#endif
 
 class EditGroupWidget::ExtraPage
 {
@@ -70,7 +67,7 @@ EditGroupWidget::EditGroupWidget(QWidget* parent)
     , m_editGroupWidgetMain(new QScrollArea())
     , m_editGroupWidgetIcons(new EditWidgetIcons())
     , m_editWidgetProperties(new EditWidgetProperties())
-#if defined(WITH_XC_BROWSER)
+#if defined(KPXC_FEATURE_BROWSER)
     , m_browserSettingsChanged(false)
     , m_browserUi(new Ui::EditGroupWidgetBrowser())
     , m_browserWidget(new QWidget(this))
@@ -81,14 +78,12 @@ EditGroupWidget::EditGroupWidget(QWidget* parent)
 
     addPage(tr("Group"), icons()->icon("document-edit"), m_editGroupWidgetMain);
     addPage(tr("Icon"), icons()->icon("preferences-desktop-icons"), m_editGroupWidgetIcons);
-#if defined(WITH_XC_BROWSER)
+#if defined(KPXC_FEATURE_BROWSER)
     if (config()->get(Config::Browser_Enabled).toBool()) {
         initializeBrowserPage();
     }
 #endif
-#if defined(WITH_XC_KEESHARE)
     addEditPage(new EditGroupPageKeeShare(this));
-#endif
     addPage(tr("Properties"), icons()->icon("document-properties"), m_editWidgetProperties);
 
     connect(m_mainUi->expireCheck, SIGNAL(toggled(bool)), m_mainUi->expireDatePicker, SLOT(setEnabled(bool)));
@@ -130,7 +125,7 @@ void EditGroupWidget::setupModifiedTracking()
     // Icon tab
     connect(m_editGroupWidgetIcons, SIGNAL(widgetUpdated()), SLOT(setModified()));
 
-#if defined(WITH_XC_BROWSER)
+#if defined(KPXC_FEATURE_BROWSER)
     if (config()->get(Config::Browser_Enabled).toBool()) {
         setupBrowserModifiedTracking();
     }
@@ -189,7 +184,7 @@ void EditGroupWidget::loadGroup(Group* group, bool create, const QSharedPointer<
         page.set(m_temporaryGroup.data(), m_db);
     }
 
-#ifdef WITH_XC_BROWSER
+#ifdef KPXC_FEATURE_BROWSER
     if (config()->get(Config::Browser_Enabled).toBool()) {
         auto inheritHideEntries = false;
         auto inheritSkipSubmit = false;
@@ -286,7 +281,7 @@ void EditGroupWidget::apply()
         page.assign();
     }
 
-#ifdef WITH_XC_BROWSER
+#ifdef KPXC_FEATURE_BROWSER
     if (config()->get(Config::Browser_Enabled).toBool()) {
         if (!m_browserSettingsChanged) {
             return;
@@ -353,7 +348,7 @@ void EditGroupWidget::cancel()
     emit editFinished(false);
 }
 
-#ifdef WITH_XC_BROWSER
+#ifdef KPXC_FEATURE_BROWSER
 void EditGroupWidget::initializeBrowserPage()
 {
     addPage(tr("Browser Integration"), icons()->icon("internet-web-browser"), m_browserWidget);
@@ -450,7 +445,7 @@ Group::TriState EditGroupWidget::triStateFromIndex(int index)
     }
 }
 
-#ifdef WITH_XC_BROWSER
+#ifdef KPXC_FEATURE_BROWSER
 void EditGroupWidget::addRestrictKeyComboBoxItems(QStringList const& keyList, QString inheritValue)
 {
     auto comboBox = m_browserUi->browserIntegrationRestrictKeyCombobox;

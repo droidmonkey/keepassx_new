@@ -17,11 +17,9 @@
 
 #include "BrowserAction.h"
 #include "BrowserMessageBuilder.h"
-#ifdef WITH_XC_BROWSER_PASSKEYS
 #include "BrowserPasskeys.h"
-#include "PasskeyUtils.h"
-#endif
 #include "BrowserSettings.h"
+#include "PasskeyUtils.h"
 #include "core/Global.h"
 #include "core/Tools.h"
 
@@ -110,12 +108,10 @@ QJsonObject BrowserAction::handleAction(QLocalSocket* socket, const QJsonObject&
         return handleGlobalAutoType(json, action);
     } else if (action.compare("get-database-entries", Qt::CaseSensitive) == 0) {
         return handleGetDatabaseEntries(json, action);
-#ifdef WITH_XC_BROWSER_PASSKEYS
     } else if (action.compare(BROWSER_REQUEST_PASSKEYS_GET) == 0) {
         return handlePasskeysGet(json, action);
     } else if (action.compare(BROWSER_REQUEST_PASSKEYS_REGISTER) == 0) {
         return handlePasskeysRegister(json, action);
-#endif
     }
 
     // Action was not recognized
@@ -519,7 +515,6 @@ QJsonObject BrowserAction::handleGlobalAutoType(const QJsonObject& json, const Q
     return buildResponse(action, browserRequest.incrementedNonce);
 }
 
-#ifdef WITH_XC_BROWSER_PASSKEYS
 QJsonObject BrowserAction::handlePasskeysGet(const QJsonObject& json, const QString& action)
 {
     if (!m_associated) {
@@ -586,7 +581,6 @@ QJsonObject BrowserAction::handlePasskeysRegister(const QJsonObject& json, const
     const Parameters params{{"response", response}};
     return buildResponse(action, browserRequest.incrementedNonce, params);
 }
-#endif
 
 QJsonObject BrowserAction::decryptMessage(const QString& message, const QString& nonce)
 {

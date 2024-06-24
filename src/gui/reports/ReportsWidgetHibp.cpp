@@ -71,7 +71,7 @@ ReportsWidgetHibp::ReportsWidgetHibp(QWidget* parent)
     connect(m_ui->hibpTableView, SIGNAL(doubleClicked(QModelIndex)), SLOT(emitEntryActivated(QModelIndex)));
     connect(m_ui->hibpTableView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customMenuRequested(QPoint)));
     connect(m_ui->showKnownBadCheckBox, SIGNAL(stateChanged(int)), this, SLOT(makeHibpTable()));
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
     connect(&m_downloader, SIGNAL(hibpResult(QString, int)), SLOT(addHibpResult(QString, int)));
     connect(&m_downloader, SIGNAL(fetchFailed(QString)), SLOT(fetchFailed(QString)));
 
@@ -92,7 +92,7 @@ void ReportsWidgetHibp::loadSettings(QSharedPointer<Database> db)
     m_error.clear();
     m_rowToEntry.clear();
     m_editedEntry = nullptr;
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
     m_ui->stackedWidget->setCurrentIndex(0);
     m_ui->validationButton->setEnabled(true);
     m_ui->progressBar->hide();
@@ -188,7 +188,7 @@ void ReportsWidgetHibp::makeHibpTable()
     }
 
     // If we're done and everything is good, display a motivational message
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
     if (m_downloader.passwordsRemaining() == 0 && m_pwndPasswords.isEmpty() && m_error.isEmpty()) {
         m_referencesModel->clear();
         m_referencesModel->setHorizontalHeaderLabels(QStringList() << tr("Congratulations, no exposed passwords!"));
@@ -219,7 +219,7 @@ void ReportsWidgetHibp::addHibpResult(const QString& password, int count)
         m_pwndPasswords[password] = count;
     }
 
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
     // Update the progress bar
     int remaining = m_downloader.passwordsRemaining();
     if (remaining > 0) {
@@ -249,7 +249,7 @@ void ReportsWidgetHibp::fetchFailed(const QString& error)
  */
 void ReportsWidgetHibp::startValidation()
 {
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
     // Collect all passwords in the database (unless recycled, and
     // unless empty, and unless marked as "known bad") and submit them
     // to the downloader.
@@ -345,7 +345,7 @@ void ReportsWidgetHibp::refreshAfterEdit()
     m_pwndPasswords.remove(m_editedPassword);
 
     // Validate the new password against HIBP
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
     m_downloader.add(m_editedEntry->password());
     m_downloader.validate();
 #endif
