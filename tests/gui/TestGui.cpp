@@ -867,23 +867,32 @@ void TestGui::testPasswordEntryEntropy_data()
     QTest::addColumn<QString>("password");
     QTest::addColumn<QString>("expectedStrengthLabel");
 
-    QTest::newRow("Empty password") << "" << "Password Quality: Poor";
+    QTest::newRow("Empty password") << ""
+                                    << "Password Quality: Poor";
 
-    QTest::newRow("Well-known password") << "hello" << "Password Quality: Poor";
+    QTest::newRow("Well-known password") << "hello"
+                                         << "Password Quality: Poor";
 
-    QTest::newRow("Password composed of well-known words.") << "helloworld" << "Password Quality: Poor";
+    QTest::newRow("Password composed of well-known words.") << "helloworld"
+                                                            << "Password Quality: Poor";
 
-    QTest::newRow("Password composed of well-known words with number.") << "password1" << "Password Quality: Poor";
+    QTest::newRow("Password composed of well-known words with number.") << "password1"
+                                                                        << "Password Quality: Poor";
 
-    QTest::newRow("Password out of small character space.") << "D0g.................." << "Password Quality: Poor";
+    QTest::newRow("Password out of small character space.") << "D0g.................."
+                                                            << "Password Quality: Poor";
 
-    QTest::newRow("XKCD, easy substitutions.") << "Tr0ub4dour&3" << "Password Quality: Poor";
+    QTest::newRow("XKCD, easy substitutions.") << "Tr0ub4dour&3"
+                                               << "Password Quality: Poor";
 
-    QTest::newRow("XKCD, word generator.") << "correcthorsebatterystaple" << "Password Quality: Weak";
+    QTest::newRow("XKCD, word generator.") << "correcthorsebatterystaple"
+                                           << "Password Quality: Weak";
 
-    QTest::newRow("Random characters, medium length.") << "YQC3kbXbjC652dTDH" << "Password Quality: Good";
+    QTest::newRow("Random characters, medium length.") << "YQC3kbXbjC652dTDH"
+                                                       << "Password Quality: Good";
 
-    QTest::newRow("Random characters, long.") << "Bs5ZFfthWzR8DGFEjaCM6bGqhmCT4km" << "Password Quality: Excellent";
+    QTest::newRow("Random characters, long.") << "Bs5ZFfthWzR8DGFEjaCM6bGqhmCT4km"
+                                              << "Password Quality: Excellent";
 
     QTest::newRow("Long password using Zxcvbn chunk estimation")
         << "quintet-tamper-kinswoman-humility-vengeful-haven-tastiness-aspire-widget-ipad-cussed-reaffirm-ladylike-"
@@ -1027,11 +1036,12 @@ void TestGui::testDicewareEntryEntropy()
         // Verify entropy and strength
         auto* entropyLabel = pwGeneratorWidget->findChild<QLabel*>("entropyLabel");
         auto* strengthLabel = pwGeneratorWidget->findChild<QLabel*>("strengthLabel");
-        auto* wordLengthLabel = pwGeneratorWidget->findChild<QLabel*>("charactersInPassphraseLabel");
+        auto* wordLengthLabel = pwGeneratorWidget->findChild<QLabel*>("passwordLengthLabel");
 
         QTRY_COMPARE_WITH_TIMEOUT(entropyLabel->text(), QString("Entropy: 77.55 bit"), 200);
         QCOMPARE(strengthLabel->text(), QString("Password Quality: Good"));
-        QCOMPARE(wordLengthLabel->text().toInt(), pwGeneratorWidget->getGeneratedPassword().size());
+        QCOMPARE(wordLengthLabel->text(),
+                 QString("Characters: %1").arg(QString::number(pwGeneratorWidget->getGeneratedPassword().length())));
 
         QTest::mouseClick(generatedPassword, Qt::LeftButton);
         QTest::keyClick(generatedPassword, Qt::Key_Escape););
@@ -1601,14 +1611,18 @@ void TestGui::testSaveBackupPath_data()
 
     QTest::newRow("Absolute backup path") << tmpFile.fileName() << tmpFile.fileName();
     // relative paths should be resolved to database parent directory
-    QTest::newRow("Relative backup path (implicit)") << "other_dir/test.old.kdbx" << "other_dir/test.old.kdbx";
-    QTest::newRow("Relative backup path (explicit)") << "./other_dir2/test2.old.kdbx" << "other_dir2/test2.old.kdbx";
+    QTest::newRow("Relative backup path (implicit)") << "other_dir/test.old.kdbx"
+                                                     << "other_dir/test.old.kdbx";
+    QTest::newRow("Relative backup path (explicit)") << "./other_dir2/test2.old.kdbx"
+                                                     << "other_dir2/test2.old.kdbx";
 
-    QTest::newRow("Path with placeholders") << "{DB_FILENAME}.old.kdbx" << "KeePassXC.old.kdbx";
+    QTest::newRow("Path with placeholders") << "{DB_FILENAME}.old.kdbx"
+                                            << "KeePassXC.old.kdbx";
     // empty path should be replaced with default pattern
     QTest::newRow("Empty path") << QString("") << config()->getDefault(Config::BackupFilePathPattern).toString();
     // {DB_FILENAME} should be replaced with database filename
-    QTest::newRow("") << "{DB_FILENAME}_.old.kdbx" << "{DB_FILENAME}_.old.kdbx";
+    QTest::newRow("") << "{DB_FILENAME}_.old.kdbx"
+                      << "{DB_FILENAME}_.old.kdbx";
 }
 
 void TestGui::testSaveBackupPath()

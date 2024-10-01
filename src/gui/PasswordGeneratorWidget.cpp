@@ -277,7 +277,6 @@ void PasswordGeneratorWidget::updatePasswordStrength()
     PasswordHealth passwordHealth(0);
     if (m_ui->tabWidget->currentIndex() == Diceware) {
         passwordHealth.init(m_dicewareGenerator->estimateEntropy());
-        m_ui->charactersInPassphraseLabel->setText(QString::number(m_ui->editNewPassword->text().length()));
     } else {
         passwordHealth = PasswordHealth(m_ui->editNewPassword->text());
     }
