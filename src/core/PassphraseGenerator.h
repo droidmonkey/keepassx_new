@@ -30,7 +30,8 @@ public:
     {
         LOWERCASE,
         UPPERCASE,
-        TITLECASE
+        TITLECASE,
+        MIXEDCASE
     };
 
     double estimateEntropy(int wordCount = 0);
