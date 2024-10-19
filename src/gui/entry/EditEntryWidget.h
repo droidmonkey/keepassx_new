@@ -77,6 +77,19 @@ public:
     Entry* currentEntry() const;
     void clear();
 
+    enum class Page
+    {
+        Main,
+        Advanced,
+        Icon,
+        AutoType,
+        Browser,
+        SSHAgent,
+        Properties,
+        History
+    };
+    bool switchToPage(Page page);
+
 signals:
     void editFinished(bool accepted);
     void historyEntryActivated(Entry* entry);
@@ -161,6 +174,8 @@ private:
 #endif
 
     void displayAttribute(QModelIndex index, bool showProtected);
+
+    QWidget* widgetForPage(Page page) const;
 
     QPointer<Entry> m_entry;
     QSharedPointer<Database> m_db;

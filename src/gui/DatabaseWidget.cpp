@@ -183,6 +183,7 @@ DatabaseWidget::DatabaseWidget(QSharedPointer<Database> db, QWidget* parent)
     m_previewSplitter->setSizes({1, 1});
 
     m_editEntryWidget->setObjectName("editEntryWidget");
+    m_historyEditEntryWidget->setObjectName("editEntryHistoryWidget");
     m_editGroupWidget->setObjectName("editGroupWidget");
     m_reportsDialog->setObjectName("reportsDialog");
     m_databaseSettingDialog->setObjectName("databaseSettingsDialog");
@@ -277,7 +278,7 @@ DatabaseWidget::Mode DatabaseWidget::currentMode() const
         mode = Mode::ReportsMode;
     } else if (widget == m_databaseSettingDialog) {
         mode = Mode::DatabaseSettingsMode;
-    } else if (widget == m_editEntryWidget) {
+    } else if (widget == m_editEntryWidget || widget == m_historyEditEntryWidget) {
         mode = Mode::EditEntryMode;
     } else if (widget == m_editGroupWidget) {
         mode = Mode::EditGroupMode;

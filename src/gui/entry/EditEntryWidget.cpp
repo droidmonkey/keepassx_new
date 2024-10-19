@@ -139,6 +139,47 @@ EditEntryWidget::EditEntryWidget(QWidget* parent)
 
 EditEntryWidget::~EditEntryWidget() = default;
 
+bool EditEntryWidget::switchToPage(Page page)
+{
+    auto index = pageIndex(widgetForPage(page));
+    if (index >= 0) {
+        setCurrentPage(index);
+        return true;
+    }
+    return false;
+}
+
+QWidget* EditEntryWidget::widgetForPage(Page page) const
+{
+    switch (page) {
+    case Page::Main:
+        return m_mainWidget;
+    case Page::Advanced:
+        return m_advancedWidget;
+    case Page::Icon:
+        return m_iconsWidget;
+    case Page::AutoType:
+        return m_autoTypeWidget;
+    case Page::Browser:
+#ifdef WITH_XC_BROWSER
+        return m_browserWidget;
+#else
+        return nullptr;
+#endif
+    case Page::SSHAgent:
+#ifdef WITH_XC_SSHAGENT
+        return m_sshAgentWidget;
+#else
+        return nullptr;
+#endif
+    case Page::Properties:
+        return m_editWidgetProperties;
+    case Page::History:
+        return m_historyWidget;
+    }
+    return nullptr;
+}
+
 void EditEntryWidget::setupMain()
 {
     m_mainUi->setupUi(m_mainWidget);
@@ -886,7 +927,7 @@ void EditEntryWidget::loadEntry(Entry* entry,
     setForms(entry);
     setReadOnly(m_history);
 
-    setCurrentPage(0);
+    switchToPage(Page::Main);
     setPageHidden(m_historyWidget, m_history || m_entry->historyItems().count() < 1);
 #ifdef WITH_XC_SSHAGENT
     setPageHidden(m_sshAgentWidget, !sshAgent()->isEnabled());
@@ -1131,7 +1172,7 @@ bool EditEntryWidget::commitEntry()
                                         MessageBox::Yes | MessageBox::No,
                                         MessageBox::Yes);
         if (res == MessageBox::Yes) {
-            setCurrentPage(3);
+            switchToPage(Page::AutoType);
             return false;
         }
     }
@@ -1146,7 +1187,7 @@ bool EditEntryWidget::commitEntry()
                                      MessageBox::Yes | MessageBox::No,
                                      MessageBox::Yes);
             if (res == MessageBox::Yes) {
-                setCurrentPage(3);
+                switchToPage(Page::AutoType);
                 return false;
             }
         }
