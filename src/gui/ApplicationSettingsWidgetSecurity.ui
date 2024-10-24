@@ -175,7 +175,7 @@
       <item>
        <widget class="QCheckBox" name="quickUnlockFallbackEnabled">
         <property name="text">
-         <string>Enable password fallback when no biometrics hardware is available</string>
+         <string>Enable password fallback for Touch ID</string>
         </property>
        </widget>
       </item>
