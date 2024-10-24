@@ -342,7 +342,7 @@ bool TouchID::isPasswordFallbackEnabled()
     //TODO config lookup
     return true;
 #else
-    return false;
+    return true;
 #endif
 }
 
