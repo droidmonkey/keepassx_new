@@ -1,10 +1,10 @@
 #include "quickunlock/TouchID.h"
 
-#include "config-keepassx.h"
-#import "core/Config.h"
-#include "crypto/CryptoHash.h"
 #include "crypto/Random.h"
 #include "crypto/SymmetricCipher.h"
+#include "crypto/CryptoHash.h"
+#include "config-keepassx.h"
+#import "core/Config.h"
 
 #include <botan/mem_ops.h>
 

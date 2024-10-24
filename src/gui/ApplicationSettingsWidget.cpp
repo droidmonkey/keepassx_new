@@ -347,8 +347,7 @@ void ApplicationSettingsWidget::loadSettings()
     m_secUi->hideTotpCheckBox->setChecked(config()->get(Config::Security_HideTotpPreviewPanel).toBool());
     m_secUi->hideNotesCheckBox->setChecked(config()->get(Config::Security_HideNotes).toBool());
 
-    bool available = getQuickUnlock()->isAvailable();
-    m_secUi->quickUnlockCheckBox->setEnabled(available);
+    m_secUi->quickUnlockCheckBox->setEnabled(getQuickUnlock()->isAvailable());
     m_secUi->quickUnlockCheckBox->setChecked(config()->get(Config::Security_QuickUnlock).toBool());
 
     for (const ExtraPage& page : asConst(m_extraPages)) {
