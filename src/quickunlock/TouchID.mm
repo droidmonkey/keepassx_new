@@ -1,9 +1,10 @@
 #include "quickunlock/TouchID.h"
 
+#include "config-keepassx.h"
+#import "core/Config.h"
+#include "crypto/CryptoHash.h"
 #include "crypto/Random.h"
 #include "crypto/SymmetricCipher.h"
-#include "crypto/CryptoHash.h"
-#include "config-keepassx.h"
 
 #include <botan/mem_ops.h>
 
@@ -339,10 +340,9 @@ bool TouchID::isTouchIdAvailable()
 bool TouchID::isPasswordFallbackEnabled()
 {
 #if XC_COMPILER_SUPPORT(TOUCH_ID)
-    //TODO config lookup
-    return true;
+    return (config()->get(Config::Security_TouchIdAllowFallbackToUserPassword).toBool());
 #else
-    return true;
+    return false;
 #endif
 }
 

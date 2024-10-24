@@ -336,7 +336,7 @@ void ApplicationSettingsWidget::loadSettings()
 #endif
     m_secUi->lockDatabasesOnUserSwitchCheckBox->setChecked(
         config()->get(Config::Security_LockDatabaseOnUserSwitch).toBool());
-    m_secUi->lockDatabasesOnUserSwitchCheckBox->setChecked(
+    m_secUi->quickUnlockFallbackEnabled->setChecked(
         config()->get(Config::Security_TouchIdAllowFallbackToUserPassword).toBool());
     m_secUi->fallbackToSearch->setChecked(config()->get(Config::Security_IconDownloadFallback).toBool());
 
@@ -347,7 +347,8 @@ void ApplicationSettingsWidget::loadSettings()
     m_secUi->hideTotpCheckBox->setChecked(config()->get(Config::Security_HideTotpPreviewPanel).toBool());
     m_secUi->hideNotesCheckBox->setChecked(config()->get(Config::Security_HideNotes).toBool());
 
-    m_secUi->quickUnlockCheckBox->setEnabled(getQuickUnlock()->isAvailable());
+    bool available = getQuickUnlock()->isAvailable();
+    m_secUi->quickUnlockCheckBox->setEnabled(available);
     m_secUi->quickUnlockCheckBox->setChecked(config()->get(Config::Security_QuickUnlock).toBool());
 
     for (const ExtraPage& page : asConst(m_extraPages)) {
