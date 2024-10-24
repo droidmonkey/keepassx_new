@@ -148,7 +148,7 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
 #endif
    }
 
-   if (!isWatchAvailable() && !isTouchIdAvailable() && fallbackEnabled()) {
+   if (!isWatchAvailable() && !isTouchIdAvailable() && isPasswordFallbackEnabled()) {
        accessControlFlags = accessControlFlags | kSecAccessControlDevicePasscode;
    }
 
@@ -336,10 +336,11 @@ bool TouchID::isTouchIdAvailable()
 #endif
 }
 
-bool TouchID::fallbackEnabled()
+bool TouchID::isPasswordFallbackEnabled()
 {
 #if XC_COMPILER_SUPPORT(TOUCH_ID)
     //TODO config lookup
+    return true;
 #else
     return false;
 #endif
@@ -351,7 +352,7 @@ bool TouchID::isAvailable() const
    // note: we cannot cache the check results because the configuration
    // is dynamic in its nature. User can close the laptop lid or take off
    // the watch, thus making one (or both) of the authentication types unavailable.
-   return  isWatchAvailable() || isTouchIdAvailable();
+   return  isWatchAvailable() || isTouchIdAvailable() || isPasswordFallbackEnabled();
 }
 
 /**

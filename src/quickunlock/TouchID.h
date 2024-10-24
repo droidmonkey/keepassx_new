@@ -37,7 +37,7 @@ public:
 private:
     static bool isWatchAvailable();
     static bool isTouchIdAvailable();
-    static bool fallbackEnabled();
+    static bool isPasswordFallbackEnabled();
 
     static void deleteKeyEntry(const QString& accountName);
     static QString databaseKeyName(const QUuid& dbUuid);
