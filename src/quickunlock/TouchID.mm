@@ -149,8 +149,8 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
 #endif
    }
 
-   if (!isWatchAvailable() && !isTouchIdAvailable() && isPasswordFallbackEnabled()) {
-       accessControlFlags = accessControlFlags | kSecAccessControlDevicePasscode;
+   if (isPasswordFallbackEnabled()) {
+       accessControlFlags = accessControlFlags | kSecAccessControlOr | kSecAccessControlDevicePasscode;
    }
 
    SecAccessControlRef sacObject = SecAccessControlCreateWithFlags(
