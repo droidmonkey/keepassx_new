@@ -634,6 +634,10 @@
         <source>Hide notes in the entry preview panel</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Enable password fallback for Touch ID</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AutoType</name>

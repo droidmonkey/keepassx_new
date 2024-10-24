@@ -552,10 +552,6 @@
         <source>Enable database quick unlock (Touch ID / Windows Hello)</source>
         <translation>Schnelle Datenbank-Entsperrung aktivieren (Touch ID/Windows Hello)</translation>
     </message>
-    <messsage>
-    <source>Enable password fallback for Touch ID</source>
-    <translation>Passwort-Fallback für Touch-ID aktivieren</translation>
-    </message>
     <message>
         <source>Lock databases when session is locked or lid is closed</source>
         <translation>Datenbanken sperren, wenn Sitzung gesperrt oder Deckel zugeklappt wird</translation>
