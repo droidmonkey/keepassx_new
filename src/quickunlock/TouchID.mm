@@ -148,6 +148,10 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
 #endif
    }
 
+   if (!isWatchAvailable() && !isTouchIdAvailable() && fallbackEnabled()) {
+       accessControlFlags = accessControlFlags | kSecAccessControlDevicePasscode;
+   }
+
    SecAccessControlRef sacObject = SecAccessControlCreateWithFlags(
        kCFAllocatorDefault, kSecAttrAccessibleWhenUnlockedThisDeviceOnly, accessControlFlags, &error);
 
@@ -329,6 +333,15 @@ bool TouchID::isTouchIdAvailable()
    }
 #else
    return false;
+#endif
+}
+
+bool TouchID::fallbackEnabled()
+{
+#if XC_COMPILER_SUPPORT(TOUCH_ID)
+    //TODO config lookup
+#else
+    return false;
 #endif
 }
 

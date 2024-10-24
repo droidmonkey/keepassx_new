@@ -37,11 +37,13 @@ public:
 private:
     static bool isWatchAvailable();
     static bool isTouchIdAvailable();
+    static bool fallbackEnabled();
 
     static void deleteKeyEntry(const QString& accountName);
     static QString databaseKeyName(const QUuid& dbUuid);
 
     QHash<QUuid, QByteArray> m_encryptedMasterKeys;
+
 };
 
 #endif // KEEPASSX_TOUCHID_H
