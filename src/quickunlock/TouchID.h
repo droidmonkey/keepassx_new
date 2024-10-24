@@ -43,7 +43,6 @@ private:
     static QString databaseKeyName(const QUuid& dbUuid);
 
     QHash<QUuid, QByteArray> m_encryptedMasterKeys;
-
 };
 
 #endif // KEEPASSX_TOUCHID_H

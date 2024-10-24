@@ -455,7 +455,8 @@ void ApplicationSettingsWidget::saveSettings()
     config()->set(Config::Security_LockDatabaseMinimize, m_secUi->lockDatabaseMinimizeCheckBox->isChecked());
     config()->set(Config::Security_LockDatabaseScreenLock, m_secUi->lockDatabaseOnScreenLockCheckBox->isChecked());
     config()->set(Config::Security_LockDatabaseOnUserSwitch, m_secUi->lockDatabasesOnUserSwitchCheckBox->isChecked());
-    config()->set(Config::Security_TouchIdAllowFallbackToUserPassword, m_secUi->quickUnlockFallbackEnabled->isChecked());
+    config()->set(Config::Security_TouchIdAllowFallbackToUserPassword,
+                  m_secUi->quickUnlockFallbackEnabled->isChecked());
     config()->set(Config::Security_IconDownloadFallback, m_secUi->fallbackToSearch->isChecked());
 
     config()->set(Config::Security_PasswordsHidden, m_secUi->passwordsHiddenCheckBox->isChecked());
