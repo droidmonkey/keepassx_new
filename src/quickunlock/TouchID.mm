@@ -132,6 +132,7 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
 
     // We need both runtime and compile time checks here to solve the following problems:
     // - Not all flags are available in all OS versions, so we have to check it at compile time
+    // - Requesting Biometry/TouchID/DevicePassword when to fingerprint sensor is available will result in runtime error
     SecAccessControlCreateFlags accessControlFlags = 0;
 #if XC_COMPILER_SUPPORT(APPLE_BIOMETRY)
        // Prefer the non-deprecated flag when available
@@ -144,7 +145,9 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
       accessControlFlags = accessControlFlags | kSecAccessControlOr | kSecAccessControlWatch;
 #endif
 
-      accessControlFlags = accessControlFlags | kSecAccessControlOr | kSecAccessControlDevicePasscode;
+   if (isPasswordFallbackEnabled()) {
+       accessControlFlags = accessControlFlags | kSecAccessControlOr | kSecAccessControlDevicePasscode;
+   }
 
    SecAccessControlRef sacObject = SecAccessControlCreateWithFlags(
        kCFAllocatorDefault, kSecAttrAccessibleWhenUnlockedThisDeviceOnly, accessControlFlags, &error);
@@ -268,10 +271,84 @@ bool TouchID::hasKey(const QUuid& dbUuid) const
     return m_encryptedMasterKeys.contains(dbUuid);
 }
 
-//! @return always true. If TouchID and Apple Watch is unavailable it will fallback to device password auth
+// TODO: Both functions below should probably handle the returned errors to
+// provide more information on availability. E.g.: the closed laptop lid results
+// in an error (because touch id is not unavailable). That error could be
+// displayed to the user when we first check for availability instead of just
+// hiding the checkbox.
+
+//! @return true if Apple Watch is available for authentication.
+bool TouchID::isWatchAvailable()
+{
+#if XC_COMPILER_SUPPORT(WATCH_UNLOCK)
+   @try {
+      LAContext *context = [[LAContext alloc] init];
+
+      LAPolicy policyCode = LAPolicyDeviceOwnerAuthenticationWithWatch;
+      NSError *error;
+
+      bool canAuthenticate = [context canEvaluatePolicy:policyCode error:&error];
+      [context release];
+      if (error) {
+         debug("Apple Wach available: %d (%ld / %s / %s)", canAuthenticate,
+               (long)error.code, error.description.UTF8String,
+               error.localizedDescription.UTF8String);
+      } else {
+          debug("Apple Wach available: %d", canAuthenticate);
+      }
+      return canAuthenticate;
+   } @catch (NSException *) {
+      return false;
+   }
+#else
+   return false;
+#endif
+}
+
+//! @return true if Touch ID is available for authentication.
+bool TouchID::isTouchIdAvailable()
+{
+#if XC_COMPILER_SUPPORT(TOUCH_ID)
+   @try {
+      LAContext *context = [[LAContext alloc] init];
+
+      LAPolicy policyCode = LAPolicyDeviceOwnerAuthenticationWithBiometrics;
+      NSError *error;
+
+      bool canAuthenticate = [context canEvaluatePolicy:policyCode error:&error];
+      [context release];
+      if (error) {
+         debug("Touch ID available: %d (%ld / %s / %s)", canAuthenticate,
+               (long)error.code, error.description.UTF8String,
+               error.localizedDescription.UTF8String);
+      } else {
+          debug("Touch ID available: %d", canAuthenticate);
+      }
+      return canAuthenticate;
+   } @catch (NSException *) {
+      return false;
+   }
+#else
+   return false;
+#endif
+}
+
+bool TouchID::isPasswordFallbackEnabled()
+{
+#if XC_COMPILER_SUPPORT(TOUCH_ID)
+    return (config()->get(Config::Security_TouchIdAllowFallbackToUserPassword).toBool());
+#else
+    return false;
+#endif
+}
+
+//! @return true if either TouchID or Apple Watch is available at the moment.
 bool TouchID::isAvailable() const
 {
-    return true;
+   // note: we cannot cache the check results because the configuration
+   // is dynamic in its nature. User can close the laptop lid or take off
+   // the watch, thus making one (or both) of the authentication types unavailable.
+   return  isWatchAvailable() || isTouchIdAvailable() || isPasswordFallbackEnabled();
 }
 
 /**
