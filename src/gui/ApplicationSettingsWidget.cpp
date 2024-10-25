@@ -328,16 +328,11 @@ void ApplicationSettingsWidget::loadSettings()
         config()->get(Config::Security_LockDatabaseScreenLock).toBool());
 #if defined(Q_OS_MACOS)
     m_secUi->lockDatabasesOnUserSwitchCheckBox->setVisible(true);
-    m_secUi->quickUnlockFallbackEnabled->setVisible(true);
 #else
     m_secUi->lockDatabasesOnUserSwitchCheckBox->setVisible(false);
-    m_secUi->quickUnlockFallbackEnabled->setVisible(false);
-
 #endif
     m_secUi->lockDatabasesOnUserSwitchCheckBox->setChecked(
         config()->get(Config::Security_LockDatabaseOnUserSwitch).toBool());
-    m_secUi->quickUnlockFallbackEnabled->setChecked(
-        config()->get(Config::Security_TouchIdAllowFallbackToUserPassword).toBool());
     m_secUi->fallbackToSearch->setChecked(config()->get(Config::Security_IconDownloadFallback).toBool());
 
     m_secUi->passwordsHiddenCheckBox->setChecked(config()->get(Config::Security_PasswordsHidden).toBool());
@@ -454,8 +449,6 @@ void ApplicationSettingsWidget::saveSettings()
     config()->set(Config::Security_LockDatabaseMinimize, m_secUi->lockDatabaseMinimizeCheckBox->isChecked());
     config()->set(Config::Security_LockDatabaseScreenLock, m_secUi->lockDatabaseOnScreenLockCheckBox->isChecked());
     config()->set(Config::Security_LockDatabaseOnUserSwitch, m_secUi->lockDatabasesOnUserSwitchCheckBox->isChecked());
-    config()->set(Config::Security_TouchIdAllowFallbackToUserPassword,
-                  m_secUi->quickUnlockFallbackEnabled->isChecked());
     config()->set(Config::Security_IconDownloadFallback, m_secUi->fallbackToSearch->isChecked());
 
     config()->set(Config::Security_PasswordsHidden, m_secUi->passwordsHiddenCheckBox->isChecked());

@@ -173,13 +173,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="quickUnlockFallbackEnabled">
-        <property name="text">
-         <string>Enable password fallback for Touch ID</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QCheckBox" name="lockDatabaseOnScreenLockCheckBox">
         <property name="text">
          <string>Lock databases when session is locked or lid is closed</string>
