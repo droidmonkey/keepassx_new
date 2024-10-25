@@ -95,8 +95,7 @@ bool Kdbx3Reader::readDatabaseImpl(QIODevice* device,
     if (db->compressionAlgorithm() == Database::CompressionNone) {
         xmlDevice = &hashedStream;
     } else {
-        ioCompressor.reset(new QtIOCompressor(&hashedStream));
-        ioCompressor->setStreamFormat(QtIOCompressor::GzipFormat);
+        ioCompressor.reset(new QtIOCompressor(&hashedStream, QtIOCompressor::GzipFormatSpec{}));
         if (!ioCompressor->open(QIODevice::ReadOnly)) {
             raiseError(ioCompressor->errorString());
             return false;

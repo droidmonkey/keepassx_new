@@ -1157,8 +1157,7 @@ QByteArray KdbxXmlReader::readCompressedBinary()
     QBuffer buffer(&rawData);
     buffer.open(QIODevice::ReadOnly);
 
-    QtIOCompressor compressor(&buffer);
-    compressor.setStreamFormat(QtIOCompressor::GzipFormat);
+    QtIOCompressor compressor(&buffer, QtIOCompressor::GzipFormatSpec{});
     compressor.open(QIODevice::ReadOnly);
 
     QByteArray result;

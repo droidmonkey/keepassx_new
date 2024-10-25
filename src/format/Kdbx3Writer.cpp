@@ -120,8 +120,7 @@ bool Kdbx3Writer::writeDatabase(QIODevice* device, Database* db)
     if (db->compressionAlgorithm() == Database::CompressionNone) {
         outputDevice = &hashedStream;
     } else {
-        ioCompressor.reset(new QtIOCompressor(&hashedStream));
-        ioCompressor->setStreamFormat(QtIOCompressor::GzipFormat);
+        ioCompressor.reset(new QtIOCompressor(&hashedStream, QtIOCompressor::GzipFormatSpec{}));
         if (!ioCompressor->open(QIODevice::WriteOnly)) {
             raiseError(ioCompressor->errorString());
             return false;

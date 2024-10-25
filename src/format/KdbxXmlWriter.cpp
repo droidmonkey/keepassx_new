@@ -239,8 +239,7 @@ void KdbxXmlWriter::writeBinaries()
             QBuffer buffer;
             buffer.open(QIODevice::ReadWrite);
 
-            QtIOCompressor compressor(&buffer);
-            compressor.setStreamFormat(QtIOCompressor::GzipFormat);
+            QtIOCompressor compressor(&buffer, QtIOCompressor::GzipFormatSpec{});
             compressor.open(QIODevice::WriteOnly);
 
             qint64 bytesWritten = compressor.write(i.value());

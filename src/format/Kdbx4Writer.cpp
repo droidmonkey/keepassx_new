@@ -137,8 +137,7 @@ bool Kdbx4Writer::writeDatabase(QIODevice* device, Database* db)
     if (db->compressionAlgorithm() == Database::CompressionNone) {
         outputDevice = cipherStream.data();
     } else {
-        ioCompressor.reset(new QtIOCompressor(cipherStream.data()));
-        ioCompressor->setStreamFormat(QtIOCompressor::GzipFormat);
+        ioCompressor.reset(new QtIOCompressor(cipherStream.data(), QtIOCompressor::GzipFormatSpec{}));
         if (!ioCompressor->open(QIODevice::WriteOnly)) {
             raiseError(ioCompressor->errorString());
             return false;

@@ -52,7 +52,7 @@ typedef uInt ZlibSize;
 
 class QtIOCompressorPrivate {
     QtIOCompressor *q_ptr;
-    Q_DECLARE_PUBLIC(QtIOCompressor)
+
 public:
     enum State {
         // Read state
@@ -67,39 +67,39 @@ public:
         Error
     };
 
-    QtIOCompressorPrivate(QtIOCompressor *q_ptr, QIODevice *device, int compressionLevel, int bufferSize);
-    ~QtIOCompressorPrivate();
-    void flushZlib(int flushMode);
-    bool writeBytes(ZlibByte *buffer, ZlibSize outputSize);
-    void setZlibError(const QString &errorMessage, int zlibErrorCode);
+    QtIOCompressorPrivate(QtIOCompressor *q_ptr, QIODevice *device, int bufferSize, char *buffer);
+    virtual ~QtIOCompressorPrivate();
+
+    virtual bool initialize(bool read) = 0;
+    virtual qint64 readData(char *data, qint64 maxSize) = 0;
+    virtual qint64 writeData(const char *data, qint64 maxSize) = 0;
+    virtual void flush() = 0;
+    virtual void finalize(bool read) = 0;
 
     QIODevice *device;
     bool manageDevice;
-    z_stream zlibStream;
-    const int compressionLevel;
-    const ZlibSize bufferSize;
-    ZlibByte *buffer;
     State state;
-    QtIOCompressor::StreamFormat streamFormat;
+
+protected:
+    Q_DECLARE_PUBLIC(QtIOCompressor)
+    qint64 bufferSize;
+    char *buffer;
+
+    bool writeBytes(const char *buffer, qint64 outputSize);
+    void setErrorString(const QString &errorMessage);
 };
 
 /*!
     \internal
 */
-QtIOCompressorPrivate::QtIOCompressorPrivate(QtIOCompressor *q_ptr, QIODevice *device, int compressionLevel, int bufferSize)
+QtIOCompressorPrivate::QtIOCompressorPrivate(QtIOCompressor *q_ptr, QIODevice *device, int bufferSize, char *buffer)
 :q_ptr(q_ptr)
 ,device(device)
-,compressionLevel(compressionLevel)
-,bufferSize(bufferSize)
-,buffer(new ZlibByte[bufferSize])
+,manageDevice(false)
 ,state(Closed)
-,streamFormat(QtIOCompressor::ZlibFormat)
-{
-    // Use default zlib memory management.
-    zlibStream.zalloc = Z_NULL;
-    zlibStream.zfree = Z_NULL;
-    zlibStream.opaque = Z_NULL;
-}
+,bufferSize(bufferSize)
+,buffer(buffer)
+{}
 
 /*!
     \internal
@@ -111,16 +111,300 @@ QtIOCompressorPrivate::~QtIOCompressorPrivate()
 
 /*!
     \internal
+    Writes outputSize bytes from buffer to the underlying device.
+*/
+bool QtIOCompressorPrivate::writeBytes(const char *buffer, qint64 outputSize)
+{
+    Q_Q(QtIOCompressor);
+
+    // Loop until all bytes are written to the underlying device.
+    do {
+        const qint64 bytesWritten = device->write(buffer, outputSize);
+        if (bytesWritten == -1) {
+            q->setErrorString(QT_TRANSLATE_NOOP("QtIOCompressor", "Error writing to underlying device: ") + device->errorString());
+            return false;
+        }
+        buffer += bytesWritten;
+        outputSize -= bytesWritten;
+    } while (outputSize > 0);
+
+    // put up a flag so that the device will be flushed on close.
+    state = BytesWritten;
+    return true;
+}
+
+/*!
+    \internal
+    Sets the error string to errorMessage
+*/
+void QtIOCompressorPrivate::setErrorString(const QString &errorMessage)
+{
+    Q_Q(QtIOCompressor);
+    q->setErrorString(errorMessage);
+}
+
+/*!
+    \enum QtIOCompressor::StreamFormat
+    This enum specifies which stream format to use.
+
+    \value ZlibFormat: This is the default and has the smallest overhead.
+
+    \value GzipFormat: This format is compatible with the gzip file
+    format, but has more overhead than ZlibFormat. Note: requires zlib
+    version 1.2.x or higher at runtime.
+
+    \value RawZipFormat: This is compatible with the most common
+    compression method of the data blocks contained in ZIP
+    archives. Note: ZIP file headers are not read or generated, so
+    setting this format, by itself, does not let QtIOCompressor read
+    or write ZIP files. Ref. the ziplist example program.
+*/
+
+/*!
+    \internal
+    Implements interfaces to invoke zlib.
+*/
+class QtIOCompressorZlibPrivate : public QtIOCompressorPrivate
+{
+public:
+    enum StreamFormat { ZlibFormat, GzipFormat, RawZipFormat };
+    QtIOCompressorZlibPrivate(QtIOCompressor *q_ptr, QIODevice *device, StreamFormat streamFormat, int compressionLevel, int bufferSize);
+
+    bool initialize(bool read) override;
+    virtual qint64 readData(char *data, qint64 maxSize) override;
+    virtual qint64 writeData(const char *data, qint64 maxSize) override;
+    void flush() override;
+    void finalize(bool read) override;
+
+private:
+    static bool checkGzipSupport(const char * const versionString);
+    void flushZlib(int flushMode);
+    void setZlibError(const QString &errorMessage, int zlibErrorCode);
+
+    z_stream zlibStream;
+    const int compressionLevel;
+    StreamFormat streamFormat;
+};
+
+/*!
+    \internal
+*/
+QtIOCompressorZlibPrivate::QtIOCompressorZlibPrivate(QtIOCompressor *q_ptr, QIODevice *device, StreamFormat streamFormat, int compressionLevel, int bufferSize)
+:QtIOCompressorPrivate(q_ptr, device, bufferSize, new char[bufferSize])
+,compressionLevel(compressionLevel)
+,streamFormat(streamFormat)
+{
+    // Use default zlib memory management.
+    zlibStream.zalloc = Z_NULL;
+    zlibStream.zfree = Z_NULL;
+    zlibStream.opaque = Z_NULL;
+
+    // Print a waning if the compile-time version of zlib does not support gzip.
+    if (streamFormat == GzipFormat && checkGzipSupport(ZLIB_VERSION) == false)
+        qWarning("QtIOCompressor::setStreamFormat: zlib 1.2.x or higher is "
+                 "required to use the gzip format. Current version is: %s",
+                 ZLIB_VERSION);
+}
+
+/*!
+    \internal
+*/
+bool QtIOCompressorZlibPrivate::initialize(bool read)
+{
+    Q_Q(QtIOCompressor);
+
+    // The second argument to inflate/deflateInit2 is the windowBits parameter,
+    // which also controls what kind of compression stream headers to use.
+    // The default value for this is 15. Passing a value greater than 15
+    // enables gzip headers and then subtracts 16 form the windowBits value.
+    // (So passing 31 gives gzip headers and 15 windowBits). Passing a negative
+    // value selects no headers hand then negates the windowBits argument.
+    int windowBits = 0;
+    switch (streamFormat) {
+    case QtIOCompressorZlibPrivate::GzipFormat:
+        windowBits = 31;
+        break;
+    case QtIOCompressorZlibPrivate::RawZipFormat:
+        windowBits = -15;
+        break;
+    default:
+        windowBits = 15;
+    }
+
+    int status = 0;
+    if (read) {
+        state = QtIOCompressorPrivate::NotReadFirstByte;
+        zlibStream.avail_in = 0;
+        zlibStream.next_in = nullptr;
+        if (streamFormat == QtIOCompressorZlibPrivate::ZlibFormat) {
+            status = inflateInit(&zlibStream);
+        } else {
+            if (checkGzipSupport(zlibVersion()) == false) {
+                setErrorString(QT_TRANSLATE_NOOP("QtIOCompressor::open", "The gzip format not supported in this version of zlib."));
+                return false;
+            }
+
+            status = inflateInit2(&zlibStream, windowBits);
+        }
+    } else {
+        state = QtIOCompressorPrivate::NoBytesWritten;
+        if (streamFormat == QtIOCompressorZlibPrivate::ZlibFormat)
+            status = deflateInit(&zlibStream, compressionLevel);
+        else
+            status = deflateInit2(&zlibStream, compressionLevel, Z_DEFLATED, windowBits, 8, Z_DEFAULT_STRATEGY);
+    }
+
+    // Handle error.
+    if (status != Z_OK) {
+        setZlibError(QT_TRANSLATE_NOOP("QtIOCompressor::open", "Internal zlib error: "), status);
+        return false;
+    }
+
+    return true;
+}
+
+/*!
+    \internal
+*/
+qint64 QtIOCompressorZlibPrivate::readData(char *data, qint64 maxSize)
+{
+    // We are going to try to fill the data buffer
+    zlibStream.next_out = reinterpret_cast<ZlibByte *>(data);
+    zlibStream.avail_out = maxSize;
+
+    int status = 0;
+    do {
+        // Read data if if the input buffer is empty. There could be data in the buffer
+        // from a previous readData call.
+        if (zlibStream.avail_in == 0) {
+            qint64 bytesAvailable = device->read(buffer, bufferSize);
+            zlibStream.next_in = reinterpret_cast<ZlibByte *>(buffer);
+            zlibStream.avail_in = bytesAvailable;
+
+            if (bytesAvailable == -1) {
+                state = QtIOCompressorPrivate::Error;
+                setErrorString(QT_TRANSLATE_NOOP("QtIOCompressor", "Error reading data from underlying device: ") + device->errorString());
+                return -1;
+            }
+
+            if (state != QtIOCompressorPrivate::InStream) {
+                // If we are not in a stream and get 0 bytes, we are probably trying to read from an empty device.
+                if(bytesAvailable == 0)
+                    return 0;
+                else if (bytesAvailable > 0)
+                    state = QtIOCompressorPrivate::InStream;
+            }
+        }
+
+        // Decompress.
+        status = inflate(&zlibStream, Z_SYNC_FLUSH);
+        switch (status) {
+            case Z_NEED_DICT:
+            case Z_DATA_ERROR:
+            case Z_MEM_ERROR:
+                state = QtIOCompressorPrivate::Error;
+                setZlibError(QT_TRANSLATE_NOOP("QtIOCompressor", "Internal zlib error when decompressing: "), status);
+                return -1;
+            case Z_BUF_ERROR: // No more input and zlib can not provide more output - Not an error, we can try to read again when we have more input.
+                return 0;
+        }
+    // Loop util data buffer is full or we reach the end of the input stream.
+    } while (zlibStream.avail_out != 0 && status != Z_STREAM_END);
+
+    if (status == Z_STREAM_END) {
+        state = QtIOCompressorPrivate::EndOfStream;
+
+        // Unget any data left in the read buffer.
+        for (int i = zlibStream.avail_in;  i >= 0; --i)
+            device->ungetChar(*reinterpret_cast<char *>(zlibStream.next_in + i));
+    }
+
+    const ZlibSize outputSize = maxSize - zlibStream.avail_out;
+    return outputSize;
+}
+
+/*!
+    \internal
+*/
+qint64 QtIOCompressorZlibPrivate::writeData(const char *data, qint64 maxSize)
+{
+    zlibStream.next_in = reinterpret_cast<ZlibByte *>(const_cast<char *>(data));
+    zlibStream.avail_in = maxSize;
+
+    do {
+        zlibStream.next_out = reinterpret_cast<ZlibByte *>(buffer);
+        zlibStream.avail_out = bufferSize;
+        const int status = deflate(&zlibStream, Z_NO_FLUSH);
+        if (status != Z_OK) {
+            state = QtIOCompressorPrivate::Error;
+            setZlibError(QT_TRANSLATE_NOOP("QtIOCompressor", "Internal zlib error when compressing: "), status);
+            return -1;
+        }
+
+        ZlibSize outputSize = bufferSize - zlibStream.avail_out;
+
+        // Try to write data from the buffer to to the underlying device, return -1 on failure.
+        if (writeBytes(buffer, outputSize) == false)
+            return -1;
+
+    } while (zlibStream.avail_out == 0); // run until output is not full.
+    Q_ASSERT(zlibStream.avail_in == 0);
+
+    return maxSize;
+}
+
+/*!
+    \internal
+*/
+void QtIOCompressorZlibPrivate::flush()
+{
+    flushZlib(Z_SYNC_FLUSH);
+}
+
+/*!
+    \internal
+*/
+void QtIOCompressorZlibPrivate::finalize(bool read)
+{
+    if (read) {
+        state = QtIOCompressorPrivate::NotReadFirstByte;
+        inflateEnd(&zlibStream);
+    } else {
+        if (state == QtIOCompressorPrivate::BytesWritten) { // Only flush if we have written anything.
+            state = QtIOCompressorPrivate::NoBytesWritten;
+            flushZlib(Z_FINISH);
+        }
+        deflateEnd(&zlibStream);
+    }
+}
+
+/*
+    \internal
+    Checks if the run-time zlib version is 1.2.x or higher.
+*/
+bool QtIOCompressorZlibPrivate::checkGzipSupport(const char * const versionString)
+{
+    if (strlen(versionString) < 3)
+        return false;
+
+    if (versionString[0] == '0' || (versionString[0] == '1' && (versionString[2] == '0' || versionString[2]  == '1' )))
+        return false;
+
+    return true;
+}
+
+/*!
+    \internal
     Flushes the zlib stream.
 */
-void QtIOCompressorPrivate::flushZlib(int flushMode)
+void QtIOCompressorZlibPrivate::flushZlib(int flushMode)
 {
     // No input.
     zlibStream.next_in = nullptr;
     zlibStream.avail_in = 0;
     int status;
     do {
-        zlibStream.next_out = buffer;
+        zlibStream.next_out = reinterpret_cast<ZlibByte *>(buffer);
         zlibStream.avail_out = bufferSize;
         status = deflate(&zlibStream, flushMode);
         if (status != Z_OK && status != Z_STREAM_END) {
@@ -145,36 +429,8 @@ void QtIOCompressorPrivate::flushZlib(int flushMode)
         Q_ASSERT(status == Z_OK);
 }
 
-/*!
-    \internal
-    Writes outputSize bytes from buffer to the underlying device.
-*/
-bool QtIOCompressorPrivate::writeBytes(ZlibByte *buffer, ZlibSize outputSize)
+void QtIOCompressorZlibPrivate::setZlibError(const QString &errorMessage, int zlibErrorCode)
 {
-    Q_Q(QtIOCompressor);
-    ZlibSize totalBytesWritten = 0;
-    // Loop until all bytes are written to the underlying device.
-    do {
-        const qint64 bytesWritten = device->write(reinterpret_cast<char *>(buffer), outputSize);
-        if (bytesWritten == -1) {
-            q->setErrorString(QT_TRANSLATE_NOOP("QtIOCompressor", "Error writing to underlying device: ") + device->errorString());
-            return false;
-        }
-        totalBytesWritten += bytesWritten;
-    } while (totalBytesWritten != outputSize);
-
-    // put up a flag so that the device will be flushed on close.
-    state = BytesWritten;
-    return true;
-}
-
-/*!
-    \internal
-    Sets the error string to errorMessage + zlib error string for zlibErrorCode
-*/
-void QtIOCompressorPrivate::setZlibError(const QString &errorMessage, int zlibErrorCode)
-{
-    Q_Q(QtIOCompressor);
     // Watch out, zlibErrorString may be null.
     const char * const zlibErrorString = zError(zlibErrorCode);
     QString errorString;
@@ -183,7 +439,7 @@ void QtIOCompressorPrivate::setZlibError(const QString &errorMessage, int zlibEr
     else
         errorString = errorMessage  + " Unknown error, code " + QString::number(zlibErrorCode);
 
-    q->setErrorString(errorString);
+    setErrorString(errorString);
 }
 
 /*! \class QtIOCompressor
@@ -204,7 +460,7 @@ void QtIOCompressorPrivate::setZlibError(const QString &errorMessage, int zlibEr
     Writing compressed data to a file:
     \code
         QFile file("foo");
-        QtIOCompressor compressor(&file);
+        QtIOCompressor compressor(&file, GzipFormatSpec{});
         compressor.open(QIODevice::WriteOnly);
         compressor.write(QByteArray() << "The quick brown fox");
         compressor.close();
@@ -213,34 +469,15 @@ void QtIOCompressorPrivate::setZlibError(const QString &errorMessage, int zlibEr
     Reading compressed data from a file:
     \code
         QFile file("foo");
-        QtIOCompressor compressor(&file);
+        QtIOCompressor compressor(&file, GzipFormatSpec{});
         compressor.open(QIODevice::ReadOnly);
         const QByteArray text = compressor.readAll();
         compressor.close();
     \endcode
 
     QtIOCompressor can also read and write compressed data in
-    different compressed formats, ref. StreamFormat. Use
-    setStreamFormat() before open() to select format.
-*/
-
-/*!
-    \enum QtIOCompressor::StreamFormat
-    This enum specifies which stream format to use.
-
-    \value ZlibFormat: This is the default and has the smallest overhead.
-
-    \value GzipFormat: This format is compatible with the gzip file
-    format, but has more overhead than ZlibFormat. Note: requires zlib
-    version 1.2.x or higher at runtime.
-
-    \value RawZipFormat: This is compatible with the most common
-    compression method of the data blocks contained in ZIP
-    archives. Note: ZIP file headers are not read or generated, so
-    setting this format, by itself, does not let QtIOCompressor read
-    or write ZIP files. Ref. the ziplist example program.
-
-    \sa setStreamFormat()
+    different compressed formats. Use corresponding constructor
+    to select format.
 */
 
 /*!
@@ -253,8 +490,8 @@ void QtIOCompressorPrivate::setZlibError(const QString &errorMessage, int zlibEr
     underlying device. The default value is 65KB. Using a larger value allows for faster compression and
     decompression at the expense of memory usage.
 */
-QtIOCompressor::QtIOCompressor(QIODevice *device, int compressionLevel, int bufferSize)
-:d_ptr(new QtIOCompressorPrivate(this, device, compressionLevel, bufferSize))
+QtIOCompressor::QtIOCompressor(QIODevice *device, GzipFormatSpec Spec, int bufferSize)
+:d_ptr(new QtIOCompressorZlibPrivate(this, device, QtIOCompressorZlibPrivate::StreamFormat::GzipFormat, Spec.compressionLevel, bufferSize))
 {}
 
 /*!
@@ -265,42 +502,6 @@ QtIOCompressor::~QtIOCompressor()
     Q_D(QtIOCompressor);
     close();
     delete d;
-}
-
-/*!
-    Sets the format on the compressed stream to \a format.
-
-    \sa QtIOCompressor::StreamFormat
-*/
-void QtIOCompressor::setStreamFormat(StreamFormat format)
-{
-    Q_D(QtIOCompressor);
-
-    // Print a waning if the compile-time version of zlib does not support gzip.
-    if (format == GzipFormat && checkGzipSupport(ZLIB_VERSION) == false)
-        qWarning("QtIOCompressor::setStreamFormat: zlib 1.2.x or higher is "
-                 "required to use the gzip format. Current version is: %s",
-                 ZLIB_VERSION);
-
-    d->streamFormat = format;
-}
-
-/*!
-    Returns the format set on the compressed stream.
-    \sa QtIOCompressor::StreamFormat
-*/
-QtIOCompressor::StreamFormat QtIOCompressor::streamFormat() const
-{
-    Q_D(const QtIOCompressor);
-    return d->streamFormat;
-}
-
-/*!
-    Returns true if the zlib library in use supports the gzip format, false otherwise.
-*/
-bool QtIOCompressor::isGzipSupported()
-{
-    return checkGzipSupport(zlibVersion());
 }
 
 /*!
@@ -364,53 +565,9 @@ bool QtIOCompressor::open(OpenMode mode)
     }
 
     // Initialize zlib for deflating or inflating.
+    if (!d->initialize(read))
+      return false;
 
-    // The second argument to inflate/deflateInit2 is the windowBits parameter,
-    // which also controls what kind of compression stream headers to use.
-    // The default value for this is 15. Passing a value greater than 15
-    // enables gzip headers and then subtracts 16 form the windowBits value.
-    // (So passing 31 gives gzip headers and 15 windowBits). Passing a negative
-    // value selects no headers hand then negates the windowBits argument.
-    int windowBits;
-    switch (d->streamFormat) {
-    case QtIOCompressor::GzipFormat:
-        windowBits = 31;
-        break;
-    case QtIOCompressor::RawZipFormat:
-        windowBits = -15;
-        break;
-    default:
-        windowBits = 15;
-    }
-
-    int status;
-    if (read) {
-        d->state = QtIOCompressorPrivate::NotReadFirstByte;
-        d->zlibStream.avail_in = 0;
-        d->zlibStream.next_in = nullptr;
-        if (d->streamFormat == QtIOCompressor::ZlibFormat) {
-            status = inflateInit(&d->zlibStream);
-        } else {
-            if (checkGzipSupport(zlibVersion()) == false) {
-                setErrorString(QT_TRANSLATE_NOOP("QtIOCompressor::open", "The gzip format not supported in this version of zlib."));
-                return false;
-            }
-
-            status = inflateInit2(&d->zlibStream, windowBits);
-        }
-    } else {
-        d->state = QtIOCompressorPrivate::NoBytesWritten;
-        if (d->streamFormat == QtIOCompressor::ZlibFormat)
-            status = deflateInit(&d->zlibStream, d->compressionLevel);
-        else
-            status = deflateInit2(&d->zlibStream, d->compressionLevel, Z_DEFLATED, windowBits, 8, Z_DEFAULT_STRATEGY);
-    }
-
-    // Handle error.
-    if (status != Z_OK) {
-        d->setZlibError(QT_TRANSLATE_NOOP("QtIOCompressor::open", "Internal zlib error: "), status);
-        return false;
-    }
     return QIODevice::open(mode);
 }
 
@@ -425,16 +582,7 @@ void QtIOCompressor::close()
         return;
 
     // Flush and close the zlib stream.
-    if (openMode() & ReadOnly) {
-        d->state = QtIOCompressorPrivate::NotReadFirstByte;
-        inflateEnd(&d->zlibStream);
-    } else {
-        if (d->state == QtIOCompressorPrivate::BytesWritten) { // Only flush if we have written anything.
-            d->state = QtIOCompressorPrivate::NoBytesWritten;
-            d->flushZlib(Z_FINISH);
-        }
-        deflateEnd(&d->zlibStream);
-    }
+    d->finalize(openMode() & ReadOnly);
 
     // Close the underlying device if we are managing it.
     if (d->manageDevice)
@@ -458,7 +606,7 @@ void QtIOCompressor::flush()
     if (isOpen() == false || openMode() & ReadOnly)
         return;
 
-    d->flushZlib(Z_SYNC_FLUSH);
+    d->flush();
 }
 
 /*!
@@ -513,59 +661,7 @@ qint64 QtIOCompressor::readData(char *data, qint64 maxSize)
     if (d->state == QtIOCompressorPrivate::Error)
         return -1;
 
-    // We are going to try to fill the data buffer
-    d->zlibStream.next_out = reinterpret_cast<ZlibByte *>(data);
-    d->zlibStream.avail_out = maxSize;
-
-    int status;
-    do {
-        // Read data if if the input buffer is empty. There could be data in the buffer
-        // from a previous readData call.
-        if (d->zlibStream.avail_in == 0) {
-            qint64 bytesAvailable = d->device->read(reinterpret_cast<char *>(d->buffer), d->bufferSize);
-            d->zlibStream.next_in = d->buffer;
-            d->zlibStream.avail_in = bytesAvailable;
-
-            if (bytesAvailable == -1) {
-                d->state = QtIOCompressorPrivate::Error;
-                setErrorString(QT_TRANSLATE_NOOP("QtIOCompressor", "Error reading data from underlying device: ") + d->device->errorString());
-                return -1;
-            }
-
-            if (d->state != QtIOCompressorPrivate::InStream) {
-                // If we are not in a stream and get 0 bytes, we are probably trying to read from an empty device.
-                if(bytesAvailable == 0)
-                    return 0;
-                else if (bytesAvailable > 0)
-                    d->state = QtIOCompressorPrivate::InStream;
-            }
-        }
-
-        // Decompress.
-        status = inflate(&d->zlibStream, Z_SYNC_FLUSH);
-        switch (status) {
-            case Z_NEED_DICT:
-            case Z_DATA_ERROR:
-            case Z_MEM_ERROR:
-                d->state = QtIOCompressorPrivate::Error;
-                d->setZlibError(QT_TRANSLATE_NOOP("QtIOCompressor", "Internal zlib error when decompressing: "), status);
-                return -1;
-            case Z_BUF_ERROR: // No more input and zlib can not provide more output - Not an error, we can try to read again when we have more input.
-                return 0;
-        }
-    // Loop util data buffer is full or we reach the end of the input stream.
-    } while (d->zlibStream.avail_out != 0 && status != Z_STREAM_END);
-
-    if (status == Z_STREAM_END) {
-        d->state = QtIOCompressorPrivate::EndOfStream;
-
-        // Unget any data left in the read buffer.
-        for (int i = d->zlibStream.avail_in;  i >= 0; --i)
-            d->device->ungetChar(*reinterpret_cast<char *>(d->zlibStream.next_in + i));
-    }
-
-    const ZlibSize outputSize = maxSize - d->zlibStream.avail_out;
-    return outputSize;
+    return d->readData(data, maxSize);
 }
 
 
@@ -578,45 +674,9 @@ qint64 QtIOCompressor::writeData(const char *data, qint64 maxSize)
     if (maxSize < 1)
         return 0;
     Q_D(QtIOCompressor);
-    d->zlibStream.next_in = reinterpret_cast<ZlibByte *>(const_cast<char *>(data));
-    d->zlibStream.avail_in = maxSize;
 
     if (d->state == QtIOCompressorPrivate::Error)
         return -1;
 
-    do {
-        d->zlibStream.next_out = d->buffer;
-        d->zlibStream.avail_out = d->bufferSize;
-        const int status = deflate(&d->zlibStream, Z_NO_FLUSH);
-        if (status != Z_OK) {
-            d->state = QtIOCompressorPrivate::Error;
-            d->setZlibError(QT_TRANSLATE_NOOP("QtIOCompressor", "Internal zlib error when compressing: "), status);
-            return -1;
-        }
-
-        ZlibSize outputSize = d->bufferSize - d->zlibStream.avail_out;
-
-        // Try to write data from the buffer to to the underlying device, return -1 on failure.
-        if (d->writeBytes(d->buffer, outputSize) == false)
-            return -1;
-
-    } while (d->zlibStream.avail_out == 0); // run until output is not full.
-    Q_ASSERT(d->zlibStream.avail_in == 0);
-
-    return maxSize;
-}
-
-/*
-    \internal
-    Checks if the run-time zlib version is 1.2.x or higher.
-*/
-bool QtIOCompressor::checkGzipSupport(const char * const versionString)
-{
-    if (strlen(versionString) < 3)
-        return false;
-
-    if (versionString[0] == '0' || (versionString[0] == '1' && (versionString[2] == '0' || versionString[2]  == '1' )))
-        return false;
-
-    return true;
+    return d->writeData(data, maxSize);
 }

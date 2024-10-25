@@ -107,8 +107,7 @@ bool Kdbx4Reader::readDatabaseImpl(QIODevice* device,
     if (db->compressionAlgorithm() == Database::CompressionNone) {
         xmlDevice = &cipherStream;
     } else {
-        ioCompressor.reset(new QtIOCompressor(&cipherStream));
-        ioCompressor->setStreamFormat(QtIOCompressor::GzipFormat);
+        ioCompressor.reset(new QtIOCompressor(&cipherStream, QtIOCompressor::GzipFormatSpec{}));
         if (!ioCompressor->open(QIODevice::ReadOnly)) {
             raiseError(ioCompressor->errorString());
             return false;
