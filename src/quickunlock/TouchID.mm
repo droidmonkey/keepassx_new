@@ -145,9 +145,9 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
       accessControlFlags = accessControlFlags | kSecAccessControlOr | kSecAccessControlWatch;
 #endif
 
-   if (isPasswordFallbackEnabled()) {
-       accessControlFlags = accessControlFlags | kSecAccessControlOr | kSecAccessControlDevicePasscode;
-   }
+#if XC_COMPILER_SUPPORT(TOUCH_ID)
+      accessControlFlags = accessControlFlags | kSecAccessControlOr | kSecAccessControlDevicePasscode;
+#endif
 
    SecAccessControlRef sacObject = SecAccessControlCreateWithFlags(
        kCFAllocatorDefault, kSecAttrAccessibleWhenUnlockedThisDeviceOnly, accessControlFlags, &error);
@@ -271,84 +271,10 @@ bool TouchID::hasKey(const QUuid& dbUuid) const
     return m_encryptedMasterKeys.contains(dbUuid);
 }
 
-// TODO: Both functions below should probably handle the returned errors to
-// provide more information on availability. E.g.: the closed laptop lid results
-// in an error (because touch id is not unavailable). That error could be
-// displayed to the user when we first check for availability instead of just
-// hiding the checkbox.
-
-//! @return true if Apple Watch is available for authentication.
-bool TouchID::isWatchAvailable()
-{
-#if XC_COMPILER_SUPPORT(WATCH_UNLOCK)
-   @try {
-      LAContext *context = [[LAContext alloc] init];
-
-      LAPolicy policyCode = LAPolicyDeviceOwnerAuthenticationWithWatch;
-      NSError *error;
-
-      bool canAuthenticate = [context canEvaluatePolicy:policyCode error:&error];
-      [context release];
-      if (error) {
-         debug("Apple Wach available: %d (%ld / %s / %s)", canAuthenticate,
-               (long)error.code, error.description.UTF8String,
-               error.localizedDescription.UTF8String);
-      } else {
-          debug("Apple Wach available: %d", canAuthenticate);
-      }
-      return canAuthenticate;
-   } @catch (NSException *) {
-      return false;
-   }
-#else
-   return false;
-#endif
-}
-
-//! @return true if Touch ID is available for authentication.
-bool TouchID::isTouchIdAvailable()
-{
-#if XC_COMPILER_SUPPORT(TOUCH_ID)
-   @try {
-      LAContext *context = [[LAContext alloc] init];
-
-      LAPolicy policyCode = LAPolicyDeviceOwnerAuthenticationWithBiometrics;
-      NSError *error;
-
-      bool canAuthenticate = [context canEvaluatePolicy:policyCode error:&error];
-      [context release];
-      if (error) {
-         debug("Touch ID available: %d (%ld / %s / %s)", canAuthenticate,
-               (long)error.code, error.description.UTF8String,
-               error.localizedDescription.UTF8String);
-      } else {
-          debug("Touch ID available: %d", canAuthenticate);
-      }
-      return canAuthenticate;
-   } @catch (NSException *) {
-      return false;
-   }
-#else
-   return false;
-#endif
-}
-
-bool TouchID::isPasswordFallbackEnabled()
-{
-#if XC_COMPILER_SUPPORT(TOUCH_ID)
-    return (config()->get(Config::Security_TouchIdAllowFallbackToUserPassword).toBool());
-#else
-    return false;
-#endif
-}
-
 //! @return true if either TouchID or Apple Watch is available at the moment.
 bool TouchID::isAvailable() const
 {
-   // note: we cannot cache the check results because the configuration
-   // is dynamic in its nature. User can close the laptop lid or take off
-   // the watch, thus making one (or both) of the authentication types unavailable.
-   return  isWatchAvailable() || isTouchIdAvailable() || isPasswordFallbackEnabled();
+    return true;
 }
 
 /**

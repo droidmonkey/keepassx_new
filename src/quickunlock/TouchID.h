@@ -33,11 +33,7 @@ public:
 
     void reset(const QUuid& dbUuid = "") override;
     void reset() override;
-
 private:
-    static bool isWatchAvailable();
-    static bool isTouchIdAvailable();
-    static bool isPasswordFallbackEnabled();
 
     static void deleteKeyEntry(const QString& accountName);
     static QString databaseKeyName(const QUuid& dbUuid);
