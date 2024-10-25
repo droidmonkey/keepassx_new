@@ -132,7 +132,6 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
 
     // We need both runtime and compile time checks here to solve the following problems:
     // - Not all flags are available in all OS versions, so we have to check it at compile time
-    // - Requesting Biometry/TouchID when to fingerprint sensor is available will result in runtime error
     SecAccessControlCreateFlags accessControlFlags = 0;
 #if XC_COMPILER_SUPPORT(APPLE_BIOMETRY)
        // Prefer the non-deprecated flag when available
@@ -271,7 +270,7 @@ bool TouchID::hasKey(const QUuid& dbUuid) const
     return m_encryptedMasterKeys.contains(dbUuid);
 }
 
-//! @return true if either TouchID or Apple Watch is available at the moment.
+//! @return always true. If TouchID and Apple Watch is unavailable it will fallback to device password auth
 bool TouchID::isAvailable() const
 {
     return true;
