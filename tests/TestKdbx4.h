@@ -62,6 +62,9 @@ private slots:
     void testFormat400Upgrade();
     void testFormat400Upgrade_data();
     void testFormat410Upgrade();
+#ifdef WITH_XC_ZSTD
+    void testFormat410ZstdCompressed();
+#endif
     void testUpgradeMasterKeyIntegrity();
     void testUpgradeMasterKeyIntegrity_data();
     void testAttachmentIndexStability();

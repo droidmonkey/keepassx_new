@@ -18,6 +18,8 @@
 #include "DatabaseSettingsWidgetGeneral.h"
 #include "ui_DatabaseSettingsWidgetGeneral.h"
 
+#include "config-keepassx.h"
+
 #include <QColorDialog>
 #include <QDialogButtonBox>
 #include <QInputDialog>
@@ -56,7 +58,15 @@ void DatabaseSettingsWidgetGeneral::initialize()
     m_ui->dbDescriptionEdit->setText(meta->description());
     m_ui->recycleBinEnabledCheckBox->setChecked(meta->recycleBinEnabled());
     m_ui->defaultUsernameEdit->setText(meta->defaultUserName());
-    m_ui->compressionCheckbox->setChecked(m_db->compressionAlgorithm() != Database::CompressionNone);
+
+    m_ui->compressionCombobox->clear();
+    m_ui->compressionCombobox->addItem(tr("None"), Database::CompressionNone);
+    m_ui->compressionCombobox->addItem(tr("gzip (default)"), Database::CompressionGZip);
+#ifdef WITH_XC_ZSTD
+    if (m_db->formatVersion() >= KeePass2::FILE_VERSION_4)
+        m_ui->compressionCombobox->addItem(tr("zstd"), Database::CompressionZstd);
+#endif
+    m_ui->compressionCombobox->setCurrentIndex(m_db->compressionAlgorithm());
 
     m_ui->dbPublicName->setText(m_db->publicName());
     setupPublicColorButton(m_db->publicColor());
@@ -123,8 +133,8 @@ bool DatabaseSettingsWidgetGeneral::saveSettings()
         meta->setRecycleBin(nullptr);
     }
 
-    m_db->setCompressionAlgorithm(m_ui->compressionCheckbox->isChecked() ? Database::CompressionGZip
-                                                                         : Database::CompressionNone);
+    m_db->setCompressionAlgorithm(
+        static_cast<Database::CompressionAlgorithm>(m_ui->compressionCombobox->currentData().toInt()));
 
     meta->setName(m_ui->dbNameEdit->text());
     meta->setDescription(m_ui->dbDescriptionEdit->text());

@@ -2120,10 +2120,6 @@ If you keep this number, your database will not be protected from brute force at
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Enable compression (recommended)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Delete Recycle Bin</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2227,6 +2223,22 @@ removed from the database.</source>
     </message>
     <message>
         <source>Select Database Icon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable compression:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>gzip (default)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>zstd</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4908,6 +4920,10 @@ If this reoccurs, then your database file may be corrupt.</source>
         <extracomment>Translation: variant map = data structure for storing meta data</extracomment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Unsupported compression algorithm</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Kdbx4Writer</name>
@@ -4927,6 +4943,10 @@ If this reoccurs, then your database file may be corrupt.</source>
     <message>
         <source>Failed to serialize KDF parameters variant map</source>
         <extracomment>Translation comment: variant map = data structure for storing meta data</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unsupported compression algorithm</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -9096,6 +9116,14 @@ This option is deprecated, use --set-key-file instead.</source>
         <source>Internal zlib error when decompressing: </source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Internal zstd error when decompressing: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Internal zstd error when compressing: </source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QtIOCompressor::open</name>
@@ -9105,6 +9133,18 @@ This option is deprecated, use --set-key-file instead.</source>
     </message>
     <message>
         <source>Internal zlib error: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Internal zstd error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Internal zstd error: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>this build doesn&apos;t ship zstd support</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -104,10 +104,21 @@ bool Kdbx4Reader::readDatabaseImpl(QIODevice* device,
     QIODevice* xmlDevice = nullptr;
     QScopedPointer<QtIOCompressor> ioCompressor;
 
-    if (db->compressionAlgorithm() == Database::CompressionNone) {
+    switch (db->compressionAlgorithm()) {
+    case Database::CompressionNone:
         xmlDevice = &cipherStream;
-    } else {
+        break;
+    case Database::CompressionGZip:
         ioCompressor.reset(new QtIOCompressor(&cipherStream, QtIOCompressor::GzipFormatSpec{}));
+        break;
+    case Database::CompressionZstd:
+        ioCompressor.reset(new QtIOCompressor(&cipherStream, QtIOCompressor::ZstdFormatSpec{}));
+        break;
+    default:
+        raiseError(tr("Unsupported compression algorithm"));
+        return false;
+    }
+    if (ioCompressor) {
         if (!ioCompressor->open(QIODevice::ReadOnly)) {
             raiseError(ioCompressor->errorString());
             return false;

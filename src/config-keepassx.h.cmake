@@ -24,6 +24,7 @@
 #cmakedefine WITH_XC_DOCS
 #cmakedefine WITH_XC_X11
 #cmakedefine WITH_XC_BOTAN3
+#cmakedefine WITH_XC_ZSTD
 
 #cmakedefine KEEPASSXC_BUILD_TYPE "@KEEPASSXC_BUILD_TYPE@"
 #cmakedefine KEEPASSXC_BUILD_TYPE_RELEASE

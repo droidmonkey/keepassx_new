@@ -292,6 +292,12 @@ void TestKdbx4Format::testFormat410Upgrade()
     entry->setPreviousParentGroup(nullptr);
     QCOMPARE(KeePass2Writer::kdbxVersionRequired(&db), KeePass2::FILE_VERSION_3_1);
 
+    // Zstd compression.
+    db.setCompressionAlgorithm(Database::CompressionZstd);
+    QCOMPARE(KeePass2Writer::kdbxVersionRequired(&db), KeePass2::FILE_VERSION_4_1);
+    db.setCompressionAlgorithm(Database::CompressionGZip);
+    QCOMPARE(KeePass2Writer::kdbxVersionRequired(&db), KeePass2::FILE_VERSION_3_1);
+
     // Custom icons with name or modification date
     Metadata::CustomIconData customIcon;
     auto iconUuid = QUuid::createUuid();
@@ -308,6 +314,33 @@ void TestKdbx4Format::testFormat410Upgrade()
     db.metadata()->addCustomIcon(iconUuid, customIcon);
     QCOMPARE(KeePass2Writer::kdbxVersionRequired(&db), KeePass2::FILE_VERSION_4_1);
 }
+
+#ifdef WITH_XC_ZSTD
+void TestKdbx4Format::testFormat410ZstdCompressed()
+{
+    QString filename = QString(KEEPASSX_TEST_DATA_DIR).append("/Format410ZstdCompressed.kdbx");
+    auto key = QSharedPointer<CompositeKey>::create();
+    key->addKey(QSharedPointer<PasswordKey>::create("t"));
+    KeePass2Reader reader;
+    auto db = QSharedPointer<Database>::create();
+    reader.readDatabase(filename, key, db.data());
+    QCOMPARE(reader.version(), KeePass2::FILE_VERSION_4_1);
+    QVERIFY(db.data());
+    QVERIFY(!reader.hasError());
+
+    QCOMPARE(db->rootGroup()->name(), QString("Format410ZstdCompressed"));
+    QCOMPARE(db->metadata()->name(), QString("Format410ZstdCompressed"));
+    QCOMPARE(db->rootGroup()->entries().size(), 1);
+    auto entry = db->rootGroup()->entries().at(0);
+
+    QCOMPARE(entry->title(), QString("Format410ZstdCompressed"));
+    QCOMPARE(entry->username(), QString("Format410ZstdCompressed"));
+    QCOMPARE(entry->attributes()->keys().size(), 6);
+    QCOMPARE(entry->attributes()->value("Format410ZstdCompressed"), QString("Format410ZstdCompressed"));
+    QCOMPARE(entry->attachments()->keys().size(), 1);
+    QCOMPARE(entry->attachments()->value("Format410ZstdCompressed"), QByteArray("Format410ZstdCompressed\n"));
+}
+#endif
 
 void TestKdbx4Format::testUpgradeMasterKeyIntegrity()
 {

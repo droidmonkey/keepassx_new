@@ -2068,8 +2068,20 @@ If you keep this number, your database will not be protected from brute force at
         <translation>Additional Database Settings</translation>
     </message>
     <message>
-        <source>Enable compression (recommended)</source>
-        <translation>Enable compression (recommended)</translation>
+        <source>Enable compression:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>gzip (default)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>zstd</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Delete Recycle Bin</source>
@@ -4461,6 +4473,10 @@ If this reoccurs, then your database file may be corrupt.</translation>
         <extracomment>Translation: variant map = data structure for storing meta data</extracomment>
         <translation>Invalid variant map field type size</translation>
     </message>
+    <message>
+        <source>Unsupported compression algorithm</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Kdbx4Writer</name>
@@ -4481,6 +4497,10 @@ If this reoccurs, then your database file may be corrupt.</translation>
         <source>Failed to serialize KDF parameters variant map</source>
         <extracomment>Translation comment: variant map = data structure for storing meta data</extracomment>
         <translation>Failed to serialize KDF parameters variant map</translation>
+    </message>
+    <message>
+        <source>Unsupported compression algorithm</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -8252,6 +8272,14 @@ Kernel: %3 %4</translation>
         <source>Internal zlib error when decompressing: </source>
         <translation>Internal zlib error when decompressing: </translation>
     </message>
+    <message>
+        <source>Internal zstd error when decompressing: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Internal zstd error when compressing: </source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QtIOCompressor::open</name>
@@ -8262,6 +8290,18 @@ Kernel: %3 %4</translation>
     <message>
         <source>Internal zlib error: </source>
         <translation>Internal zlib error: </translation>
+    </message>
+    <message>
+        <source>this build doesn't ship zstd support</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Internal zstd error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Internal zstd error: </source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

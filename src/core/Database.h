@@ -59,9 +59,10 @@ public:
     enum CompressionAlgorithm
     {
         CompressionNone = 0,
-        CompressionGZip = 1
+        CompressionGZip = 1,
+        CompressionZstd = 2,
     };
-    static const quint32 CompressionAlgorithmMax = CompressionGZip;
+    static const quint32 CompressionAlgorithmMax = CompressionZstd;
 
     enum SaveAction
     {

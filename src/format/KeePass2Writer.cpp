@@ -104,6 +104,10 @@ quint32 KeePass2Writer::kdbxVersionRequired(Database const* db, bool ignoreCurre
         }
     }
 
+    if (db->compressionAlgorithm() == Database::CompressionZstd) {
+        VERSION_MAX(version, KeePass2::FILE_VERSION_4_1)
+    }
+
     return version;
 }
 

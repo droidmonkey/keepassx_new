@@ -45,10 +45,21 @@
 ****************************************************************************/
 
 #include "qtiocompressor.h"
+#include "config-keepassx.h"
 #include <zlib.h>
+#ifdef WITH_XC_ZSTD
+#include <zstd.h>
+#endif
 
 typedef Bytef ZlibByte;
 typedef uInt ZlibSize;
+
+#ifndef WITH_XC_ZSTD
+struct ZSTD_CStream;
+struct ZSTD_DStream;
+struct ZSTD_inBuffer {};
+enum ZSTD_EndDirective {};
+#endif
 
 class QtIOCompressorPrivate {
     QtIOCompressor *q_ptr;
@@ -442,6 +453,235 @@ void QtIOCompressorZlibPrivate::setZlibError(const QString &errorMessage, int zl
     setErrorString(errorString);
 }
 
+/*!
+    \internal
+    Implements interfaces to invoke zstd.
+*/
+class QtIOCompressorZstdPrivate : public QtIOCompressorPrivate
+{
+public:
+    QtIOCompressorZstdPrivate(QtIOCompressor *q_ptr, QIODevice *device, int compressionLevel, int bufferSize);
+    ~QtIOCompressorZstdPrivate();
+
+    bool initialize(bool read) override;
+    virtual qint64 readData(char *data, qint64 maxSize) override;
+    virtual qint64 writeData(const char *data, qint64 maxSize) override;
+    void flush() override;
+    void finalize(bool read) override;
+
+private:
+    void flushZstd(ZSTD_EndDirective flushMode);
+    void setZstdError(const QString &errorMessage, size_t zstdErrorCode);
+
+    ZSTD_CStream *zstdCStream;
+    ZSTD_DStream *zstdDStream;
+    ZSTD_inBuffer zstdInBuffer;
+    const int compressionLevel;
+};
+
+QtIOCompressorZstdPrivate::QtIOCompressorZstdPrivate(QtIOCompressor *q_ptr, QIODevice *device, int compressionLevel, int bufferSizeHint)
+:QtIOCompressorPrivate(q_ptr, device, bufferSizeHint, nullptr)
+,zstdCStream(nullptr)
+,zstdDStream(nullptr)
+,zstdInBuffer{}
+,compressionLevel(compressionLevel)
+{
+#ifndef WITH_XC_ZSTD
+    state = State::Error;
+    qWarning("QtIOCompressor::setStreamFormat: this build doesn't ship zstd support");
+#endif
+}
+
+QtIOCompressorZstdPrivate::~QtIOCompressorZstdPrivate()
+{
+#ifdef WITH_XC_ZSTD
+    ZSTD_freeCStream(zstdCStream);
+    ZSTD_freeDStream(zstdDStream);
+#endif
+}
+
+bool QtIOCompressorZstdPrivate::initialize(bool read)
+{
+#ifdef WITH_XC_ZSTD
+    if (read) {
+        zstdDStream = ZSTD_createDStream();
+        if (!zstdDStream) {
+            setErrorString(QT_TRANSLATE_NOOP("QtIOCompressor::open", "Internal zstd error"));
+            return false;
+        }
+        if (size_t status = ZSTD_initDStream(zstdDStream); ZSTD_isError(status)) {
+            setZstdError(QT_TRANSLATE_NOOP("QtIOCompressor::open", "Internal zstd error: "), status);
+            return false;
+        }
+        bufferSize = std::max<qint64>(ZSTD_DStreamInSize(), bufferSize);
+    } else {
+        zstdCStream = ZSTD_createCStream();
+        if (!zstdCStream) {
+            setErrorString(QT_TRANSLATE_NOOP("QtIOCompressor::open", "Internal zstd error"));
+            return false;
+        }
+        if (size_t status = ZSTD_initCStream(zstdCStream, compressionLevel); ZSTD_isError(status)) {
+            setZstdError(QT_TRANSLATE_NOOP("QtIOCompressor::open", "Internal zstd error: "), status);
+            return false;
+        }
+        bufferSize = std::max<qint64>(ZSTD_CStreamOutSize(), bufferSize);
+    }
+    buffer = new char[bufferSize];
+    zstdInBuffer = ZSTD_inBuffer{buffer, 0, 0};
+    return true;
+#else
+    (void) read;
+    setErrorString(QT_TRANSLATE_NOOP("QtIOCompressor::open", "this build doesn't ship zstd support"));
+    return false;
+#endif
+}
+
+qint64 QtIOCompressorZstdPrivate::readData(char *data, qint64 maxSize)
+{
+#ifdef WITH_XC_ZSTD
+    ZSTD_outBuffer zstdOutBuffer {data, static_cast<size_t>(maxSize), 0};
+    size_t status = 0;
+    do {
+        if (zstdInBuffer.pos >= zstdInBuffer.size) {
+            qint64 bytesAvailable = device->read(buffer, bufferSize);
+            if (bytesAvailable == -1) {
+                state = QtIOCompressorPrivate::Error;
+                setErrorString(QT_TRANSLATE_NOOP("QtIOCompressor", "Error reading data from underlying device: ") + device->errorString());
+                return -1;
+            }
+            zstdInBuffer.pos = 0;
+            zstdInBuffer.size = bytesAvailable;
+            if (state != QtIOCompressorPrivate::InStream) {
+                // If we are not in a stream and get 0 bytes, we are probably trying to read from an empty device.
+                if(bytesAvailable == 0)
+                    return 0;
+                else if (bytesAvailable > 0)
+                    state = QtIOCompressorPrivate::InStream;
+            }
+        }
+        status = ZSTD_decompressStream(zstdDStream, &zstdOutBuffer, &zstdInBuffer);
+        if (status == 0)
+            break;
+        if (ZSTD_isError(status)) {
+            setZstdError(QT_TRANSLATE_NOOP("QtIOCompressor", "Internal zstd error when decompressing: "), status);
+            return -1;
+        }
+    } while (zstdOutBuffer.pos < zstdOutBuffer.size && status != 0);
+
+    if (status == 0) {
+        state = QtIOCompressorPrivate::EndOfStream;
+        // Unget any data left in the read buffer.
+        while (zstdInBuffer.pos < zstdInBuffer.size)
+            device->ungetChar(static_cast<const char *>(zstdInBuffer.src)[--zstdInBuffer.size]);
+    }
+
+    return zstdOutBuffer.pos;
+#else
+    (void) data;
+    (void) maxSize;
+    return -1;
+#endif
+}
+
+qint64 QtIOCompressorZstdPrivate::writeData(const char *data, qint64 maxSize)
+{
+#ifdef WITH_XC_ZSTD
+    ZSTD_inBuffer zstdInBuffer {data, static_cast<size_t>(maxSize), 0};
+    do {
+        ZSTD_outBuffer zstdOutBuffer {buffer, static_cast<size_t>(bufferSize), 0};
+        size_t status = ZSTD_compressStream2(zstdCStream, &zstdOutBuffer, &zstdInBuffer, ZSTD_e_continue);
+        if (ZSTD_isError(status)) {
+            state = QtIOCompressorPrivate::Error;
+            setZstdError(QT_TRANSLATE_NOOP("QtIOCompressor", "Internal zstd error when compressing: "), status);
+            return -1;
+        }
+
+        // Try to write data from the buffer to to the underlying device, return -1 on failure.
+        if (!writeBytes(static_cast<const char *>(zstdOutBuffer.dst), zstdOutBuffer.pos))
+            return -1;
+    } while (zstdInBuffer.pos < zstdInBuffer.size);
+
+    // put up a flag so that the device will be flushed on close.
+    state = BytesWritten;
+    return maxSize;
+#else
+    (void) data;
+    (void) maxSize;
+    return -1;
+#endif
+}
+
+void QtIOCompressorZstdPrivate::flush()
+{
+#ifdef WITH_XC_ZSTD
+    flushZstd(ZSTD_e_flush);
+#endif
+}
+
+void QtIOCompressorZstdPrivate::finalize(bool read)
+{
+#ifdef WITH_XC_ZSTD
+    if (read) {
+        state = QtIOCompressorPrivate::NotReadFirstByte;
+        ZSTD_freeDStream(zstdDStream);
+        zstdDStream = nullptr;
+    } else {
+        if (state == QtIOCompressorPrivate::BytesWritten) { // Only flush if we have written anything.
+            state = QtIOCompressorPrivate::NoBytesWritten;
+            flushZstd(ZSTD_e_end);
+        }
+        ZSTD_freeCStream(zstdCStream);
+        zstdCStream = nullptr;
+    }
+    zstdInBuffer = ZSTD_inBuffer{};
+#else
+    (void) read;
+#endif
+}
+
+/*!
+    \internal
+    Flushes the zstd stream.
+*/
+void QtIOCompressorZstdPrivate::flushZstd(ZSTD_EndDirective flushMode)
+{
+#ifdef WITH_XC_ZSTD
+    // No input.
+    ZSTD_inBuffer zstdInBuffer {nullptr, 0, 0};
+    size_t status = 0;
+    do {
+        ZSTD_outBuffer zstdOutBuffer {buffer, static_cast<size_t>(bufferSize), 0};
+        status = ZSTD_compressStream2(zstdCStream, &zstdOutBuffer, &zstdInBuffer, flushMode);
+
+        if (ZSTD_isError(status)) {
+            state = QtIOCompressorPrivate::Error;
+            setZstdError(QT_TRANSLATE_NOOP("QtIOCompressor", "Internal zstd error when compressing: "), status);
+            return;
+        }
+
+        // Try to write data from the buffer to to the underlying device, return on failure.
+        if (!writeBytes(static_cast<const char *>(zstdOutBuffer.dst), zstdOutBuffer.pos))
+            return;
+
+    } while (status != 0);
+#else
+    (void) flushMode;
+#endif
+}
+
+void QtIOCompressorZstdPrivate::setZstdError(const QString &errorMessage, size_t zstdErrorCode)
+{
+    QString errorString;
+#ifdef WITH_XC_ZSTD
+    if (const char * const zstdErrorString = ZSTD_getErrorName(zstdErrorCode))
+        errorString = errorMessage + zstdErrorString;
+    else
+#endif
+        errorString = errorMessage  + " Unknown error, code " + QString::number(zstdErrorCode);
+
+    setErrorString(errorString);
+}
+
 /*! \class QtIOCompressor
     \brief The QtIOCompressor class is a QIODevice that compresses data streams.
 
@@ -492,6 +732,10 @@ void QtIOCompressorZlibPrivate::setZlibError(const QString &errorMessage, int zl
 */
 QtIOCompressor::QtIOCompressor(QIODevice *device, GzipFormatSpec Spec, int bufferSize)
 :d_ptr(new QtIOCompressorZlibPrivate(this, device, QtIOCompressorZlibPrivate::StreamFormat::GzipFormat, Spec.compressionLevel, bufferSize))
+{}
+
+QtIOCompressor::QtIOCompressor(QIODevice *device, ZstdFormatSpec Spec, int bufferSize)
+:d_ptr(new QtIOCompressorZstdPrivate(this, device, Spec.compressionLevel, bufferSize))
 {}
 
 /*!

@@ -23,6 +23,7 @@ add_feature_info(Passkeys WITH_XC_BROWSER_PASSKEYS "Passkeys support for browser
 add_feature_info(SSHAgent WITH_XC_SSHAGENT "SSH agent integration compatible with KeeAgent")
 add_feature_info(KeeShare WITH_XC_KEESHARE "Sharing integration with KeeShare")
 add_feature_info(YubiKey WITH_XC_YUBIKEY "YubiKey HMAC-SHA1 challenge-response")
+add_feature_info(Zstd WITH_XC_ZSTD "Database compression using zstd")
 add_feature_info(UpdateCheck WITH_XC_UPDATECHECK "Automatic update checking")
 if(UNIX AND NOT APPLE)
     add_feature_info(FdoSecrets WITH_XC_FDOSECRETS "Implement freedesktop.org Secret Storage Spec server side API.")
@@ -367,6 +368,7 @@ target_link_libraries(keepassxc_core
         ${PCSC_LIBRARIES}
         ${ZXCVBN_LIBRARIES}
         ${ZLIB_LIBRARIES}
+        ${ZSTD_LIBRARIES}
         ${MINIZIP_LIBRARIES}
         ${ARGON2_LIBRARIES}
         ${KEYUTILS_LIBRARIES}

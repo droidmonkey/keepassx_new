@@ -55,8 +55,10 @@ class QtIOCompressor : public QIODevice
 Q_OBJECT
 public:
     struct GzipFormatSpec { int compressionLevel = 6; };
+    struct ZstdFormatSpec { int compressionLevel = 3; };
 
     QtIOCompressor(QIODevice *device, GzipFormatSpec Spec, int bufferSize = 65500);
+    QtIOCompressor(QIODevice *device, ZstdFormatSpec Spec, int bufferSizeHint = 65500);
     ~QtIOCompressor() override;
     bool isSequential() const override;
     bool open(OpenMode mode) override;

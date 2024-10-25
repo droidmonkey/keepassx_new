@@ -134,10 +134,21 @@ bool Kdbx4Writer::writeDatabase(QIODevice* device, Database* db)
     QIODevice* outputDevice = nullptr;
     QScopedPointer<QtIOCompressor> ioCompressor;
 
-    if (db->compressionAlgorithm() == Database::CompressionNone) {
+    switch (db->compressionAlgorithm()) {
+    case Database::CompressionNone:
         outputDevice = cipherStream.data();
-    } else {
+        break;
+    case Database::CompressionGZip:
         ioCompressor.reset(new QtIOCompressor(cipherStream.data(), QtIOCompressor::GzipFormatSpec{}));
+        break;
+    case Database::CompressionZstd:
+        ioCompressor.reset(new QtIOCompressor(cipherStream.data(), QtIOCompressor::ZstdFormatSpec{}));
+        break;
+    default:
+        raiseError(tr("Unsupported compression algorithm"));
+        return false;
+    }
+    if (ioCompressor) {
         if (!ioCompressor->open(QIODevice::WriteOnly)) {
             raiseError(ioCompressor->errorString());
             return false;
