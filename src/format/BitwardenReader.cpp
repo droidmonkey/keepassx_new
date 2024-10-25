@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -79,6 +79,43 @@ namespace
                     totp = url.toString(QUrl::FullyEncoded);
                 }
                 entry->setTotp(Totp::parseSettings(totp));
+            }
+
+            // Parse passkey
+            if (loginMap.contains("fido2Credentials")) {
+                const auto fido2CredentialsMap = loginMap.value("fido2Credentials").toList();
+                for (const auto& fido2Credentials : fido2CredentialsMap) {
+                    const auto passkey = fido2Credentials.toMap();
+
+                    // Change from UUID to base64 byte array
+                    const auto credentialIdValue = passkey.value("credentialId").toString();
+                    if (!credentialIdValue.isEmpty()) {
+                        const auto credentialUuid = Tools::uuidToHex(credentialIdValue);
+                        const auto credentialIdArray = QByteArray::fromHex(credentialUuid.toUtf8());
+                        const auto credentialId =
+                            credentialIdArray.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+                        entry->attributes()->set(EntryAttributes::KPEX_PASSKEY_CREDENTIAL_ID, credentialId, true);
+                    }
+
+                    // Base64 needs to be changed from URL encoding back to normal, and the result as PEM string
+                    const auto keyValue = passkey.value("keyValue").toString();
+                    if (!keyValue.isEmpty()) {
+                        const auto keyValueArray =
+                            QByteArray::fromBase64(keyValue.toUtf8(), QByteArray::Base64UrlEncoding);
+                        auto privateKey = keyValueArray.toBase64(QByteArray::Base64Encoding);
+                        privateKey.insert(0, EntryAttributes::KPEX_PASSKEY_PRIVATE_KEY_START.toUtf8());
+                        privateKey.append(EntryAttributes::KPEX_PASSKEY_PRIVATE_KEY_END.toUtf8());
+                        entry->attributes()->set(EntryAttributes::KPEX_PASSKEY_PRIVATE_KEY_PEM, privateKey, true);
+                    }
+
+                    entry->attributes()->set(EntryAttributes::KPEX_PASSKEY_USERNAME,
+                                             passkey.value("userName").toString());
+                    entry->attributes()->set(EntryAttributes::KPEX_PASSKEY_RELYING_PARTY,
+                                             passkey.value("rpId").toString());
+                    entry->attributes()->set(
+                        EntryAttributes::KPEX_PASSKEY_USER_HANDLE, passkey.value("userHandle").toString(), true);
+                    entry->addTag(QObject::tr("Passkey"));
+                }
             }
 
             // Set the entry url(s)

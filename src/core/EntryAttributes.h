@@ -64,7 +64,18 @@ public:
     static const QStringList DefaultAttributes;
     static const QString RememberCmdExecAttr;
     static const QString AdditionalUrlAttribute;
+
     static const QString PasskeyAttribute;
+    static const QString KPXC_PASSKEY_USERNAME;
+    static const QString KPEX_PASSKEY_USERNAME;
+    static const QString KPEX_PASSKEY_CREDENTIAL_ID;
+    static const QString KPEX_PASSKEY_GENERATED_USER_ID;
+    static const QString KPEX_PASSKEY_PRIVATE_KEY_PEM;
+    static const QString KPEX_PASSKEY_RELYING_PARTY;
+    static const QString KPEX_PASSKEY_USER_HANDLE;
+    static const QString KPEX_PASSKEY_PRIVATE_KEY_START;
+    static const QString KPEX_PASSKEY_PRIVATE_KEY_END;
+
     static bool isDefaultAttribute(const QString& key);
     static bool isPasskeyAttribute(const QString& key);
 

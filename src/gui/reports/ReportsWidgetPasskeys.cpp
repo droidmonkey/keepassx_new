@@ -21,6 +21,7 @@
 #include "browser/BrowserPasskeys.h"
 #include "browser/PasskeyUtils.h"
 #include "core/AsyncTask.h"
+#include "core/EntryAttributes.h"
 #include "core/Group.h"
 #include "core/Metadata.h"
 #include "gui/GuiTools.h"
@@ -75,7 +76,7 @@ PasskeyList::PasskeyList(const QSharedPointer<Database>& db)
         }
 
         for (auto entry : group->entries()) {
-            if (entry->isRecycled() || !entry->attributes()->hasKey(BrowserPasskeys::KPEX_PASSKEY_PRIVATE_KEY_PEM)) {
+            if (entry->isRecycled() || !entry->attributes()->hasKey(EntryAttributes::KPEX_PASSKEY_PRIVATE_KEY_PEM)) {
                 continue;
             }
 
@@ -134,7 +135,7 @@ void ReportsWidgetPasskeys::addPasskeyRow(Group* group, Entry* entry)
     row << new QStandardItem(Icons::entryIconPixmap(entry), title);
     row << new QStandardItem(Icons::groupIconPixmap(group), group->hierarchy().join("/"));
     row << new QStandardItem(passkeyUtils()->getUsernameFromEntry(entry));
-    row << new QStandardItem(entry->attributes()->value(BrowserPasskeys::KPEX_PASSKEY_RELYING_PARTY));
+    row << new QStandardItem(entry->attributes()->value(EntryAttributes::KPEX_PASSKEY_RELYING_PARTY));
     row << new QStandardItem(urlList.join('\n'));
 
     // Set tooltips

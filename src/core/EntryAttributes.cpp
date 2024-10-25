@@ -36,7 +36,20 @@ const QString EntryAttributes::SearchTextGroupName = "SearchText";
 
 const QString EntryAttributes::RememberCmdExecAttr = "_EXEC_CMD";
 const QString EntryAttributes::AdditionalUrlAttribute = "KP2A_URL";
+
+// Passkey related attributes
 const QString EntryAttributes::PasskeyAttribute = "KPEX_PASSKEY";
+const QString EntryAttributes::KPEX_PASSKEY_USERNAME = QStringLiteral("KPEX_PASSKEY_USERNAME");
+const QString EntryAttributes::KPEX_PASSKEY_CREDENTIAL_ID = QStringLiteral("KPEX_PASSKEY_CREDENTIAL_ID");
+const QString EntryAttributes::KPEX_PASSKEY_PRIVATE_KEY_PEM = QStringLiteral("KPEX_PASSKEY_PRIVATE_KEY_PEM");
+const QString EntryAttributes::KPEX_PASSKEY_RELYING_PARTY = QStringLiteral("KPEX_PASSKEY_RELYING_PARTY");
+const QString EntryAttributes::KPEX_PASSKEY_USER_HANDLE = QStringLiteral("KPEX_PASSKEY_USER_HANDLE");
+const QString EntryAttributes::KPEX_PASSKEY_PRIVATE_KEY_START = QStringLiteral("-----BEGIN PRIVATE KEY-----");
+const QString EntryAttributes::KPEX_PASSKEY_PRIVATE_KEY_END = QStringLiteral("-----END PRIVATE KEY-----");
+
+// For compatibility with StrongBox
+const QString EntryAttributes::KPEX_PASSKEY_GENERATED_USER_ID = QStringLiteral("KPEX_PASSKEY_GENERATED_USER_ID");
+const QString EntryAttributes::KPXC_PASSKEY_USERNAME = QStringLiteral("KPXC_PASSKEY_USERNAME");
 
 EntryAttributes::EntryAttributes(QObject* parent)
     : ModifiableObject(parent)

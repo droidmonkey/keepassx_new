@@ -18,6 +18,7 @@
 #include "PasskeyUtils.h"
 #include "BrowserMessageBuilder.h"
 #include "BrowserPasskeys.h"
+#include "core/EntryAttributes.h"
 #include "core/Tools.h"
 #include "gui/UrlTools.h"
 
@@ -389,9 +390,9 @@ QString PasskeyUtils::getCredentialIdFromEntry(const Entry* entry) const
         return {};
     }
 
-    return entry->attributes()->hasKey(BrowserPasskeys::KPEX_PASSKEY_GENERATED_USER_ID)
-               ? entry->attributes()->value(BrowserPasskeys::KPEX_PASSKEY_GENERATED_USER_ID)
-               : entry->attributes()->value(BrowserPasskeys::KPEX_PASSKEY_CREDENTIAL_ID);
+    return entry->attributes()->hasKey(EntryAttributes::KPEX_PASSKEY_GENERATED_USER_ID)
+               ? entry->attributes()->value(EntryAttributes::KPEX_PASSKEY_GENERATED_USER_ID)
+               : entry->attributes()->value(EntryAttributes::KPEX_PASSKEY_CREDENTIAL_ID);
 }
 
 // For compatibility with StrongBox (and other possible clients in the future)
@@ -401,7 +402,7 @@ QString PasskeyUtils::getUsernameFromEntry(const Entry* entry) const
         return {};
     }
 
-    return entry->attributes()->hasKey(BrowserPasskeys::KPXC_PASSKEY_USERNAME)
-               ? entry->attributes()->value(BrowserPasskeys::KPXC_PASSKEY_USERNAME)
-               : entry->attributes()->value(BrowserPasskeys::KPEX_PASSKEY_USERNAME);
+    return entry->attributes()->hasKey(EntryAttributes::KPXC_PASSKEY_USERNAME)
+               ? entry->attributes()->value(EntryAttributes::KPXC_PASSKEY_USERNAME)
+               : entry->attributes()->value(EntryAttributes::KPEX_PASSKEY_USERNAME);
 }

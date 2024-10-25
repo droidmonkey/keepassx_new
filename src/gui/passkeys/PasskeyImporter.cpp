@@ -76,8 +76,8 @@ void PasskeyImporter::importSelectedFile(QFile& file, QSharedPointer<Database>& 
                                 tr("Cannot import passkey"),
                                 tr("Cannot import passkey file \"%1\".\nThe following data is missing:\n%2")
                                     .arg(file.fileName(), missingKeys.join(", ")));
-    } else if (!privateKey.startsWith("-----BEGIN PRIVATE KEY-----")
-               || !privateKey.trimmed().endsWith("-----END PRIVATE KEY-----")) {
+    } else if (!privateKey.startsWith(EntryAttributes::KPEX_PASSKEY_PRIVATE_KEY_START)
+               || !privateKey.trimmed().endsWith(EntryAttributes::KPEX_PASSKEY_PRIVATE_KEY_END)) {
         MessageBox::information(
             m_parent,
             tr("Cannot import passkey"),
