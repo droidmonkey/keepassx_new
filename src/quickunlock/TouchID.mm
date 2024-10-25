@@ -144,9 +144,7 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
       accessControlFlags = accessControlFlags | kSecAccessControlOr | kSecAccessControlWatch;
 #endif
 
-#if XC_COMPILER_SUPPORT(TOUCH_ID)
       accessControlFlags = accessControlFlags | kSecAccessControlOr | kSecAccessControlDevicePasscode;
-#endif
 
    SecAccessControlRef sacObject = SecAccessControlCreateWithFlags(
        kCFAllocatorDefault, kSecAttrAccessibleWhenUnlockedThisDeviceOnly, accessControlFlags, &error);
