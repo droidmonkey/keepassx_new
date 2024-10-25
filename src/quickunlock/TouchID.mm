@@ -135,19 +135,28 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
     // - Requesting Biometry/TouchID/DevicePassword when to fingerprint sensor is available will result in runtime error
     SecAccessControlCreateFlags accessControlFlags = 0;
 #if XC_COMPILER_SUPPORT(APPLE_BIOMETRY)
-       // Prefer the non-deprecated flag when available
-       accessControlFlags = kSecAccessControlBiometryCurrentSet;
+    // Needs a special check to work with SecItemAdd, when TouchID is not enrolled and the flag
+    // is set, the method call fails with an error. But we want to still set this flag if TouchID is
+    // enrolled but temporarily unavailable due to closed lid
+    if (isTouchIdEnrolled()) {
+        // Prefer the non-deprecated flag when available
+        accessControlFlags = kSecAccessControlBiometryCurrentSet;
+    }
 #elif XC_COMPILER_SUPPORT(TOUCH_ID)
-       accessControlFlags = kSecAccessControlTouchIDCurrentSet;
+    if (isTouchIdEnrolled()) {
+        accessControlFlags = kSecAccessControlTouchIDCurrentSet;
+    }
 #endif
 
 #if XC_COMPILER_SUPPORT(WATCH_UNLOCK)
       accessControlFlags = accessControlFlags | kSecAccessControlOr | kSecAccessControlWatch;
 #endif
 
-   if (isPasswordFallbackEnabled()) {
+#if XC_COMPILER_SUPPORT(TOUCH_ID)
+   if (isPasswordFallbackPossible()) {
        accessControlFlags = accessControlFlags | kSecAccessControlOr | kSecAccessControlDevicePasscode;
    }
+#endif
 
    SecAccessControlRef sacObject = SecAccessControlCreateWithFlags(
        kCFAllocatorDefault, kSecAttrAccessibleWhenUnlockedThisDeviceOnly, accessControlFlags, &error);
@@ -333,10 +342,58 @@ bool TouchID::isTouchIdAvailable()
 #endif
 }
 
-bool TouchID::isPasswordFallbackEnabled()
+//! @return true if finger is enrolled
+bool TouchID::isTouchIdEnrolled()
 {
 #if XC_COMPILER_SUPPORT(TOUCH_ID)
-    return (config()->get(Config::Security_TouchIdAllowFallbackToUserPassword).toBool());
+   @try {
+      LAContext *context = [[LAContext alloc] init];
+
+      LAPolicy policyCode = LAPolicyDeviceOwnerAuthenticationWithBiometrics;
+      NSError *error;
+
+      bool canAuthenticate = [context canEvaluatePolicy:policyCode error:&error];
+      [context release];
+       //TODO: check if this is the correct error message
+       if (error && error.code == LAErrorBiometryNotEnrolled) {
+         debug("Touch ID available: %d (%ld / %s / %s)", canAuthenticate,
+               (long)error.code, error.description.UTF8String,
+               error.localizedDescription.UTF8String);
+      } else {
+          debug("Touch ID not available but enrolled");
+          canAuthenticate = true;
+      }
+       return canAuthenticate;
+   } @catch (NSException *) {
+      return false;
+   }
+#else
+   return false;
+#endif
+}
+
+bool TouchID::isPasswordFallbackPossible()
+{
+#if XC_COMPILER_SUPPORT(TOUCH_ID)
+    @try {
+        LAContext *context = [[LAContext alloc] init];
+
+        LAPolicy policyCode = LAPolicyDeviceOwnerAuthentication;
+        NSError *error;
+
+        bool canAuthenticate = [context canEvaluatePolicy:policyCode error:&error];
+        [context release];
+        if (error) {
+            debug("Password fallback available: %d (%ld / %s / %s)", canAuthenticate,
+                  (long)error.code, error.description.UTF8String,
+                  error.localizedDescription.UTF8String);
+        } else {
+            debug("Password fallback available: %d", canAuthenticate);
+        }
+        return canAuthenticate;
+    } @catch (NSException *) {
+        return false;
+    }
 #else
     return false;
 #endif
@@ -348,7 +405,7 @@ bool TouchID::isAvailable() const
    // note: we cannot cache the check results because the configuration
    // is dynamic in its nature. User can close the laptop lid or take off
    // the watch, thus making one (or both) of the authentication types unavailable.
-   return  isWatchAvailable() || isTouchIdAvailable() || isPasswordFallbackEnabled();
+   return  isWatchAvailable() || isTouchIdAvailable() || isPasswordFallbackPossible();
 }
 
 /**
