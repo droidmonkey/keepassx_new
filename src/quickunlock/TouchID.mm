@@ -134,20 +134,16 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
     // - Not all flags are available in all OS versions, so we have to check it at compile time
     // - Requesting Biometry/TouchID when to fingerprint sensor is available will result in runtime error
     SecAccessControlCreateFlags accessControlFlags = 0;
-    if (isTouchIdAvailable()) {
 #if XC_COMPILER_SUPPORT(APPLE_BIOMETRY)
        // Prefer the non-deprecated flag when available
        accessControlFlags = kSecAccessControlBiometryCurrentSet;
 #elif XC_COMPILER_SUPPORT(TOUCH_ID)
        accessControlFlags = kSecAccessControlTouchIDCurrentSet;
 #endif
-    }
 
-   if (isWatchAvailable()) {
 #if XC_COMPILER_SUPPORT(WATCH_UNLOCK)
       accessControlFlags = accessControlFlags | kSecAccessControlOr | kSecAccessControlWatch;
 #endif
-   }
 
    if (isPasswordFallbackEnabled()) {
        accessControlFlags = accessControlFlags | kSecAccessControlOr | kSecAccessControlDevicePasscode;
