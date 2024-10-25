@@ -364,6 +364,48 @@ bool SSHAgent::removeIdentity(OpenSSHKey& key)
 }
 
 /**
+ * Remove all identities from the SSH agent.
+ *
+ * Since the agent might be forwarded, old or non-OpenSSH, when asked
+ * to remove all keys, attempt to remove both protocol v.1 and v.2
+ * keys.
+ *
+ * @return true on success
+ */
+bool SSHAgent::clearAllAgentIdentities()
+{
+    if (!isAgentRunning()) {
+        m_error = tr("No agent running, cannot remove identity.");
+        return false;
+    }
+
+    bool ret = true;
+    QByteArray requestData;
+    QByteArray responseData;
+    BinaryStream request(&requestData);
+
+    // Same request order as OpenBSD ssh-add: useful?
+    request.write(SSH2_AGENTC_REMOVE_ALL_IDENTITIES);
+
+    if (!sendMessage(requestData, responseData)) {
+        m_error = tr("Failed to remove all SSH identities from agent.");
+        ret = false;
+    }
+
+    request.flush();
+    responseData.clear();
+
+    // Same request order as OpenBSD ssh-add: useful?
+    request.write(SSH_AGENTC_REMOVE_ALL_RSA_IDENTITIES);
+
+    // ignore error-code for ssh1
+    sendMessage(requestData, responseData);
+
+    m_error = tr("All SSH identities removed from agent.");
+    return ret;
+}
+
+/**
  * Get a list of identities from the SSH agent.
  *
  * @param list list of keys to append

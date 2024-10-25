@@ -203,6 +203,7 @@ public slots:
 #ifdef WITH_XC_SSHAGENT
     void addToAgent();
     void removeFromAgent();
+    void clearSSHAgent();
 #endif
     void performAutoType(const QString& sequence = {});
     void performAutoTypeUsername();

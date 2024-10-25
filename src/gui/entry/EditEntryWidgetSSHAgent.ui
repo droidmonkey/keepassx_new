@@ -139,7 +139,7 @@
        </widget>
       </item>
       <item row="4" column="3">
-       <layout class="QHBoxLayout" name="agentActionsLayout" stretch="0,0">
+       <layout class="QHBoxLayout" name="agentActionsLayout" stretch="0,0,0">
         <item>
          <widget class="QPushButton" name="addToAgentButton">
           <property name="text">
@@ -151,6 +151,13 @@
          <widget class="QPushButton" name="removeFromAgentButton">
           <property name="text">
            <string>Remove from agent</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="clearAgentButton">
+          <property name="text">
+           <string>Clear agent</string>
           </property>
          </widget>
         </item>
