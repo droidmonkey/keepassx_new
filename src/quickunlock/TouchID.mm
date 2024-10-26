@@ -4,7 +4,6 @@
 #include "crypto/SymmetricCipher.h"
 #include "crypto/CryptoHash.h"
 #include "config-keepassx.h"
-#import "core/Config.h"
 
 #include <botan/mem_ops.h>
 
