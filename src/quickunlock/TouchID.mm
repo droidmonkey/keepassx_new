@@ -136,9 +136,14 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey, const b
     // is set, the method call fails with an error. But we want to still set this flag if TouchID is
     // enrolled but temporarily unavailable due to closed lid
     //
-    // At least on a Hackintosh the enrolled-check does not work (LAErrorBiometryNotAvailable > LAErrorBiometryNotEnrolled),
-    // so you cannot know for sure if touchid hardware is temporarily unavailable or not present at all, so to make quick
-    // unlock fallbacks possible there you have to try to save the key a second time without this flag to make it work.
+    // At least on a Hackintosh the enrolled-check does not work, there LAErrorBiometryNotAvailable gets returned instead of
+    // LAErrorBiometryNotEnrolled.
+    //
+    // Thats kinda unfortunate, because now you cannot know for sure if TouchID hardware is either temporarily unavailable or not present
+    // at all, because LAErrorBiometryNotAvailable is used for both cases.
+    //
+    // So to make quick unlock fallbacks possible on these machines you have to try to save the key a second time without this flag, if the
+    // first try fails with an error.
     if (isTouchIdEnrolled() && !ignoreTouchID) {
         // Prefer the non-deprecated flag when available
         accessControlFlags = kSecAccessControlBiometryCurrentSet;
@@ -213,6 +218,7 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey, const b
 bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
 {
     if (!setKey(dbUuid,passwordKey, false)) {
+        debug("TouchID::setKey failed with error trying fallback method without TouchID flag")
         return setKey(dbUuid, passwordKey, true);
     } else {
         return true;
