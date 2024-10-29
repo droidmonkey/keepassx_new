@@ -218,7 +218,7 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey, const b
 bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
 {
     if (!setKey(dbUuid,passwordKey, false)) {
-        debug("TouchID::setKey failed with error trying fallback method without TouchID flag")
+        debug("TouchID::setKey failed with error trying fallback method without TouchID flag");
         return setKey(dbUuid, passwordKey, true);
     } else {
         return true;
