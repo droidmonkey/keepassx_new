@@ -88,12 +88,10 @@ void TouchID::reset()
     m_encryptedMasterKeys.clear();
 }
 
-/**
- * Generates a random AES 256bit key and uses it to encrypt the PasswordKey that
- * protects the database. The encrypted PasswordKey is kept in memory while the
- * AES key is stored in the macOS KeyChain protected by either TouchID or Apple Watch.
- */
-bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
+
+
+
+bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey, const bool ignoreTouchID)
 {
     if (passwordKey.isEmpty()) {
         debug("TouchID::setKey - illegal arguments");
@@ -137,12 +135,16 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
     // Needs a special check to work with SecItemAdd, when TouchID is not enrolled and the flag
     // is set, the method call fails with an error. But we want to still set this flag if TouchID is
     // enrolled but temporarily unavailable due to closed lid
-    if (isTouchIdEnrolled()) {
+    //
+    // At least on a Hackintosh the enrolled-check does not work (LAErrorBiometryNotAvailable > LAErrorBiometryNotEnrolled),
+    // so you cannot know for sure if touchid hardware is temporarily unavailable or not present at all, so to make quick
+    // unlock fallbacks possible there you have to try to save the key a second time without this flag to make it work.
+    if (isTouchIdEnrolled() && !ignoreTouchID) {
         // Prefer the non-deprecated flag when available
         accessControlFlags = kSecAccessControlBiometryCurrentSet;
     }
 #elif XC_COMPILER_SUPPORT(TOUCH_ID)
-    if (isTouchIdEnrolled()) {
+    if (isTouchIdEnrolled() && !ignoreTouchID) {
         accessControlFlags = kSecAccessControlTouchIDCurrentSet;
     }
 #endif
@@ -201,6 +203,20 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
     m_encryptedMasterKeys.insert(dbUuid, encryptedMasterKey);
     debug("TouchID::setKey - Success!");
     return true;
+}
+
+/**
+ * Generates a random AES 256bit key and uses it to encrypt the PasswordKey that
+ * protects the database. The encrypted PasswordKey is kept in memory while the
+ * AES key is stored in the macOS KeyChain protected by either TouchID or Apple Watch.
+ */
+bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
+{
+    if (!setKey(dbUuid,passwordKey, false)) {
+        return setKey(dbUuid, passwordKey, true);
+    } else {
+        return true;
+    }
 }
 
 /**
