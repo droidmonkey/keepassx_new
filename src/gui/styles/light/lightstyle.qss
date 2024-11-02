@@ -1,12 +1,14 @@
 DatabaseWidget:!active, GroupView:!active,
+DatabaseWidget #groupView:!active, DatabaseWidget #tagView:!active,
 EntryPreviewWidget QLineEdit:!active, EntryPreviewWidget QTextEdit:!active,
-EntryPreviewWidget TagsEdit:!active {
+EntryPreviewWidget TagsEdit:!active, QStatusBar:!active {
     background-color: #FCFCFC;
 }
 
 DatabaseWidget:disabled, GroupView:disabled,
+DatabaseWidget #groupView:disabled, DatabaseWidget #tagView:disabled,
 EntryPreviewWidget QLineEdit:disabled, EntryPreviewWidget QTextEdit:disabled,
-EntryPreviewWidget TagsEdit:disabled {
+EntryPreviewWidget TagsEdit:disabled, QStatusBar:disabled {
     background-color: #EDEDED;
 }
 
