@@ -22,6 +22,7 @@
 #if __clang_major__ >= 13 && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_12_3
 #import <ScreenCaptureKit/ScreenCaptureKit.h>
 #endif
+
 @implementation AppKitImpl
 
 - (id) initWithObject:(AppKit*)appkit
@@ -183,7 +184,7 @@
 //
 // Check if screen recording is enabled, may show an popup asking for permissions
 //
-- (bool)enableScreenRecording 
+- (bool) enableScreenRecording 
 {
 #if __clang_major__ >= 13 && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_12_3
         __block BOOL hasPermission = NO;
