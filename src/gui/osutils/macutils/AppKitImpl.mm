@@ -204,7 +204,8 @@
         }];
 
         // Wait for the asynchronous callback to complete
-        dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+        dispatch_time_t timeout = dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC);
+        dispatch_semaphore_wait(sema, timeout);
 
         // Return the final result
         return hasPermission;
