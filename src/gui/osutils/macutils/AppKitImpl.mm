@@ -187,6 +187,7 @@
 - (bool) enableScreenRecording 
 {
 #if __clang_major__ >= 13 && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_12_3
+    if (@available(macOS 12.3, *)) {
         __block BOOL hasPermission = NO;
         dispatch_semaphore_t sema = dispatch_semaphore_create(0);
 
@@ -210,6 +211,7 @@
 
         // Return the final result
         return hasPermission;
+    }
 #endif
     return YES; // Return YES for macOS versions that do not support ScreenCaptureKit
 }
