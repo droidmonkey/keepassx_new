@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
- *  Copyright (C) 2020 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -67,6 +67,7 @@ signals:
     void databaseUnlocked(DatabaseWidget* dbWidget);
     void databaseLocked(DatabaseWidget* dbWidget);
     void activeDatabaseChanged(DatabaseWidget* dbWidget);
+    void databaseUnlockDialogFinished(bool accepted, DatabaseWidget* dbWidget);
 
 public slots:
     void openDatabase(const QString& filePath, const QString& password = {}, const QString& keyfile = {});

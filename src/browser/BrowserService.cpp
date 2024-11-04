@@ -86,6 +86,10 @@ BrowserService::BrowserService()
     connect(getMainWindow(), &MainWindow::databaseUnlocked, this, &BrowserService::databaseUnlocked);
     connect(getMainWindow(), &MainWindow::databaseLocked, this, &BrowserService::databaseLocked);
     connect(getMainWindow(), &MainWindow::activeDatabaseChanged, this, &BrowserService::activeDatabaseChanged);
+    connect(getMainWindow(),
+            &MainWindow::databaseUnlockDialogFinished,
+            this,
+            &BrowserService::handleDatabaseUnlockDialogFinished);
 
     setEnabled(browserSettings()->isEnabled());
 }
@@ -1676,6 +1680,17 @@ void BrowserService::activeDatabaseChanged(DatabaseWidget* dbWidget)
     }
 
     m_currentDatabaseWidget = dbWidget;
+}
+
+void BrowserService::handleDatabaseUnlockDialogFinished(bool accepted, DatabaseWidget* dbWidget)
+{
+    // User canceled the database open dialog
+    if (dbWidget && !accepted && m_bringToFrontRequested) {
+        if (m_bringToFrontRequested) {
+            m_bringToFrontRequested = false;
+            hideWindow();
+        }
+    }
 }
 
 void BrowserService::processClientMessage(QLocalSocket* socket, const QJsonObject& message)
