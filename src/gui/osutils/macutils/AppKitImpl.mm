@@ -194,6 +194,7 @@
         // Attempt to use SCShareableContent to check for screen recording permission
         [SCShareableContent getShareableContentWithCompletionHandler:^(SCShareableContent * _Nullable content, 
                                                                         NSError * _Nullable error) {
+            Q_UNUSED(error);
             if (content) {
                 // Successfully obtained content, indicating permission is granted
                 hasPermission = YES;
