@@ -144,12 +144,12 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey, const b
     //
     // So to make quick unlock fallbacks possible on these machines you have to try to save the key a second time without this flag, if the
     // first try fails with an error.
-    if (isTouchIdEnrolled() && !ignoreTouchID) {
+    if (!ignoreTouchID) {
         // Prefer the non-deprecated flag when available
         accessControlFlags = kSecAccessControlBiometryCurrentSet;
     }
 #elif XC_COMPILER_SUPPORT(TOUCH_ID)
-    if (isTouchIdEnrolled() && !ignoreTouchID) {
+    if (!ignoreTouchID) {
         accessControlFlags = kSecAccessControlTouchIDCurrentSet;
     }
 #endif
@@ -355,36 +355,6 @@ bool TouchID::isTouchIdAvailable()
           debug("Touch ID available: %d", canAuthenticate);
       }
       return canAuthenticate;
-   } @catch (NSException *) {
-      return false;
-   }
-#else
-   return false;
-#endif
-}
-
-//! @return true if finger is enrolled
-bool TouchID::isTouchIdEnrolled()
-{
-#if XC_COMPILER_SUPPORT(TOUCH_ID)
-   @try {
-      LAContext *context = [[LAContext alloc] init];
-
-      LAPolicy policyCode = LAPolicyDeviceOwnerAuthenticationWithBiometrics;
-      NSError *error;
-
-      bool canAuthenticate = [context canEvaluatePolicy:policyCode error:&error];
-      [context release];
-       //TODO: check if this is the correct error message
-       if (error && error.code == LAErrorBiometryNotEnrolled) {
-         debug("Touch ID available: %d (%ld / %s / %s)", canAuthenticate,
-               (long)error.code, error.description.UTF8String,
-               error.localizedDescription.UTF8String);
-      } else {
-          debug("Touch ID not available but enrolled");
-          canAuthenticate = true;
-      }
-       return canAuthenticate;
    } @catch (NSException *) {
       return false;
    }
