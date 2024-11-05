@@ -1686,10 +1686,8 @@ void BrowserService::handleDatabaseUnlockDialogFinished(bool accepted, DatabaseW
 {
     // User canceled the database open dialog
     if (dbWidget && !accepted && m_bringToFrontRequested) {
-        if (m_bringToFrontRequested) {
-            m_bringToFrontRequested = false;
-            hideWindow();
-        }
+        m_bringToFrontRequested = false;
+        hideWindow();
     }
 }
 
