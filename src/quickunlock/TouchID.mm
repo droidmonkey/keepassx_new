@@ -195,14 +195,14 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey, const b
 
     CFRelease(sacObject);
     CFRelease(attributes);
+    
+    // Cleanse the key information from the memory
+    Botan::secure_scrub_memory(randomKey.data(), randomKey.size());
+    Botan::secure_scrub_memory(randomIV.data(), randomIV.size());
 
     if (status != errSecSuccess) {
         return false;
     }
-
-    // Cleanse the key information from the memory
-    Botan::secure_scrub_memory(randomKey.data(), randomKey.size());
-    Botan::secure_scrub_memory(randomIV.data(), randomIV.size());
 
     // memorize which database the stored key is for
     m_encryptedMasterKeys.insert(dbUuid, encryptedMasterKey);
