@@ -1,0 +1,24 @@
+#compdef keepassxc
+
+_arguments -s \
+  '--help[Displays help on commandline options]' \
+  '--help-all[Displays help including Qt specific options]' \
+  '--version[Displays version information]' \
+  '--config[Specify path to a custom config file]:config:_files' \
+  '--localconfig[Specify path to a custom local config file]:localconfig:_files' \
+  '--lock[Lock all open databases]' \
+  '--keyfile[Specify the key file of the database]:keyfile:_files' \
+  '--pw-stdin[Read password of the database from stdin]' \
+  '--debug-info[Displays debugging information]' \
+  '--allow-screencapture[Allow screenshots and app recording (Windows/macOS)]' \
+  '--qmljsdebugger[Activate the QML/JS debugger with a specified port]:port:_values "port" "block"' \
+  '--platform[QPA plugin, see QGuiApplication documentation]:platformName:options' \
+  '--platformpluginpath[Path to the platform plugins]:path:_files' \
+  '--platformtheme[Specify the platform theme]:theme' \
+  '--plugin[Load additional plugin, can be specified multiple times]:plugin' \
+  '--qwindowgeometry[Specify window geometry for the main window]:geometry' \
+  '--qwindowicon[Default window icon]:icon:_files' \
+  '--qwindowtitle[Title of the first window]:title' \
+  '--reverse[Sets the application layout direction to Qt::RightToLeft (debugging helper)]' \
+  '--session[Restores the application from an earlier session]:session' \
+  '*:filename(s):_files -g "*.kdbx"'

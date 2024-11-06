@@ -1,0 +1,17 @@
+Quick Guide: Installing Zsh Completion Files
+
+1. Place completion files in one of these locations:
+- /usr/local/share/zsh/site-functions/
+- /usr/share/zsh/site-functions/
+- ~/.zsh/completion/
+
+2. To use a custom directory (e.g., ~/my_custom_completions) for completions:
+- Add to ~/.zshrc: fpath=(~/my_custom_completions $fpath)
+
+3. Ensure Zsh loads and uses your completions:
+- Add to ~/.zshrc: autoload -U compinit && compinit
+
+4. Apply changes:
+- Run: source ~/.zshrc or restart terminal
+
+Note: Check your completion files are chmod 644
