@@ -1,0 +1,17 @@
+#compdef keepassxc-cli clip
+
+_message -r "Usage: keepassxc-cli clip [options] database entry [timeout]"
+_message -r "Copy an entry's attribute to the clipboard."
+
+_arguments -s \
+  '(-q --quiet)'{-q,--quiet}'[Silence password prompt and other secondary outputs.]' \
+  '(-k --key-file)'{-k,--key-file}'[Key file of the database.]:path:_files' \
+  '--no-password[Deactivate password key for the database.]' \
+  '(-y --yubikey)'{-y,--yubikey}'[Yubikey slot and optional serial used to access the database (e.g., 1:7370001)]:slot[:serial]' \
+  '(-a --attribute)'{-a,--attribute}'[Copy the given attribute to the clipboard. Defaults to "password" if not specified.]:attr' \
+  '(-t --totp)'{-t,--totp}'[Copy the current TOTP to the clipboard (equivalent to "-a totp").]' \
+  '(-b --best-match)'{-b,--best-match}'[Must match only one entry, otherwise a list of possible matches is shown.]' \
+  '(-h --help)'{-h,--help}'[Display help information.]' \
+  '1:db:_files' \
+  '2:entry' \
+  '3:timeout'

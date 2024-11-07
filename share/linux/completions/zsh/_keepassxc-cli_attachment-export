@@ -1,0 +1,16 @@
+#compdef keepassxc-cli attachment-export
+
+_message -r "Usage: keepassxc-cli attachment-export [options] database entry attachment-name export-file"
+_message -r "Export an attachment of an entry."
+
+_arguments -s \
+  '(-q --quiet)'{-q,--quiet}'[Silence password prompt and other secondary outputs.]' \
+  '(-k --key-file)'{-k,--key-file}'[Key file of the database.]:path:_files' \
+  '--no-password[Deactivate password key for the database.]' \
+  '(-y --yubikey)'{-y,--yubikey}'[Yubikey slot and optional serial used to access the database (e.g., 1:7370001)]:slot[:serial]' \
+  '--stdout[Output the attachment to stdout instead of a file.]' \
+  '(-h --help)'{-h,--help}'[Display help information.]' \
+  '1:db:_files' \
+  '2:entry' \
+  '3:attachment' \
+  '4:export:_files'

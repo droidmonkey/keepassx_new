@@ -1,0 +1,18 @@
+#compdef keepassxc-cli generate
+
+_message -r "Usage: keepassxc-cli generate [options]"
+_message -r "Generate a new random password."
+
+_arguments -s \
+  '(-q --quiet)'{-q,--quiet}'[Silence password prompt and other secondary outputs.]' \
+  '(-L --length)'{-L,--length}'[Length of the generated password.]:length' \
+  '(-l --lower)'{-l,--lower}'[Use lowercase characters in the generated password.]' \
+  '(-U --upper)'{-U,--upper}'[Use uppercase characters in the generated password.]' \
+  '(-n --numeric)'{-n,--numeric}'[Use numbers in the generated password.]' \
+  '(-s --special)'{-s,--special}'[Use special characters in the generated password.]' \
+  '(-e --extended)'{-e,--extended}'[Use extended ASCII characters in the generated password.]' \
+  '(-x --exclude)'{-x,--exclude}'[Exclude specific characters from the password.]:chars' \
+  '--exclude-similar[Exclude similar-looking characters from the password.]' \
+  '--every-group[Include characters from every selected group in the password.]' \
+  '(-c --custom)'{-c,--custom}'[Use a custom character set for the password.]:chars' \
+  '(-h --help)'{-h,--help}'[Display help information.]'

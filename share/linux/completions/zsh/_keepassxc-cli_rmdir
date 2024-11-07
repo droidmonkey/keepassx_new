@@ -1,0 +1,13 @@
+#compdef keepassxc-cli rmdir
+
+_message -r "Usage: keepassxc-cli rmdir [options] database group"
+_message -r "Remove a group from a database."
+
+_arguments -s \
+  '(-q --quiet)'{-q,--quiet}'[Silence password prompt and other secondary outputs.]' \
+  '(-k --key-file)'{-k,--key-file}'[Key file of the database.]:path:_files' \
+  '--no-password[Deactivate password key for the database.]' \
+  '(-y --yubikey)'{-y,--yubikey}'[Yubikey slot and optional serial used to access the database (e.g., 1:7370001)]:slot[:serial]' \
+  '(-h --help)'{-h,--help}'[Display help information.]' \
+  '1:db:_files' \
+  '2:group'

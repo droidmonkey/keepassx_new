@@ -1,0 +1,126 @@
+#compdef keepassxc-cli
+
+local curcontext="$curcontext" state line
+typeset -A opt_args
+
+_keepassxc-cli_commands() {
+  local -a commands
+  commands=(
+    'add:Add a new entry to the database.'
+    'analyze:Analyze passwords for weaknesses and problems.'
+    'attachment-export:Export an attachment of an entry.'
+    'attachment-import:Import an attachment to an entry.'
+    'attachment-rm:Remove an attachment from an entry.'
+    'clip:Copy an entry’s attribute to the clipboard.'
+    'close:Close the currently opened database.'
+    'db-create:Create a new database.'
+    'db-edit:Edit a database.'
+    'db-info:Show information about a database.'
+    'diceware:Generate a new random diceware passphrase.'
+    'edit:Edit an entry.'
+    'estimate:Estimate the entropy of a password.'
+    'export:Export the content of a database to standard output in a specified format.'
+    'generate:Generate a new random password.'
+    'help:Display help for a command.'
+    'import:Import the contents of an XML database.'
+    'ls:List entries in the database.'
+    'merge:Merge two databases.'
+    'mkdir:Add a new group to a database.'
+    'mv:Move an entry to a new group.'
+    'open:Open a database.'
+    'rm:Remove an entry from the database.'
+    'rmdir:Remove a group from the database.'
+    'search:Quickly find entries.'
+    'show:Show information about an entry.'
+  )
+  _describe -t commands 'keepassxc-cli command' commands
+}
+
+_arguments -C \
+  '1: :_keepassxc-cli_commands' \
+  '*:: :->args'
+
+case $state in
+  args)
+    case $line[1] in
+      add)
+        _keepassxc-cli_add
+        ;;
+      analyze)
+        _keepassxc-cli_analyze
+        ;;
+      attachment-export)
+        _keepassxc-cli_attachment-export
+        ;;
+      attachment-import)
+        _keepassxc-cli_attachment-import
+        ;;
+      attachment-rm)
+        _keepassxc-cli_attachment-rm
+        ;;
+      clip)
+        _keepassxc-cli_clip
+        ;;
+      close)
+        _message -r "Close the currently opened database."
+        ;;
+      db-create)
+        _keepassxc-cli_db-create
+        ;;
+      db-edit)
+        _keepassxc-cli_db-edit
+        ;;
+      db-info)
+        _keepassxc-cli_db-info
+        ;;
+      diceware)
+        _message -r "Generate a new random diceware passphrase."
+        ;;
+      edit)
+        _keepassxc-cli_edit
+        ;;
+      estimate)
+        _keepassxc-cli_estimate
+        ;;
+      export)
+        _keepassxc-cli_export
+        ;;
+      generate)
+        _keepassxc-cli_generate
+        ;;
+      help)
+        _message -r "Display command help."
+        ;;
+      import)
+        _keepassxc-cli_import
+        ;;
+      ls)
+        _keepassxc-cli_ls
+        ;;
+      merge)
+        _keepassxc-cli_merge
+        ;;
+      mkdir)
+        _keepassxc-cli_mkdir
+        ;;
+      mv)
+        _keepassxc-cli_mv
+        ;;
+      open)
+        _keepassxc-cli_open
+        ;;
+      rm)
+        _keepassxc-cli_rm
+        ;;
+      rmdir)
+        _keepassxc-cli_rmdir
+        ;;
+      search)
+        _keepassxc-cli_search
+        ;;
+      show)
+        _keepassxc-cli_show
+        ;;
+    esac
+    ;;
+esac

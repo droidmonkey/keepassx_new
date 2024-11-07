@@ -1,0 +1,14 @@
+#compdef keepassxc-cli attachment-rm
+
+_message -r "Usage: keepassxc-cli attachment-rm [options] database entry attachment-name"
+_message -r "Remove an attachment of an entry."
+
+_arguments -s \
+  '(-q --quiet)'{-q,--quiet}'[Silence password prompt and other secondary outputs.]' \
+  '(-k --key-file)'{-k,--key-file}'[Key file of the database.]:path:_files' \
+  '--no-password[Deactivate password key for the database.]' \
+  '(-y --yubikey)'{-y,--yubikey}'[Yubikey slot and optional serial used to access the database (e.g., 1:7370001)]:slot[:serial]' \
+  '(-h --help)'{-h,--help}'[Display help information.]' \
+  '1:db:_files' \
+  '2:entry' \
+  '3:attachment'

@@ -1,0 +1,10 @@
+#compdef keepassxc-cli estimate
+
+_message -r "Usage: keepassxc-cli estimate [options] [password]"
+_message -r "Estimate the entropy of a password."
+
+_arguments -s \
+  '(-q --quiet)'{-q,--quiet}'[Silence password prompt and other secondary outputs.]' \
+  '(-a --advanced)'{-a,--advanced}'[Perform advanced analysis on the password.]' \
+  '(-h --help)'{-h,--help}'[Display help information.]' \
+  '1:password'

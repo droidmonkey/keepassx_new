@@ -21,4 +21,4 @@ _arguments -s \
   '--qwindowtitle[Title of the first window]:title' \
   '--reverse[Sets the application layout direction to Qt::RightToLeft (debugging helper)]' \
   '--session[Restores the application from an earlier session]:session' \
-  '*:filename(s):_files -g "*.kdbx"'
+  '*:files:_files -g "*.kdbx"'

@@ -1,0 +1,15 @@
+#compdef keepassxc-cli ls
+
+_message -r "Usage: keepassxc-cli ls [options] database [group]"
+_message -r "List database entries."
+
+_arguments -s \
+  '(-q --quiet)'{-q,--quiet}'[Silence password prompt and other secondary outputs.]' \
+  '(-k --key-file)'{-k,--key-file}'[Key file of the database.]:path:_files' \
+  '--no-password[Deactivate password key for the database.]' \
+  '(-y --yubikey)'{-y,--yubikey}'[Yubikey slot and optional serial used to access the database (e.g., 1:7370001)]:slot[:serial]' \
+  '(-R --recursive)'{-R,--recursive}'[Recursively list the elements of the group.]' \
+  '(-f --flatten)'{-f,--flatten}'[Flatten the output to single lines.]' \
+  '(-h --help)'{-h,--help}'[Display help information.]' \
+  '1:db:_files' \
+  '2:group'
