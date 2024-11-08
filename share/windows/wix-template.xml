@@ -115,6 +115,14 @@
             <ComponentRef Id="DesktopShortcut" />
         </FeatureRef>
 
+        <!-- Detect VCRedist Version -->
+        <Property Id="VCREDISTINSTALLED">
+            <RegistrySearch Id="SearchVCRedist" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64" Name="Version" Type="raw" Win64="yes"/>
+        </Property>
+        <Condition Message="The installed version of Visual Studio Redistributable is too old. Please install the latest version from: https://aka.ms/vs/17/release/vc_redist.x64.exe">
+            <![CDATA[VCREDISTINSTALLED AND VCREDISTINSTALLED > "14.32.31332.0"]]>
+        </Condition>
+
         <!-- Action to launch application after installer exits -->
         <Property Id="WixShellExecTarget" Value="[#CM_FP_KeePassXC.exe]" />
         <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
