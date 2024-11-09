@@ -225,7 +225,9 @@ public:
         DateTimeUtcHour,
         DateTimeUtcMinute,
         DateTimeUtcSecond,
-        DbDir
+        DbDir,
+        Conversion,
+        Regex
     };
 
     static const int DefaultIconNumber;
@@ -244,6 +246,8 @@ public:
     QString resolvePlaceholder(const QString& str) const;
     QString resolveUrlPlaceholder(const QString& str, PlaceholderType placeholderType) const;
     QString resolveDateTimePlaceholder(PlaceholderType placeholderType) const;
+    QString resolveConversionPlaceholder(const QString& str, QString* error = nullptr) const;
+    QString resolveRegexPlaceholder(const QString& str, QString* error = nullptr) const;
     PlaceholderType placeholderType(const QString& placeholder) const;
     QString resolveUrl(const QString& url) const;
 
