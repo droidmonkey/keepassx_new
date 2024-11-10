@@ -679,6 +679,11 @@ MainWindow::MainWindow()
 
     restoreConfigState();
     updateMenuActionState();
+
+    // Check the current screen and hide the status bar if it is the WelcomeScreen
+    if (m_ui->stackedWidget->currentIndex() == WelcomeScreen) {
+        statusBar()->hide();
+    }
 }
 
 MainWindow::~MainWindow()
@@ -1159,8 +1164,10 @@ void MainWindow::switchToDatabases()
 {
     if (m_ui->tabWidget->currentIndex() == -1) {
         m_ui->stackedWidget->setCurrentIndex(WelcomeScreen);
+        statusBar()->hide();
     } else {
         m_ui->stackedWidget->setCurrentIndex(DatabaseTabScreen);
+        statusBar()->show();
     }
 }
 
@@ -1269,8 +1276,10 @@ void MainWindow::databaseTabChanged(int tabIndex)
 {
     if (tabIndex != -1 && m_ui->stackedWidget->currentIndex() == WelcomeScreen) {
         m_ui->stackedWidget->setCurrentIndex(DatabaseTabScreen);
+        statusBar()->show();
     } else if (tabIndex == -1 && m_ui->stackedWidget->currentIndex() == DatabaseTabScreen) {
         m_ui->stackedWidget->setCurrentIndex(WelcomeScreen);
+        statusBar()->hide();
     }
 
     m_actionMultiplexer.setCurrentObject(m_ui->tabWidget->currentDatabaseWidget());
