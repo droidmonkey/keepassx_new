@@ -84,7 +84,7 @@ There are three ways that KeePassXC can handle database files. This behavior is 
 
 3. *Direct-write saves* write directly to the existing database file. This is an unsafe operation since any interruption can leave your entire database inaccessible. We only recommend using this option when interfacing with Linux GVFS services (e.g. Google Cloud on Gnome) and other types of storage services that host a virtual drive system.
 
-In addition to these save options, KeePassXC can create a backup of your existing database file just prior to saving. This backup will be saved at the path specified in the *Backup destination* field. This path can be absolute or relative. The latter will be resolved according to the databases path. It is possible to specify a custom naming scheme with placeholders. See xref:UserGuide.adoc#_backup_path_placeholders[Backup Path Placeholders] for available placeholders and examples.
+In addition to these save options, KeePassXC can create a backup of your existing database file just prior to saving. This backup will be saved at the path specified in the *Backup destination* field. This path can be absolute or relative. The latter will be resolved according to the databases path. It is possible to specify a custom naming scheme with placeholders. See <<Backup Path Placeholders, Backup Path Placeholders>> for available placeholders and examples.
 
 image::save_options.png[]
 // end::advanced[]
@@ -180,7 +180,7 @@ image::clone_entry_dialog.png[,50%]
 .References in a cloned entry
 image::clone_entry_references.png[]
 
-4. You can create your own references using the xref:UserGuide.adoc#_entry_cross_reference[Entry Reference Syntax]
+4. You can create your own references using the <<Entry Cross-Reference, Entry Reference Syntax>>
 
 == Searching the Database
 KeePassXC provides an enhanced and granular search features the enables you to search for specific entries in the databases using the different modifiers, wild card characters, and logical operators.
@@ -266,7 +266,7 @@ image::edit_entry_colors.png[]
 === Icons
 You can select an icon to be displayed with each entry for easy identification. KeePassXC comes with a set of default icons that you can use or you can use your own custom icons. If you defined a URL with an entry, you can also download the favorite icon for that particular website.
 
-NOTE: To delete a custom icon, go to xref:UserGuide.adoc#_database_maintenance[Database Maintenance] where you can purge unused icons and delete one or more icons at a time.
+NOTE: To delete a custom icon, go to <<Database Maintenance>> where you can purge unused icons and delete one or more icons at a time.
 
 .Entry icon selection
 image::edit_entry_icons.png[]
