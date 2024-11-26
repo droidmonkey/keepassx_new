@@ -81,7 +81,7 @@ void AutoTypePlatformWayland::handleCreateSession(uint response, QVariantMap res
             selectDevicesOptions.insert("restore_token", m_restore_token);
         }
 
-        m_remote_desktop.call("SelectDevices", m_session_handle, selectDevicesOptions);
+        m_remote_desktop.call("SelectDevices", QVariant::fromValue(m_session_handle), selectDevicesOptions);
 
         QString startRequestHandle = generateToken();
         m_handlers.insert(startRequestHandle,
@@ -93,7 +93,7 @@ void AutoTypePlatformWayland::handleCreateSession(uint response, QVariantMap res
 
         // TODO: Pass window identifier here instead of empty string if we want the dialog to appear on top of the
         // application window, need to be able to get active window and handle from Wayland
-        m_remote_desktop.call("Start", m_session_handle, "", startOptions);
+        m_remote_desktop.call("Start", QVariant::fromValue(m_session_handle), "", startOptions);
     }
 }
 
@@ -127,15 +127,19 @@ void AutoTypePlatformWayland::portalResponse(uint response, QVariantMap results,
 AutoTypeAction::Result AutoTypePlatformWayland::sendKey(xkb_keysym_t keysym, QVector<xkb_keysym_t> modifiers)
 {
     for (auto modifier : modifiers) {
-        m_remote_desktop.call("NotifyKeyboardKeysym", m_session_handle, QVariantMap(), int(modifier), uint(1));
+        m_remote_desktop.call(
+            "NotifyKeyboardKeysym", QVariant::fromValue(m_session_handle), QVariantMap(), int(modifier), uint(1));
     }
 
-    m_remote_desktop.call("NotifyKeyboardKeysym", m_session_handle, QVariantMap(), int(keysym), uint(1));
+    m_remote_desktop.call(
+        "NotifyKeyboardKeysym", QVariant::fromValue(m_session_handle), QVariantMap(), int(keysym), uint(1));
 
-    m_remote_desktop.call("NotifyKeyboardKeysym", m_session_handle, QVariantMap(), int(keysym), uint(0));
+    m_remote_desktop.call(
+        "NotifyKeyboardKeysym", QVariant::fromValue(m_session_handle), QVariantMap(), int(keysym), uint(0));
 
     for (auto modifier : modifiers) {
-        m_remote_desktop.call("NotifyKeyboardKeysym", m_session_handle, QVariantMap(), int(modifier), uint(0));
+        m_remote_desktop.call(
+            "NotifyKeyboardKeysym", QVariant::fromValue(m_session_handle), QVariantMap(), int(modifier), uint(0));
     }
     return AutoTypeAction::Result::Ok();
 }
