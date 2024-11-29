@@ -20,6 +20,7 @@
 #include "TagModel.h"
 #include "core/Database.h"
 #include "core/Metadata.h"
+#include "gui/Application.h"
 #include "gui/Icons.h"
 #include "gui/MessageBox.h"
 
@@ -39,7 +40,11 @@ public:
         if (index.data(Qt::UserRole + 1).toBool()) {
             QRect bounds = option.rect;
             bounds.setY(bounds.bottom());
-            painter->fillRect(bounds, option.palette.mid());
+            if (kpxcApp->isDarkTheme()) {
+                painter->fillRect(bounds, option.palette.mid().color().lighter(185));
+            } else {
+                painter->fillRect(bounds, option.palette.mid());
+            }
         }
     }
 };
