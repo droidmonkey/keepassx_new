@@ -31,6 +31,10 @@ QPushButton:default:hover, QPushButton:checked:hover {
     background: #2E582E;
 }
 
+QSplitterHandle {
+    background-color: #56565A;
+}
+
 QToolTip {
     color: #BFBFBF;
     background-color: #2D532D;
