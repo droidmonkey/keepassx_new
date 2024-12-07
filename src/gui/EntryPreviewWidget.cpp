@@ -246,7 +246,7 @@ void EntryPreviewWidget::updateEntryHeaderLine()
 {
     Q_ASSERT(m_currentEntry);
     const QString title = m_currentEntry->resolveMultiplePlaceholders(m_currentEntry->title());
-    m_ui->entryTitleLabel->setRawText(hierarchy(m_currentEntry->group(), title));
+    m_ui->entryTitleLabel->setRawText(hierarchy(m_currentEntry->group(), title.toHtmlEscaped()));
     m_ui->entryIcon->setPixmap(Icons::entryIconPixmap(m_currentEntry, IconSize::Large));
 }
 
@@ -306,7 +306,7 @@ void EntryPreviewWidget::setPasswordVisible(bool state)
             m_ui->entryPasswordLabel->setText(html);
         } else {
             // No color
-            m_ui->entryPasswordLabel->setText(password);
+            m_ui->entryPasswordLabel->setText(password.toHtmlEscaped());
         }
     } else if (password.isEmpty() && !config()->get(Config::Security_PasswordEmptyPlaceholder).toBool()) {
         m_ui->entryPasswordLabel->setText("");
@@ -388,7 +388,7 @@ void EntryPreviewWidget::updateEntryGeneralTab()
         m_ui->entryNotesTextEdit->setFont(Font::defaultFont());
     }
 
-    m_ui->entryUrlLabel->setRawText(m_currentEntry->displayUrl());
+    m_ui->entryUrlLabel->setRawText(m_currentEntry->displayUrl().toHtmlEscaped());
     const QString url = m_currentEntry->url();
     if (!url.isEmpty()) {
         // URL is well formed and can be opened in a browser
