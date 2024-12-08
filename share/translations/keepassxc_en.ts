@@ -6218,6 +6218,10 @@ Expect some bugs and minor issues, this version is meant for testing purposes.</
         <source>Toggle Show Group Panel</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Password Generator</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ManageDatabase</name>

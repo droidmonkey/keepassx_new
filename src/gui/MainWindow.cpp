@@ -1033,26 +1033,21 @@ void MainWindow::updateWindowTitle()
 
     if (stackedWidgetIndex == DatabaseTabScreen && tabWidgetIndex != -1) {
         customWindowTitlePart = m_ui->tabWidget->tabName(tabWidgetIndex);
-        if (isModified) {
-            // remove asterisk '*' from title
+        if (isModified && customWindowTitlePart.endsWith("*")) {
             customWindowTitlePart.remove(customWindowTitlePart.size() - 1, 1);
         }
         m_ui->actionDatabaseSave->setEnabled(m_ui->tabWidget->canSave(tabWidgetIndex));
-    } else if (stackedWidgetIndex == 1) {
+    } else if (stackedWidgetIndex == StackedWidgetIndex::SettingsScreen) {
         customWindowTitlePart = tr("Settings");
+    } else if (stackedWidgetIndex == StackedWidgetIndex::PasswordGeneratorScreen) {
+        customWindowTitlePart = tr("Password Generator");
     }
 
     QString windowTitle;
     if (customWindowTitlePart.isEmpty()) {
-        windowTitle = BaseWindowTitle;
+        windowTitle = QString("%1[*]").arg(BaseWindowTitle);
     } else {
         windowTitle = QString("%1[*] - %2").arg(customWindowTitlePart, BaseWindowTitle);
-    }
-
-    if (customWindowTitlePart.isEmpty() || stackedWidgetIndex == 1) {
-        setWindowFilePath("");
-    } else {
-        setWindowFilePath(m_ui->tabWidget->databaseWidgetFromIndex(tabWidgetIndex)->database()->filePath());
     }
 
     setWindowTitle(windowTitle);
