@@ -5888,6 +5888,10 @@ We recommend you use the AppImage available on our downloads page.</source>
         <source>Toggle Show Group Panel</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Password Generator</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ManageDatabase</name>
