@@ -1029,7 +1029,7 @@ namespace Phantom
         // Expected time (release): 5usecs for regular-sized arrows
         Q_NEVER_INLINE void drawArrow(QPainter* p, QRect rect, Qt::ArrowType arrowDirection, const QBrush& brush)
         {
-            const qreal ArrowBaseRatio = 0.9;
+            const qreal ArrowBaseRatio = 1.0;
             qreal irx, iry, irw, irh;
             QRectF(rect).getRect(&irx, &iry, &irw, &irh);
             if (irw < 1.0 || irh < 1.0)
