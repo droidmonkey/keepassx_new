@@ -2393,9 +2393,10 @@ bool DatabaseWidget::performSave(QString& errorMessage, const QString& fileName)
     QPointer<QWidget> focusWidget(qApp->focusWidget());
 
     // Lock out interactions
-    m_entryView->setDisabled(true);
-    m_groupView->setDisabled(true);
-    m_tagView->setDisabled(true);
+    QWidget *mainWindow = this->window();
+    if (mainWindow) {
+        mainWindow->setDisabled(true);
+    }
     QApplication::processEvents();
 
     Database::SaveAction saveAction = Database::Atomic;
@@ -2435,9 +2436,9 @@ bool DatabaseWidget::performSave(QString& errorMessage, const QString& fileName)
     }
 
     // Return control
-    m_entryView->setDisabled(false);
-    m_groupView->setDisabled(false);
-    m_tagView->setDisabled(false);
+    if (mainWindow) {
+        mainWindow->setDisabled(false);
+    }
 
     if (focusWidget && focusWidget->isVisible()) {
         focusWidget->setFocus();
