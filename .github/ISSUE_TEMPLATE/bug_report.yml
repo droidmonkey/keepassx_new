@@ -20,7 +20,8 @@ body:
       description: |
         Provide an overview of the problem, include any information that may help us triage this issue.
         Provide screenshots if possible, but do NOT show sensitive data (use View -> Allow Screen Capture).
-      required: true
+      validations:
+        required: true
 
   - type: textarea
     id: steps
@@ -31,7 +32,8 @@ body:
         1. 
         2. 
         3. 
-      required: true
+      validations:
+        required: true
 
   - type: textarea
     id: expected_vs_actual
