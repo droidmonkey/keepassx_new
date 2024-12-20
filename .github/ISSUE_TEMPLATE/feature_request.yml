@@ -18,8 +18,8 @@ body:
       description: |
         Provide an overview of the feature you are interested in adding.
         Provide screenshots if possible, but do NOT show sensitive data (use View -> Allow Screen Capture).
-      validations:
-        required: true
+    validations:
+      required: true
 
   - type: textarea
     id: example
