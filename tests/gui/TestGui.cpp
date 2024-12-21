@@ -2421,7 +2421,7 @@ void TestGui::addCannedEntries()
     QTest::mouseClick(entryNewWidget, Qt::LeftButton);
     QTest::keyClicks(titleEdit, "test");
     auto* editEntryWidgetTagsEdit = editEntryWidget->findChild<TagsEdit*>("tagsList");
-    editEntryWidgetTagsEdit->tags(QStringList() << "testTag");
+    editEntryWidgetTagsEdit->setTags({"testTag"});
     auto* editEntryWidgetButtonBox = editEntryWidget->findChild<QDialogButtonBox*>("buttonBox");
     QTest::mouseClick(editEntryWidgetButtonBox->button(QDialogButtonBox::Ok), Qt::LeftButton);
 

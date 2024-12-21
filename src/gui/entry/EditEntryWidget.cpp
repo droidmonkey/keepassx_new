@@ -948,8 +948,8 @@ void EditEntryWidget::setForms(Entry* entry, bool restore)
     m_mainUi->usernameComboBox->lineEdit()->setReadOnly(m_history);
     m_mainUi->urlEdit->setReadOnly(m_history);
     m_mainUi->passwordEdit->setReadOnly(m_history);
-    m_mainUi->tagsList->tags(entry->tagList());
-    m_mainUi->tagsList->completion(m_db->tagList());
+    m_mainUi->tagsList->setTags(entry->tagList());
+    m_mainUi->tagsList->setCompletion(m_db->tagList());
     m_mainUi->expireCheck->setEnabled(!m_history);
     m_mainUi->expireDatePicker->setReadOnly(m_history);
     m_mainUi->revealNotesButton->setIcon(icons()->onOffIcon("password-show", false));
