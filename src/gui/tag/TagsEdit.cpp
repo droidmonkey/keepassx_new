@@ -339,7 +339,8 @@ struct TagsEdit::Impl
     }
 
     void insertText(const QString& text) {
-        currentText().insert(cursor, text);
+        Q_ASSERT(tags.editingIndex() != tags.end());
+        tags.editingIndex()->text.insert(cursor, text);
         moveCursor(cursor + text.size(), false);
     }
 
@@ -368,7 +369,7 @@ struct TagsEdit::Impl
     void setCurrentText(const QString& text)
     {
         Q_ASSERT(tags.editingIndex() != tags.end());
-        currentText() = text;
+        tags.editingIndex()->text = text;
         moveCursor(currentText().length(), false);
         updateDisplayText();
         calcRectsAndUpdateScrollRanges();
@@ -391,7 +392,7 @@ struct TagsEdit::Impl
     // and ensures Invariant-1.
     void editNewTag(const iterator& i)
     {
-        currentText() = currentText().trimmed();
+        tags.editingIndex()->text = currentText().trimmed();
         auto inserted_at = tags.insert(i, Tag());
         setEditingIndex(inserted_at);
         moveCursor(0, false);
@@ -419,7 +420,7 @@ struct TagsEdit::Impl
     void removeSelection()
     {
         cursor = select_start;
-        currentText().remove(cursor, select_size);
+        tags.editingIndex()->text.remove(cursor, select_size);
         deselectAll();
     }
 
@@ -428,7 +429,7 @@ struct TagsEdit::Impl
         if (hasSelection()) {
             removeSelection();
         } else {
-            currentText().remove(--cursor, 1);
+            tags.editingIndex()->text.remove(--cursor, 1);
         }
     }
 
@@ -618,7 +619,6 @@ private:
     int select_start;
     int select_size;
     bool cross_deleter;
-    int hscroll{0};
     QTextLayout text_layout;
 
 public:
@@ -641,11 +641,8 @@ public:
                 const auto r = currentRect();
                 const auto txt_p = r.topLeft() + QPoint(TAG_INNER.left(), ((r.height() - fontHeight) / 2));
 
-                // Nothing to draw. Don't draw anything to avoid adding text margins.
-                if (!it->isEmpty()) {
-                    // draw not terminated tag
-                    text_layout.draw(&p, txt_p - scrollOffsets, formatting());
-                }
+                // draw not terminated tag
+                text_layout.draw(&p, txt_p - scrollOffsets, formatting());
 
                 // draw cursor
                 if (drawCursor) {
@@ -663,19 +660,8 @@ TagsEdit::TagsEdit(QWidget* parent)
     , impl(new Impl(this))
     , completer(new QCompleter)
 {
-    QSizePolicy size_policy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-    size_policy.setHeightForWidth(true);
-    setSizePolicy(size_policy);
-
-    setFocusPolicy(Qt::StrongFocus);
-    viewport()->setCursor(Qt::IBeamCursor);
-    setAttribute(Qt::WA_InputMethodEnabled, true);
-    setMouseTracking(true);
-
+    setReadOnly(false);
     setupCompleter();
-    setCursorVisible(hasFocus());
-    impl->updateDisplayText();
-
     viewport()->setContentsMargins(TAG_H_SPACING, TAG_V_SPACING, TAG_H_SPACING, TAG_V_SPACING);
 }
 
@@ -694,6 +680,7 @@ void TagsEdit::setReadOnly(bool readOnly)
         setCursor(Qt::IBeamCursor);
         setAttribute(Qt::WA_InputMethodEnabled, true);
     }
+    setMouseTracking(!m_readOnly);
     impl->setReadOnly(m_readOnly);
 }
 
@@ -837,24 +824,20 @@ void TagsEdit::mousePressEvent(QMouseEvent* event)
     }
 }
 
-QSize TagsEdit::sizeHint() const
+QSize TagsEdit::viewportSizeHint() const
 {
-    return minimumSizeHint();
+    return impl->updateTagRenderStates({0, 0, width(), 0}).size();
 }
 
-QSize TagsEdit::minimumSizeHint() const
+bool TagsEdit::hasHeightForWidth() const
 {
-    ensurePolished();
-    QFontMetrics fm = fontMetrics();
-    QRect rect(0, 0, fm.maxWidth() + TAG_CROSS_PADDING + TAG_CROSS_WIDTH, fm.height() + fm.leading());
-    rect += TAG_INNER + contentsMargins() + viewport()->contentsMargins() + viewportMargins();
-    return rect.size();
+    return true;
 }
 
 int TagsEdit::heightForWidth(int w) const
 {
     const auto content_width = w;
-    QRect contents_rect(0, 0, content_width, 100);
+    QRect contents_rect(0, 0, content_width, 32);
     contents_rect -= contentsMargins() + viewport()->contentsMargins() + viewportMargins();
     contents_rect = impl->updateTagRenderStates(contents_rect);
     contents_rect += contentsMargins() + viewport()->contentsMargins() + viewportMargins();

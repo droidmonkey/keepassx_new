@@ -37,8 +37,7 @@ public:
     explicit TagsEdit(QWidget* parent = nullptr);
     ~TagsEdit() override;
 
-    QSize sizeHint() const override;
-    QSize minimumSizeHint() const override;
+    bool hasHeightForWidth() const override;
     int heightForWidth(int w) const override;
 
     void setReadOnly(bool readOnly);
@@ -60,6 +59,7 @@ protected:
     void keyPressEvent(QKeyEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void hideEvent(QHideEvent* event) override;
+    QSize viewportSizeHint() const override;
 
 private:
     bool isAcceptableInput(QKeyEvent const* event) const;
