@@ -2213,17 +2213,18 @@ void DatabaseWidget::reloadDatabaseFile(bool triggeredBySave)
     if (triggeredBySave || m_db->isModified() || m_db->hasNonDataChanges()) {
         // Ask how to proceed
         auto prefix = triggeredBySave ? tr("Cannot save because the") : tr("The");
-        auto result = MessageBox::question(
-            this,
-            tr("Reload database"),
-            QString("%1 %2.\n%3\n\n%4.\n%5.\n%6.").arg(
-                prefix, tr("database file \"%1\" was modified externally").arg(displayFileName()),
-                tr("How to proceed with your unsaved changes?"),
-                tr("Merge all changes together"),
-                tr("Discard your changes"),
-                tr("Ignore the changes in the file on disk")),
-            MessageBox::Merge | MessageBox::Discard | MessageBox::Ignore | MessageBox::Cancel,
-            MessageBox::Merge);
+        auto result =
+            MessageBox::question(this,
+                                 tr("Reload database"),
+                                 QString("%1 %2.\n%3\n\n%4.\n%5.\n%6.")
+                                     .arg(prefix,
+                                          tr("database file \"%1\" was modified externally").arg(displayFileName()),
+                                          tr("How to proceed with your unsaved changes?"),
+                                          tr("Merge all changes together"),
+                                          tr("Discard your changes"),
+                                          tr("Ignore the changes in the file on disk")),
+                                 MessageBox::Merge | MessageBox::Discard | MessageBox::Ignore | MessageBox::Cancel,
+                                 MessageBox::Merge);
 
         if (result == MessageBox::Cancel) {
             reloadAbort();
@@ -2249,15 +2250,14 @@ void DatabaseWidget::reloadDatabaseFile(bool triggeredBySave)
     // the user needs to provide credentials
     auto dbWidget = new DatabaseWidget(std::move(db));
     auto openDialog = new DatabaseOpenDialog(this);
-    QObject::connect(openDialog, &QObject::destroyed, [=](QObject*) { dbWidget->deleteLater(); });
-    QObject::connect(
-        openDialog, &DatabaseOpenDialog::dialogFinished, this, [=](bool accepted, DatabaseWidget* dbWidget) {
-            if (accepted) {
-                reloadContinue(openDialog->database(), merge);
-            } else {
-                reloadAbort();
-            }
-        });
+    connect(openDialog, &QObject::destroyed, [=](QObject*) { dbWidget->deleteLater(); });
+    connect(openDialog, &DatabaseOpenDialog::dialogFinished, this, [=](bool accepted, DatabaseWidget*) {
+        if (accepted) {
+            reloadContinue(openDialog->database(), merge);
+        } else {
+            reloadAbort();
+        }
+    });
     openDialog->setAttribute(Qt::WA_DeleteOnClose); // free the memory on close
     openDialog->addDatabaseTab(dbWidget);
     openDialog->setActiveDatabaseTab(dbWidget);

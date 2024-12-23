@@ -2805,6 +2805,18 @@ Disable safe saves and try again?</source>
         <source>Unlock to reload</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Cannot save because the</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>database file &quot;%1&quot; was modified externally</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>EditEntryWidget</name>
