@@ -38,9 +38,7 @@ public:
                         const QSharedPointer<const Database>& db,
                         bool sorted = true,
                         bool ascending = true);
-    QString exportDatabase(const QSharedPointer<const Database>& db,
-                           bool sorted = true,
-                           bool ascending = true);
+    QString exportDatabase(const QSharedPointer<const Database>& db, bool sorted = true, bool ascending = true);
     QString errorString() const;
 
     virtual ~HtmlExporter() = default;
@@ -50,10 +48,7 @@ protected:
     virtual QString entryIconToHtml(const Entry* entry);
 
 private:
-    QString exportGroup(const Group& group,
-                        QString path = QString(),
-                        bool sorted = true,
-                        bool ascending = true);
+    QString exportGroup(const Group& group, QString path = QString(), bool sorted = true, bool ascending = true);
     QString exportHeader(const QSharedPointer<const Database>& db);
     QString exportFooter();
 

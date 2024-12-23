@@ -37,10 +37,12 @@ namespace
     }
 } // namespace
 
-QString HtmlGuiExporter::groupIconToHtml(const Group* group) {
+QString HtmlGuiExporter::groupIconToHtml(const Group* group)
+{
     return PixmapToHTML(Icons::groupIconPixmap(group, IconSize::Medium));
 }
 
-QString HtmlGuiExporter::entryIconToHtml(const Entry* entry) {
+QString HtmlGuiExporter::entryIconToHtml(const Entry* entry)
+{
     return PixmapToHTML(Icons::entryIconPixmap(entry, IconSize::Medium));
 }

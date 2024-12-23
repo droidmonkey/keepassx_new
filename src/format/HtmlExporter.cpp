@@ -112,11 +112,13 @@ QString HtmlExporter::errorString() const
     return m_error;
 }
 
-QString HtmlExporter::groupIconToHtml(const Group* /* group */) {
+QString HtmlExporter::groupIconToHtml(const Group* /* group */)
+{
     return "";
 }
 
-QString HtmlExporter::entryIconToHtml(const Entry* /* entry */) {
+QString HtmlExporter::entryIconToHtml(const Entry* /* entry */)
+{
     return "";
 }
 
@@ -145,9 +147,7 @@ bool HtmlExporter::exportDatabase(QIODevice* device,
     return true;
 }
 
-QString HtmlExporter::exportDatabase(const QSharedPointer<const Database>& db,
-                                     bool sorted,
-                                     bool ascending)
+QString HtmlExporter::exportDatabase(const QSharedPointer<const Database>& db, bool sorted, bool ascending)
 {
     QString response;
 
@@ -234,9 +234,9 @@ QString HtmlExporter::exportGroup(const Group& group, QString path, bool sorted,
     if (!group.entries().empty() || !notes.isEmpty()) {
         // Header line
         auto header = QString("<hr><h2>");
-        auto group_icon = this->groupIconToHtml(&group);
-        if (!group_icon.isEmpty()) {
-            header.append(group_icon);
+        auto groupIcon = this->groupIconToHtml(&group);
+        if (!groupIcon.isEmpty()) {
+            header.append(groupIcon);
             header.append("&nbsp;");
         }
         header.append(path);
@@ -264,7 +264,7 @@ QString HtmlExporter::exportGroup(const Group& group, QString path, bool sorted,
         });
     }
 
-    // Output the entries in this group
+    // Append to the output the entries in this group
     for (const auto* entry : entries) {
         auto formatted_entry = formatEntry(*entry);
 
@@ -274,9 +274,9 @@ QString HtmlExporter::exportGroup(const Group& group, QString path, bool sorted,
         // Output it into our table. First the left side with
         // icon and entry title ...
         table += "<tr>";
-        auto entry_icon = this->entryIconToHtml(entry);
-        if (!entry_icon.isEmpty()) {
-            table += "<td width=\"1%\">" + entry_icon + "</td>";
+        auto entryIcon = this->entryIconToHtml(entry);
+        if (!entryIcon.isEmpty()) {
+            table += "<td width=\"1%\">" + entryIcon + "</td>";
         }
         auto caption = "<caption>" + entry->title().toHtmlEscaped() + "</caption>";
 
@@ -298,7 +298,7 @@ QString HtmlExporter::exportGroup(const Group& group, QString path, bool sorted,
         });
     }
 
-    // Recursively output the child groups
+    // Recursively append to the output the child groups
     for (const auto* child : children) {
         if (child) {
             response.append(exportGroup(*child, path, sorted, ascending));

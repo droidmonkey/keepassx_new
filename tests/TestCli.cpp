@@ -1318,11 +1318,11 @@ void TestCli::testExport()
     QVERIFY(htmlHeader.contains(QByteArray("<meta charset=\"UTF-8\"><title></title>")));
     QByteArray htmlBody = m_stdout->readAll();
     QVERIFY(htmlBody.contains(QByteArray("<h2>NewDatabase</h2>")));
-    QVERIFY(htmlBody.contains(QByteArray(
-        "<caption>Sample Entry</caption>"
-        "<tr><th>User name</th><td class=\"username\">User Name</td></tr>"
-        "<tr><th>Password</th><td class=\"password\">Password</td></tr>"
-        "<tr><th>URL</th><td class=\"url\"><a href=\"http://www.somesite.com/\">http://www.somesite.com/</a></td></tr>")));
+    QVERIFY(htmlBody.contains(QByteArray("<caption>Sample Entry</caption>"
+                                         "<tr><th>User name</th><td class=\"username\">User Name</td></tr>"
+                                         "<tr><th>Password</th><td class=\"password\">Password</td></tr>"
+                                         "<tr><th>URL</th><td class=\"url\"><a "
+                                         "href=\"http://www.somesite.com/\">http://www.somesite.com/</a></td></tr>")));
     // test invalid format
     setInput("a");
     execCmd(exportCmd, {"export", "-f", "yaml", m_dbFile->fileName()});
