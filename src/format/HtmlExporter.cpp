@@ -17,28 +17,13 @@
 
 #include "HtmlExporter.h"
 
-#include <QBuffer>
 #include <QFile>
 
 #include "core/Group.h"
 #include "core/Metadata.h"
-#include "gui/Icons.h"
 
 namespace
 {
-    QString PixmapToHTML(const QPixmap& pixmap)
-    {
-        if (pixmap.isNull()) {
-            return "";
-        }
-
-        // Based on https://stackoverflow.com/a/6621278
-        QByteArray a;
-        QBuffer buffer(&a);
-        pixmap.save(&buffer, "PNG");
-        return QString("<img src=\"data:image/png;base64,") + a.toBase64() + "\"/>";
-    }
-
     QString formatEntry(const Entry& entry)
     {
         // Here we collect the table rows with this entry's data fields
@@ -127,15 +112,62 @@ QString HtmlExporter::errorString() const
     return m_error;
 }
 
+QString HtmlExporter::groupIconToHtml(const Group* /* group */) {
+    return "";
+}
+
+QString HtmlExporter::entryIconToHtml(const Entry* /* entry */) {
+    return "";
+}
+
 bool HtmlExporter::exportDatabase(QIODevice* device,
                                   const QSharedPointer<const Database>& db,
                                   bool sorted,
                                   bool ascending)
 {
+    if (device->write(exportHeader(db).toUtf8()) == -1) {
+        m_error = device->errorString();
+        return false;
+    }
+
+    if (db->rootGroup()) {
+        if (device->write(exportGroup(*db->rootGroup(), QString(), sorted, ascending).toUtf8()) == -1) {
+            m_error = device->errorString();
+            return false;
+        }
+    }
+
+    if (device->write(exportFooter().toUtf8()) == -1) {
+        m_error = device->errorString();
+        return false;
+    }
+
+    return true;
+}
+
+QString HtmlExporter::exportDatabase(const QSharedPointer<const Database>& db,
+                                     bool sorted,
+                                     bool ascending)
+{
+    QString response;
+
+    response = exportHeader(db);
+    if (!response.isEmpty()) {
+        if (db->rootGroup()) {
+            response.append(exportGroup(*db->rootGroup(), QString(), sorted, ascending));
+        }
+        response.append(exportFooter());
+    }
+
+    return response;
+}
+
+QString HtmlExporter::exportHeader(const QSharedPointer<const Database>& db)
+{
     const auto meta = db->metadata();
     if (!meta) {
         m_error = "Internal error: metadata is NULL";
-        return false;
+        return "";
     }
 
     const auto header = QString("<html>"
@@ -171,33 +203,23 @@ bool HtmlExporter::exportDatabase(QIODevice* device,
                                 + "</p>"
                                   "<p><code>"
                                 + db->filePath().toHtmlEscaped() + "</code></p>");
-    const auto footer = QString("</body>"
-                                "</html>");
-
-    if (device->write(header.toUtf8()) == -1) {
-        m_error = device->errorString();
-        return false;
-    }
-
-    if (db->rootGroup()) {
-        if (!writeGroup(*device, *db->rootGroup(), QString(), sorted, ascending)) {
-            return false;
-        }
-    }
-
-    if (device->write(footer.toUtf8()) == -1) {
-        m_error = device->errorString();
-        return false;
-    }
-
-    return true;
+    return header;
 }
 
-bool HtmlExporter::writeGroup(QIODevice& device, const Group& group, QString path, bool sorted, bool ascending)
+QString HtmlExporter::exportFooter()
 {
+    const auto footer = QString("</body>"
+                                "</html>");
+    return footer;
+}
+
+QString HtmlExporter::exportGroup(const Group& group, QString path, bool sorted, bool ascending)
+{
+    QString response = "";
+
     // Don't output the recycle bin
     if (&group == group.database()->metadata()->recycleBin()) {
-        return true;
+        return response;
     }
 
     if (!path.isEmpty()) {
@@ -212,8 +234,11 @@ bool HtmlExporter::writeGroup(QIODevice& device, const Group& group, QString pat
     if (!group.entries().empty() || !notes.isEmpty()) {
         // Header line
         auto header = QString("<hr><h2>");
-        header.append(PixmapToHTML(Icons::groupIconPixmap(&group, IconSize::Medium)));
-        header.append("&nbsp;");
+        auto group_icon = this->groupIconToHtml(&group);
+        if (!group_icon.isEmpty()) {
+            header.append(group_icon);
+            header.append("&nbsp;");
+        }
         header.append(path);
         header.append("</h2>\n");
 
@@ -224,11 +249,8 @@ bool HtmlExporter::writeGroup(QIODevice& device, const Group& group, QString pat
             header.append("</p>");
         }
 
-        // Output it
-        if (device.write(header.toUtf8()) == -1) {
-            m_error = device.errorString();
-            return false;
-        }
+        // Append it to the output
+        response.append(header);
     }
 
     // Begin the table for the entries in this group
@@ -252,7 +274,10 @@ bool HtmlExporter::writeGroup(QIODevice& device, const Group& group, QString pat
         // Output it into our table. First the left side with
         // icon and entry title ...
         table += "<tr>";
-        table += "<td width=\"1%\">" + PixmapToHTML(Icons::entryIconPixmap(entry, IconSize::Medium)) + "</td>";
+        auto entry_icon = this->entryIconToHtml(entry);
+        if (!entry_icon.isEmpty()) {
+            table += "<td width=\"1%\">" + entry_icon + "</td>";
+        }
         auto caption = "<caption>" + entry->title().toHtmlEscaped() + "</caption>";
 
         // ... then the right side with the data fields
@@ -261,12 +286,9 @@ bool HtmlExporter::writeGroup(QIODevice& device, const Group& group, QString pat
         table += "</tr>";
     }
 
-    // Output the complete table of this group
+    // Append the complete table of this group to the output
     table.append("</table>\n");
-    if (device.write(table.toUtf8()) == -1) {
-        m_error = device.errorString();
-        return false;
-    }
+    response.append(table);
 
     auto children = group.children();
     if (sorted) {
@@ -278,10 +300,10 @@ bool HtmlExporter::writeGroup(QIODevice& device, const Group& group, QString pat
 
     // Recursively output the child groups
     for (const auto* child : children) {
-        if (child && !writeGroup(device, *child, path, sorted, ascending)) {
-            return false;
+        if (child) {
+            response.append(exportGroup(*child, path, sorted, ascending));
         }
     }
 
-    return true;
+    return response;
 }

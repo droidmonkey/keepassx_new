@@ -19,7 +19,7 @@
 #include "ui_ExportDialog.h"
 
 #include "gui/FileDialog.h"
-#include "gui/HtmlExporter.h"
+#include "gui/HtmlGuiExporter.h"
 
 ExportDialog::ExportDialog(QSharedPointer<const Database> db, DatabaseTabWidget* parent)
     : QDialog(parent)
@@ -72,7 +72,7 @@ void ExportDialog::exportDatabase()
 
     FileDialog::saveLastDir("html", fileName, true);
 
-    HtmlExporter htmlExporter;
+    HtmlGuiExporter htmlExporter;
     if (!htmlExporter.exportDatabase(
             fileName, m_db, sortBy != ExportSortingStrategy::BY_DATABASE_ORDER, ascendingOrder)) {
         emit exportFailed(htmlExporter.errorString());
