@@ -27,7 +27,7 @@ KeePassXC has numerous features for novice and power users alike. This guide wil
  ** Auto-Type passwords into applications
  ** Browser integration with Google Chrome, Mozilla Firefox, Microsoft Edge, Chromium, Vivaldi, Brave, and Tor-Browser
  ** Entry icon download
- ** Import databases from CSV, 1Password, and KeePass1 formats
+ ** Import databases from CSV, 1Password, Bitwarden, and KeePass1 formats
 
 * Advanced Features
  ** Database reports (password health, HIBP, and statistics)
