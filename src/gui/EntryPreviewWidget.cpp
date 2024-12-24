@@ -246,7 +246,7 @@ void EntryPreviewWidget::updateEntryHeaderLine()
 {
     Q_ASSERT(m_currentEntry);
     const QString title = m_currentEntry->resolveMultiplePlaceholders(m_currentEntry->title());
-    m_ui->entryTitleLabel->setRawText(hierarchy(m_currentEntry->group(), title.toHtmlEscaped()));
+    m_ui->entryTitleLabel->setRawText(hierarchy(m_currentEntry->group(), title));
     m_ui->entryIcon->setPixmap(Icons::entryIconPixmap(m_currentEntry, IconSize::Large));
 }
 
@@ -303,10 +303,12 @@ void EntryPreviewWidget::setPasswordVisible(bool state)
                 html += "<span style=\"color: " + QString(color) + ";\">" + QString(c).toHtmlEscaped() + "</span>";
             }
             // clang-format on
+            m_ui->entryPasswordLabel->setTextFormat(Qt::RichText);
             m_ui->entryPasswordLabel->setText(html);
         } else {
             // No color
-            m_ui->entryPasswordLabel->setText(password.toHtmlEscaped());
+            m_ui->entryPasswordLabel->setTextFormat(Qt::PlainText);
+            m_ui->entryPasswordLabel->setText(password);
         }
     } else if (password.isEmpty() && !config()->get(Config::Security_PasswordEmptyPlaceholder).toBool()) {
         m_ui->entryPasswordLabel->setText("");

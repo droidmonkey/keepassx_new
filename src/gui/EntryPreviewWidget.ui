@@ -100,7 +100,7 @@
               <enum>Qt::ClickFocus</enum>
              </property>
              <property name="textFormat">
-              <enum>Qt::AutoText</enum>
+              <enum>Qt::PlainText</enum>
              </property>
              <property name="textInteractionFlags">
               <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
@@ -279,6 +279,9 @@
                     </property>
                     <item>
                      <widget class="QLabel" name="entryPasswordLabel">
+                      <property name="focusPolicy">
+                       <enum>Qt::ClickFocus</enum>
+                      </property>
                       <property name="text">
                        <string notr="true">TextLabel</string>
                       </property>
@@ -315,6 +318,9 @@
                 </property>
                 <property name="text">
                  <string notr="true">https://example.com</string>
+                </property>
+                <property name="textFormat">
+                 <enum>Qt::RichText</enum>
                 </property>
                 <property name="textInteractionFlags">
                  <set>Qt::TextBrowserInteraction</set>
@@ -503,6 +509,9 @@
                 </property>
                 <property name="text">
                  <string notr="true">expired</string>
+                </property>
+                <property name="textFormat">
+                 <enum>Qt::PlainText</enum>
                 </property>
                 <property name="textInteractionFlags">
                  <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
