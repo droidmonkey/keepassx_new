@@ -682,19 +682,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Invalid conversion type: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Invalid conversion syntax: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Invalid regular expression syntax %1
-%2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Invalid placeholder: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3814,6 +3801,19 @@ This may cause the affected plugins to malfunction.</source>
         <source>Passkey</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Invalid conversion type: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid conversion syntax: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid regular expression syntax %1
+%2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>EntryAttachments</name>
@@ -6177,6 +6177,14 @@ Expect some bugs and minor issues, this version is meant for testing purposes.</
     </message>
     <message>
         <source>Setup Remote Sync…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show Group Panel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggle Show Group Panel</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -9060,6 +9068,10 @@ This option is deprecated, use --set-key-file instead.</source>
             <numerusform></numerusform>
             <numerusform></numerusform>
         </translation>
+    </message>
+    <message>
+        <source>Passkey</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

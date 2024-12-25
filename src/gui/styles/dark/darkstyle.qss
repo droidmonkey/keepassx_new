@@ -1,12 +1,14 @@
 DatabaseWidget:!active, GroupView:!active,
+DatabaseWidget #groupView:!active, DatabaseWidget #tagView:!active,
 EntryPreviewWidget QLineEdit:!active, EntryPreviewWidget QTextEdit:!active,
-EntryPreviewWidget TagsEdit:!active {
+EntryPreviewWidget TagsEdit:!active, QStatusBar:!active {
     background-color: #404042;
 }
 
 DatabaseWidget:disabled, GroupView:disabled,
+DatabaseWidget #groupView:disabled, DatabaseWidget #tagView:disabled,
 EntryPreviewWidget QLineEdit:disabled, EntryPreviewWidget QTextEdit:disabled,
-EntryPreviewWidget TagsEdit:disabled {
+EntryPreviewWidget TagsEdit:disabled, QStatusBar:disabled {
     background-color: #424242;
 }
 
@@ -27,6 +29,10 @@ QPushButton:!default:hover {
 QPushButton:default:hover, QPushButton:checked:hover {
     /* Using slightly lighter shade from palette(highlight) */
     background: #2E582E;
+}
+
+QSplitterHandle {
+    background-color: #56565A;
 }
 
 QToolTip {

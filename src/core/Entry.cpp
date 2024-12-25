@@ -1030,9 +1030,9 @@ void Entry::updateModifiedSinceBegin()
 
 QString Entry::resolveMultiplePlaceholdersRecursive(const QString& str, int maxDepth) const
 {
-    static const QRegularExpression placeholderRegEx(R"(\{[^}]+\})");
+    static const QRegularExpression placeholderRegEx("({(?>[^{}]+?|(?1))+?})");
 
-    if (maxDepth <= 0) {
+    if (--maxDepth < 0) {
         qWarning("Maximum depth of replacement has been reached. Entry uuid: %s", uuid().toString().toLatin1().data());
         return str;
     }
@@ -1043,7 +1043,7 @@ QString Entry::resolveMultiplePlaceholdersRecursive(const QString& str, int maxD
     while (matches.hasNext()) {
         const auto match = matches.next();
         result += str.midRef(capEnd, match.capturedStart() - capEnd);
-        result += resolvePlaceholderRecursive(match.captured(), maxDepth - 1);
+        result += resolvePlaceholderRecursive(match.captured(), maxDepth);
         capEnd = match.capturedEnd();
     }
     result += str.rightRef(str.length() - capEnd);
@@ -1052,7 +1052,7 @@ QString Entry::resolveMultiplePlaceholdersRecursive(const QString& str, int maxD
 
 QString Entry::resolvePlaceholderRecursive(const QString& placeholder, int maxDepth) const
 {
-    if (maxDepth <= 0) {
+    if (--maxDepth < 0) {
         qWarning("Maximum depth of replacement has been reached. Entry uuid: %s", uuid().toString().toLatin1().data());
         return placeholder;
     }
@@ -1060,21 +1060,20 @@ QString Entry::resolvePlaceholderRecursive(const QString& placeholder, int maxDe
     const PlaceholderType typeOfPlaceholder = placeholderType(placeholder);
     switch (typeOfPlaceholder) {
     case PlaceholderType::NotPlaceholder:
-        return resolveMultiplePlaceholdersRecursive(placeholder, maxDepth - 1);
+        return resolveMultiplePlaceholdersRecursive(placeholder, maxDepth);
     case PlaceholderType::Unknown: {
-        return "{" % resolveMultiplePlaceholdersRecursive(placeholder.mid(1, placeholder.length() - 2), maxDepth - 1)
-               % "}";
+        return "{" % resolveMultiplePlaceholdersRecursive(placeholder.mid(1, placeholder.length() - 2), maxDepth) % "}";
     }
     case PlaceholderType::Title:
-        return resolveMultiplePlaceholdersRecursive(title(), maxDepth - 1);
+        return resolveMultiplePlaceholdersRecursive(title(), maxDepth);
     case PlaceholderType::UserName:
-        return resolveMultiplePlaceholdersRecursive(username(), maxDepth - 1);
+        return resolveMultiplePlaceholdersRecursive(username(), maxDepth);
     case PlaceholderType::Password:
-        return resolveMultiplePlaceholdersRecursive(password(), maxDepth - 1);
+        return resolveMultiplePlaceholdersRecursive(password(), maxDepth);
     case PlaceholderType::Notes:
-        return resolveMultiplePlaceholdersRecursive(notes(), maxDepth - 1);
+        return resolveMultiplePlaceholdersRecursive(notes(), maxDepth);
     case PlaceholderType::Url:
-        return resolveMultiplePlaceholdersRecursive(url(), maxDepth - 1);
+        return resolveMultiplePlaceholdersRecursive(url(), maxDepth);
     case PlaceholderType::DbDir: {
         QFileInfo fileInfo(database()->filePath());
         return fileInfo.absoluteDir().absolutePath();
@@ -1089,7 +1088,7 @@ QString Entry::resolvePlaceholderRecursive(const QString& placeholder, int maxDe
     case PlaceholderType::UrlUserInfo:
     case PlaceholderType::UrlUserName:
     case PlaceholderType::UrlPassword: {
-        const QString strUrl = resolveMultiplePlaceholdersRecursive(url(), maxDepth - 1);
+        const QString strUrl = resolveMultiplePlaceholdersRecursive(url(), maxDepth);
         return resolveUrlPlaceholder(strUrl, typeOfPlaceholder);
     }
     case PlaceholderType::Totp:
@@ -1097,10 +1096,11 @@ QString Entry::resolvePlaceholderRecursive(const QString& placeholder, int maxDe
         return totp();
     case PlaceholderType::CustomAttribute: {
         const QString key = placeholder.mid(3, placeholder.length() - 4); // {S:attr} => mid(3, len - 4)
-        return attributes()->hasKey(key) ? attributes()->value(key) : QString();
+        return attributes()->hasKey(key) ? resolveMultiplePlaceholdersRecursive(attributes()->value(key), maxDepth)
+                                         : QString();
     }
     case PlaceholderType::Reference:
-        return resolveReferencePlaceholderRecursive(placeholder, maxDepth);
+        return resolveReferencePlaceholderRecursive(placeholder, ++maxDepth);
     case PlaceholderType::DateTimeSimple:
     case PlaceholderType::DateTimeYear:
     case PlaceholderType::DateTimeMonth:
@@ -1115,7 +1115,11 @@ QString Entry::resolvePlaceholderRecursive(const QString& placeholder, int maxDe
     case PlaceholderType::DateTimeUtcHour:
     case PlaceholderType::DateTimeUtcMinute:
     case PlaceholderType::DateTimeUtcSecond:
-        return resolveMultiplePlaceholdersRecursive(resolveDateTimePlaceholder(typeOfPlaceholder), maxDepth - 1);
+        return resolveMultiplePlaceholdersRecursive(resolveDateTimePlaceholder(typeOfPlaceholder), maxDepth);
+    case PlaceholderType::Conversion:
+        return resolveMultiplePlaceholdersRecursive(resolveConversionPlaceholder(placeholder), maxDepth);
+    case PlaceholderType::Regex:
+        return resolveMultiplePlaceholdersRecursive(resolveRegexPlaceholder(placeholder), maxDepth);
     }
 
     return placeholder;
@@ -1164,9 +1168,93 @@ QString Entry::resolveDateTimePlaceholder(Entry::PlaceholderType placeholderType
     return {};
 }
 
+QString Entry::resolveConversionPlaceholder(const QString& str, QString* error) const
+{
+    if (error) {
+        error->clear();
+    }
+
+    // Extract the inner conversion from the placeholder
+    QRegularExpression conversionRegEx("^{?t-conv:(.*)}?$", QRegularExpression::CaseInsensitiveOption);
+    auto placeholder = conversionRegEx.match(str).captured(1);
+    if (!placeholder.isEmpty()) {
+        // Determine the separator character and split, include empty groups
+        auto sep = placeholder[0];
+        auto parts = placeholder.split(sep);
+        if (parts.size() >= 4) {
+            auto resolved = resolveMultiplePlaceholders(parts[1]);
+            auto type = parts[2].toLower();
+
+            if (type == "base64") {
+                resolved = resolved.toUtf8().toBase64();
+            } else if (type == "hex") {
+                resolved = resolved.toUtf8().toHex();
+            } else if (type == "uri") {
+                resolved = QUrl::toPercentEncoding(resolved.toUtf8());
+            } else if (type == "uri-dec") {
+                resolved = QUrl::fromPercentEncoding(resolved.toUtf8());
+            } else if (type.startsWith("u")) {
+                resolved = resolved.toUpper();
+            } else if (type.startsWith("l")) {
+                resolved = resolved.toLower();
+            } else {
+                if (error) {
+                    *error = tr("Invalid conversion type: %1").arg(type);
+                }
+                return {};
+            }
+            return resolved;
+        }
+    }
+
+    if (error) {
+        *error = tr("Invalid conversion syntax: %1").arg(str);
+    }
+    return {};
+}
+
+QString Entry::resolveRegexPlaceholder(const QString& str, QString* error) const
+{
+    if (error) {
+        error->clear();
+    }
+
+    // Extract the inner regex from the placeholder
+    QRegularExpression conversionRegEx("^{?t-replace-rx:(.*)}?$", QRegularExpression::CaseInsensitiveOption);
+    auto placeholder = conversionRegEx.match(str).captured(1);
+    if (!placeholder.isEmpty()) {
+        // Determine the separator character and split, include empty groups
+        auto sep = placeholder[0];
+        auto parts = placeholder.split(sep);
+        if (parts.size() >= 5) {
+            auto resolvedText = resolveMultiplePlaceholders(parts[1]);
+            auto resolvedSearch = resolveMultiplePlaceholders(parts[2]);
+            auto resolvedReplace = resolveMultiplePlaceholders(parts[3]);
+            // Replace $<num> with \\<num> to support Qt substitutions
+            resolvedReplace.replace(QRegularExpression(R"(\$(\d+))"), R"(\\1)");
+
+            auto searchRegex = QRegularExpression(resolvedSearch);
+            if (!searchRegex.isValid()) {
+                if (error) {
+                    *error =
+                        tr("Invalid regular expression syntax %1\n%2").arg(resolvedSearch, searchRegex.errorString());
+                }
+                return {};
+            }
+
+            return resolvedText.replace(searchRegex, resolvedReplace);
+        }
+    }
+
+    if (error) {
+        *error = tr("Invalid conversion syntax: %1").arg(str);
+    }
+    return {};
+}
+
 QString Entry::resolveReferencePlaceholderRecursive(const QString& placeholder, int maxDepth) const
 {
-    if (maxDepth <= 0) {
+    if (--maxDepth < 0) {
         qWarning("Maximum depth of replacement has been reached. Entry uuid: %s", uuid().toString().toLatin1().data());
         return placeholder;
     }
@@ -1194,7 +1282,7 @@ QString Entry::resolveReferencePlaceholderRecursive(const QString& placeholder, 
         // Referencing fields of other entries only works with standard fields, not with custom user strings.
         // If you want to reference a custom user string, you need to place a redirection in a standard field
         // of the entry with the custom string, using {S:<Name>}, and reference the standard field.
-        result = refEntry->resolveMultiplePlaceholdersRecursive(result, maxDepth - 1);
+        result = refEntry->resolveMultiplePlaceholdersRecursive(result, maxDepth);
     }
 
     return result;
@@ -1369,14 +1457,20 @@ QString Entry::resolveUrlPlaceholder(const QString& str, Entry::PlaceholderType 
 
 Entry::PlaceholderType Entry::placeholderType(const QString& placeholder) const
 {
-    if (!placeholder.startsWith(QLatin1Char('{')) || !placeholder.endsWith(QLatin1Char('}'))) {
+    if (!placeholder.startsWith(QStringLiteral("{")) || !placeholder.endsWith(QStringLiteral("}"))) {
         return PlaceholderType::NotPlaceholder;
     }
-    if (placeholder.startsWith(QLatin1Literal("{S:"))) {
+    if (placeholder.startsWith(QStringLiteral("{S:"))) {
         return PlaceholderType::CustomAttribute;
     }
-    if (placeholder.startsWith(QLatin1Literal("{REF:"))) {
+    if (placeholder.startsWith(QStringLiteral("{REF:"))) {
         return PlaceholderType::Reference;
+    }
+    if (placeholder.startsWith(QStringLiteral("{T-CONV:"), Qt::CaseInsensitive)) {
+        return PlaceholderType::Conversion;
+    }
+    if (placeholder.startsWith(QStringLiteral("{T-REPLACE-RX:"), Qt::CaseInsensitive)) {
+        return PlaceholderType::Regex;
     }
 
     static const QMap<QString, PlaceholderType> placeholders{

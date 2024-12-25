@@ -1,0 +1,49 @@
+{
+  "encrypted": false,
+  "folders": [],
+  "items": [
+    {
+      "passwordHistory": null,
+      "revisionDate": "2024-10-23T16:38:08.870Z",
+      "creationDate": "2024-10-23T16:38:08.606Z",
+      "deletedDate": null,
+      "id": "a8e579f0-98c2-4ac9-a126-b212011225f8",
+      "organizationId": null,
+      "folderId": null,
+      "type": 1,
+      "reprompt": 0,
+      "name": "webauthn.io",
+      "notes": null,
+      "favorite": false,
+      "login": {
+        "fido2Credentials": [
+          {
+            "credentialId": "a3e15f8b-27c1-42ae-90cf-a615ad87854f",
+            "keyType": "public-key",
+            "keyAlgorithm": "ECDSA",
+            "keyCurve": "P-256",
+            "keyValue": "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgmr4GQQjerojFuf0ZouOuUllMvAwxZSZAfB6gwDYcLiehRANCAAT0WR5zVSp6ieusvjkLkzaGc7fjGBmwpiuLPxR_d-ZjqMI9L2DKh-takp6wGt2x0n4jzr1KA352NZg0vjZX9CHh",
+            "rpId": "webauthn.io",
+            "userHandle": "aTFtdmFnOHYtS2dxVEJ0by1rSFpLWGg0enlTVC1iUVJReDZ5czJXa3c2aw",
+            "userName": "KPXC_BITWARDEN",
+            "counter": "0",
+            "rpName": "webauthn.io",
+            "userDisplayName": "KPXC_BITWARDEN",
+            "discoverable": "true",
+            "creationDate": "2024-10-23T16:38:08.617Z"
+          }
+        ],
+        "uris": [
+          {
+            "match": null,
+            "uri": "https://webauthn.io/"
+          }
+        ],
+        "username": "KPXC_BITWARDEN",
+        "password": null,
+        "totp": null
+      },
+      "collectionIds": null
+    }
+  ]
+}

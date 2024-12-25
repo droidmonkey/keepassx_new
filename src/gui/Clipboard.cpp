@@ -60,6 +60,8 @@ void Clipboard::setText(const QString& text, bool clear)
     mime->setData("x-kde-passwordManagerHint", QByteArrayLiteral("secret"));
 #elif defined(Q_OS_WIN)
     mime->setData("ExcludeClipboardContentFromMonitorProcessing", QByteArrayLiteral("1"));
+    mime->setData("CanIncludeInClipboardHistory", {4, '\0'});
+    mime->setData("CanUploadToCloudClipboard ", {4, '\0'});
 #endif
 
     if (clipboard->supportsSelection()) {

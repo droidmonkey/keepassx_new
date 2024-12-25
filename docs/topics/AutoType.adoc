@@ -37,7 +37,7 @@ TIP: You can use an asterisk (`\*`) to match any value (e.g., when a window titl
 .Auto-Type entry sequences
 image::autotype_entry_sequences.png[]
 
-2. _(Optional)_ Define a custom Auto-Type sequence for each window title match by selecting the _Use specific sequence for this association_ checkbox. Sequence action codes and field placeholders are detailed in the following table. Beyond the most important ones detailed below, there are additional action codes and placeholders available: xref:UserGuide.adoc#_auto_type_actions[Auto-Type Actions Reference] and xref:UserGuide.adoc#_entry_placeholders[Entry Placeholders Reference]. Action codes and placeholders are not case sensitive.
+2. _(Optional)_ Define a custom Auto-Type sequence for each window title match by selecting the _Use specific sequence for this association_ checkbox. Sequence action codes and field placeholders are detailed in the following table. Beyond the most important ones detailed below, there are additional action codes and placeholders available: <<Auto-Type Actions, Auto-Type Actions Reference>> and <<Entry Placeholders, Entry Placeholders Reference>>. Action codes and placeholders are not case sensitive.
 +
 [grid=rows, frame=none, width=90%]
 |===

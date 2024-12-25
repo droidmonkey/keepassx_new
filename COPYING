@@ -141,6 +141,7 @@ Copyright: 2022 KeePassXC Team <team@keepassxc.org>
 License: MIT
 
 Files: share/icons/application/scalable/actions/application-exit.svg
+       share/icons/application/scalable/actions/arrow-collapse-down.svg
        share/icons/application/scalable/actions/attributes-copy.svg
        share/icons/application/scalable/actions/auto-type.svg
        share/icons/application/scalable/actions/bitwarden.svg

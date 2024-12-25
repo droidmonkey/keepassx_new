@@ -1,0 +1,85 @@
+name: Pre-Release Bug Report
+description: Report an issue with pre-release code (e.g. snapshot builds).
+type: Bug
+labels: PRE-RELEASE BUG
+assignees: droidmonkey
+
+body:
+  - type: checkboxes
+    attributes:
+      label: Have you searched for an existing issue?
+      description: |
+        Use the issue search box to see if one already exists for the bug you encountered.
+        Also take a moment to review our pinned issues.
+      options:
+      - label: Yes, I tried searching and reviewed the pinned issues
+        required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Brief Summary
+      description: |
+        Provide an overview of the problem, include any information that may help us triage this issue.
+        Provide screenshots if possible, but do NOT show sensitive data (use View -> Allow Screen Capture).
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Provide a simple set of steps to reproduce this bug.
+      placeholder: |
+        1. 
+        2. 
+        3. 
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_vs_actual
+    attributes:
+      label: Expected Versus Actual Behavior
+      description: Tell us what you expected to happen and what actually happened.
+
+  - type: textarea
+    id: debug_info
+    attributes:
+      label: KeePassXC Debug Information
+      placeholder: "Paste the output of: Help -> About -> Debug Info"
+      render: Text
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      description: Select your operating system.
+      options:
+        - Windows
+        - Linux
+        - macOS
+        - Other (BSD, Haiku, etc)
+
+  - type: dropdown
+    id: desktop_env
+    attributes:
+      label: Linux Desktop Environment
+      description: If on Linux, please select your desktop environment.
+      options:
+        - Gnome
+        - KDE
+        - XFCE
+        - Mate / Cinnamon
+        - Sway
+        - i3
+        - Other
+
+  - type: dropdown
+    id: window_system
+    attributes:
+      label: Linux Windowing System
+      description: If on Linux, please select your windowing system.
+      options:
+        - X11
+        - Wayland

@@ -181,6 +181,8 @@ int main(int argc, char** argv)
 
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationVersion(KEEPASSXC_VERSION);
+    // Cleanup code pages after cli exits
+    QObject::connect(&app, &QCoreApplication::destroyed, &app, [] { Utils::resetTextStreams(); });
 
     Bootstrap::bootstrap(config()->get(Config::GUI_Language).toString());
     Utils::setDefaultTextStreams();
@@ -218,7 +220,9 @@ int main(int argc, char** argv)
             // Switch to parser.showVersion() when available (QT 5.4).
             out << KEEPASSXC_VERSION << Qt::endl;
             return EXIT_SUCCESS;
-        } else if (parser.isSet(debugInfoOption)) {
+        }
+
+        if (parser.isSet(debugInfoOption)) {
             QString debugInfo = Tools::debugInfo().append("\n").append(Crypto::debugInfo());
             out << debugInfo << Qt::endl;
             return EXIT_SUCCESS;

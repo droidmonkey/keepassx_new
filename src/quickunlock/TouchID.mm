@@ -88,12 +88,10 @@ void TouchID::reset()
     m_encryptedMasterKeys.clear();
 }
 
-/**
- * Generates a random AES 256bit key and uses it to encrypt the PasswordKey that
- * protects the database. The encrypted PasswordKey is kept in memory while the
- * AES key is stored in the macOS KeyChain protected by either TouchID or Apple Watch.
- */
-bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
+
+
+
+bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey, const bool ignoreTouchID)
 {
     if (passwordKey.isEmpty()) {
         debug("TouchID::setKey - illegal arguments");
@@ -131,22 +129,40 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
 
     // We need both runtime and compile time checks here to solve the following problems:
     // - Not all flags are available in all OS versions, so we have to check it at compile time
-    // - Requesting Biometry/TouchID when to fingerprint sensor is available will result in runtime error
+    // - Requesting Biometry/TouchID/DevicePassword when to fingerprint sensor is available will result in runtime error
     SecAccessControlCreateFlags accessControlFlags = 0;
-    if (isTouchIdAvailable()) {
 #if XC_COMPILER_SUPPORT(APPLE_BIOMETRY)
-       // Prefer the non-deprecated flag when available
-       accessControlFlags = kSecAccessControlBiometryCurrentSet;
-#elif XC_COMPILER_SUPPORT(TOUCH_ID)
-       accessControlFlags = kSecAccessControlTouchIDCurrentSet;
-#endif
+    // Needs a special check to work with SecItemAdd, when TouchID is not enrolled and the flag
+    // is set, the method call fails with an error. But we want to still set this flag if TouchID is
+    // enrolled but temporarily unavailable due to closed lid
+    //
+    // At least on a Hackintosh the enrolled-check does not work, there LAErrorBiometryNotAvailable gets returned instead of
+    // LAErrorBiometryNotEnrolled.
+    //
+    // Thats kinda unfortunate, because now you cannot know for sure if TouchID hardware is either temporarily unavailable or not present
+    // at all, because LAErrorBiometryNotAvailable is used for both cases.
+    //
+    // So to make quick unlock fallbacks possible on these machines you have to try to save the key a second time without this flag, if the
+    // first try fails with an error.
+    if (!ignoreTouchID) {
+        // Prefer the non-deprecated flag when available
+        accessControlFlags = kSecAccessControlBiometryCurrentSet;
     }
+#elif XC_COMPILER_SUPPORT(TOUCH_ID)
+    if (!ignoreTouchID) {
+        accessControlFlags = kSecAccessControlTouchIDCurrentSet;
+    }
+#endif
 
-   if (isWatchAvailable()) {
 #if XC_COMPILER_SUPPORT(WATCH_UNLOCK)
       accessControlFlags = accessControlFlags | kSecAccessControlOr | kSecAccessControlWatch;
 #endif
+
+#if XC_COMPILER_SUPPORT(TOUCH_ID)
+   if (isPasswordFallbackPossible()) {
+       accessControlFlags = accessControlFlags | kSecAccessControlOr | kSecAccessControlDevicePasscode;
    }
+#endif
 
    SecAccessControlRef sacObject = SecAccessControlCreateWithFlags(
        kCFAllocatorDefault, kSecAttrAccessibleWhenUnlockedThisDeviceOnly, accessControlFlags, &error);
@@ -179,19 +195,34 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
 
     CFRelease(sacObject);
     CFRelease(attributes);
+    
+    // Cleanse the key information from the memory
+    Botan::secure_scrub_memory(randomKey.data(), randomKey.size());
+    Botan::secure_scrub_memory(randomIV.data(), randomIV.size());
 
     if (status != errSecSuccess) {
         return false;
     }
 
-    // Cleanse the key information from the memory
-    Botan::secure_scrub_memory(randomKey.data(), randomKey.size());
-    Botan::secure_scrub_memory(randomIV.data(), randomIV.size());
-
     // memorize which database the stored key is for
     m_encryptedMasterKeys.insert(dbUuid, encryptedMasterKey);
     debug("TouchID::setKey - Success!");
     return true;
+}
+
+/**
+ * Generates a random AES 256bit key and uses it to encrypt the PasswordKey that
+ * protects the database. The encrypted PasswordKey is kept in memory while the
+ * AES key is stored in the macOS KeyChain protected by either TouchID or Apple Watch.
+ */
+bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
+{
+    if (!setKey(dbUuid,passwordKey, false)) {
+        debug("TouchID::setKey failed with error trying fallback method without TouchID flag");
+        return setKey(dbUuid, passwordKey, true);
+    } else {
+        return true;
+    }
 }
 
 /**
@@ -332,13 +363,40 @@ bool TouchID::isTouchIdAvailable()
 #endif
 }
 
+bool TouchID::isPasswordFallbackPossible()
+{
+#if XC_COMPILER_SUPPORT(TOUCH_ID)
+    @try {
+        LAContext *context = [[LAContext alloc] init];
+
+        LAPolicy policyCode = LAPolicyDeviceOwnerAuthentication;
+        NSError *error;
+
+        bool canAuthenticate = [context canEvaluatePolicy:policyCode error:&error];
+        [context release];
+        if (error) {
+            debug("Password fallback available: %d (%ld / %s / %s)", canAuthenticate,
+                  (long)error.code, error.description.UTF8String,
+                  error.localizedDescription.UTF8String);
+        } else {
+            debug("Password fallback available: %d", canAuthenticate);
+        }
+        return canAuthenticate;
+    } @catch (NSException *) {
+        return false;
+    }
+#else
+    return false;
+#endif
+}
+
 //! @return true if either TouchID or Apple Watch is available at the moment.
 bool TouchID::isAvailable() const
 {
    // note: we cannot cache the check results because the configuration
    // is dynamic in its nature. User can close the laptop lid or take off
    // the watch, thus making one (or both) of the authentication types unavailable.
-   return  isWatchAvailable() || isTouchIdAvailable();
+   return  isWatchAvailable() || isTouchIdAvailable() || isPasswordFallbackPossible();
 }
 
 /**

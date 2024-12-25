@@ -33,7 +33,9 @@ DatabaseWidgetStateSync::DatabaseWidgetStateSync(QObject* parent)
     m_listViewState = config()->get(Config::GUI_ListViewState).toByteArray();
     m_searchViewState = config()->get(Config::GUI_SearchViewState).toByteArray();
 
-    connect(qApp, &QCoreApplication::aboutToQuit, this, &DatabaseWidgetStateSync::sync);
+    m_syncTimer.setSingleShot(true);
+    m_syncTimer.setInterval(100);
+    connect(&m_syncTimer, &QTimer::timeout, this, &DatabaseWidgetStateSync::sync);
 }
 
 DatabaseWidgetStateSync::~DatabaseWidgetStateSync() = default;
@@ -43,6 +45,7 @@ DatabaseWidgetStateSync::~DatabaseWidgetStateSync() = default;
  */
 void DatabaseWidgetStateSync::sync()
 {
+    m_syncTimer.stop();
     config()->set(Config::GUI_SplitterState, intListToVariant(m_splitterSizes.value(Config::GUI_SplitterState)));
     config()->set(Config::GUI_PreviewSplitterState,
                   intListToVariant(m_splitterSizes.value(Config::GUI_PreviewSplitterState)));
@@ -56,79 +59,71 @@ void DatabaseWidgetStateSync::sync()
 void DatabaseWidgetStateSync::setActive(DatabaseWidget* dbWidget)
 {
     if (m_activeDbWidget) {
+        if (m_activeDbWidget->currentMode() != DatabaseWidget::Mode::LockedMode) {
+            // Update settings from previously active database if unlocked
+            updateAll();
+        }
         disconnect(m_activeDbWidget, nullptr, this, nullptr);
     }
 
     m_activeDbWidget = dbWidget;
 
     if (m_activeDbWidget) {
-        // Give the database widget a chance to render itself before restoring the state
-        QTimer::singleShot(0, this, [this] {
-            if (!m_activeDbWidget) {
-                return;
-            }
+        if (m_activeDbWidget->currentMode() != DatabaseWidget::Mode::LockedMode) {
+            // Immediately apply settings to active database if already unlocked
+            applySplitterSizes();
+            applyViewState();
+        }
 
-            m_blockUpdates = true;
-
-            m_activeDbWidget->setSplitterSizes(m_splitterSizes);
-
-            if (m_activeDbWidget->isSearchActive()) {
-                restoreSearchView();
-            } else {
-                restoreListView();
-            }
-
-            m_blockUpdates = false;
-        });
-
+        connect(m_activeDbWidget, SIGNAL(databaseAboutToUnlock()), SLOT(blockUpdates()));
+        connect(m_activeDbWidget, SIGNAL(databaseUnlocked()), SLOT(applySplitterSizes()));
+        connect(m_activeDbWidget, SIGNAL(databaseUnlocked()), SLOT(applyViewState()));
+        connect(m_activeDbWidget, &DatabaseWidget::databaseLocked, this, [this] { updateAll(true); });
         connect(m_activeDbWidget, SIGNAL(splitterSizesChanged()), SLOT(updateSplitterSizes()));
         connect(m_activeDbWidget, SIGNAL(entryViewStateChanged()), SLOT(updateViewState()));
-        connect(m_activeDbWidget, SIGNAL(listModeActivated()), SLOT(restoreListView()));
-        connect(m_activeDbWidget, SIGNAL(searchModeActivated()), SLOT(restoreSearchView()));
+        connect(m_activeDbWidget, SIGNAL(listModeActivated()), SLOT(applyViewState()));
+        connect(m_activeDbWidget, SIGNAL(searchModeActivated()), SLOT(applyViewState()));
         connect(m_activeDbWidget, SIGNAL(listModeAboutToActivate()), SLOT(blockUpdates()));
         connect(m_activeDbWidget, SIGNAL(searchModeAboutToActivate()), SLOT(blockUpdates()));
     }
+}
+
+void DatabaseWidgetStateSync::applySplitterSizes()
+{
+    if (!m_activeDbWidget) {
+        return;
+    }
+
+    m_blockUpdates = true;
+
+    m_activeDbWidget->setSplitterSizes(m_splitterSizes);
+
+    m_blockUpdates = false;
 }
 
 /**
  * Restore entry view list view state
  *
  * NOTE:
- * States of entry view 'Hide Usernames'/'Hide Passwords' settings are global,
- * i.e. they are the same for both list and search mode
- *
- * NOTE:
  * If m_listViewState is empty, the list view has been activated for the first
  * time after starting with a clean (or invalid) config.
  */
-void DatabaseWidgetStateSync::restoreListView()
+void DatabaseWidgetStateSync::applyViewState()
 {
-    if (!m_listViewState.isEmpty()) {
-        m_activeDbWidget->setEntryViewState(m_listViewState);
+    if (!m_activeDbWidget) {
+        return;
     }
 
-    m_blockUpdates = false;
-}
+    m_blockUpdates = true;
 
-/**
- * Restore entry view search view state
- *
- * NOTE:
- * States of entry view 'Hide Usernames'/'Hide Passwords' settings are global,
- * i.e. they are the same for both list and search mode
- *
- * NOTE:
- * If m_searchViewState is empty, the search view has been activated for the
- * first time after starting with a clean (or invalid) config. Thus, save the
- * current state. Without this, m_searchViewState would remain empty until
- * there is an actual view state change (e.g. column is resized)
- */
-void DatabaseWidgetStateSync::restoreSearchView()
-{
-    if (!m_searchViewState.isEmpty()) {
-        m_activeDbWidget->setEntryViewState(m_searchViewState);
+    if (m_activeDbWidget->isSearchActive()) {
+        if (!m_searchViewState.isEmpty()) {
+            m_activeDbWidget->setEntryViewState(m_searchViewState);
+        }
     } else {
-        m_searchViewState = m_activeDbWidget->entryViewState();
+        if (!m_listViewState.isEmpty()) {
+            m_activeDbWidget->setEntryViewState(m_listViewState);
+        }
     }
 
     m_blockUpdates = false;
@@ -139,19 +134,25 @@ void DatabaseWidgetStateSync::blockUpdates()
     m_blockUpdates = true;
 }
 
+void DatabaseWidgetStateSync::updateAll(bool forceSync)
+{
+    updateSplitterSizes();
+    updateViewState();
+    if (forceSync) {
+        sync();
+    }
+}
+
 void DatabaseWidgetStateSync::updateSplitterSizes()
 {
     if (!m_blockUpdates) {
         m_splitterSizes = m_activeDbWidget->splitterSizes();
+        m_syncTimer.start();
     }
 }
 
 /**
  * Update entry view list/search view state
- *
- * NOTE:
- * States of entry view 'Hide Usernames'/'Hide Passwords' settings are global,
- * i.e. they are the same for both list and search mode
  */
 void DatabaseWidgetStateSync::updateViewState()
 {
@@ -165,7 +166,7 @@ void DatabaseWidgetStateSync::updateViewState()
         m_listViewState = m_activeDbWidget->entryViewState();
     }
 
-    sync();
+    m_syncTimer.start();
 }
 
 QList<int> DatabaseWidgetStateSync::variantToIntList(const QVariant& variant)

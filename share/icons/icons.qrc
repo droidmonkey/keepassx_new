@@ -6,6 +6,7 @@
         <file>application/256x256/apps/keepassxc.png</file>
 
         <file>application/scalable/actions/application-exit.svg</file>
+        <file>application/scalable/actions/arrow-collapse-down.svg</file>
         <file>application/scalable/actions/attributes-copy.svg</file>
         <file>application/scalable/actions/auto-type.svg</file>
         <file>application/scalable/actions/bitwarden.svg</file>

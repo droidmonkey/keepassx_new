@@ -43,6 +43,11 @@ namespace Utils
     QTextStream STDIN;
     QTextStream DEVNULL;
 
+#ifdef Q_OS_WIN
+    UINT origCodePage;
+    UINT origOutputCodePage;
+#endif
+
     void setDefaultTextStreams()
     {
         auto fd = new QFile();
@@ -66,10 +71,21 @@ namespace Utils
         DEVNULL.setDevice(fd);
 
 #ifdef Q_OS_WIN
+        origCodePage = GetConsoleCP();
+        origOutputCodePage = GetConsoleOutputCP();
+
         // On Windows, we ask via keepassxc-cli.exe.manifest to use UTF-8,
         // but the console code-page isn't automatically changed to match.
         SetConsoleCP(GetACP());
         SetConsoleOutputCP(GetACP());
+#endif
+    }
+
+    void resetTextStreams()
+    {
+#ifdef Q_OS_WIN
+        SetConsoleCP(origCodePage);
+        SetConsoleOutputCP(origOutputCodePage);
 #endif
     }
 

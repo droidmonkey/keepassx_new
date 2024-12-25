@@ -71,16 +71,25 @@ void EditWidget::addPage(const QString& labelText, const QIcon& icon, QWidget* w
     m_ui->categoryList->addCategory(labelText, icon);
 }
 
-bool EditWidget::hasPage(QWidget* widget)
+bool EditWidget::hasPage(const QWidget* widget) const
 {
+    return pageIndex(widget) >= 0;
+}
+
+int EditWidget::pageIndex(const QWidget* widget) const
+{
+    if (!widget) {
+        return -1;
+    }
+
     for (int i = 0; i < m_ui->stackedWidget->count(); i++) {
         auto* scrollArea = qobject_cast<QScrollArea*>(m_ui->stackedWidget->widget(i));
         if (scrollArea && scrollArea->widget() == widget) {
-            return true;
+            return i;
         }
     }
 
-    return false;
+    return -1;
 }
 
 void EditWidget::setPageHidden(QWidget* widget, bool hidden)

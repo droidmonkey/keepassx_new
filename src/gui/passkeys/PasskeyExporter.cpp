@@ -21,6 +21,7 @@
 #include "browser/BrowserPasskeys.h"
 #include "browser/PasskeyUtils.h"
 #include "core/Entry.h"
+#include "core/EntryAttributes.h"
 #include "core/Tools.h"
 #include "gui/MessageBox.h"
 #include <QFile>
@@ -94,12 +95,12 @@ void PasskeyExporter::exportSelectedEntry(const Entry* entry, const QString& fol
     }
 
     QJsonObject passkeyObject;
-    passkeyObject["relyingParty"] = entry->attributes()->value(BrowserPasskeys::KPEX_PASSKEY_RELYING_PARTY);
+    passkeyObject["relyingParty"] = entry->attributes()->value(EntryAttributes::KPEX_PASSKEY_RELYING_PARTY);
     passkeyObject["url"] = entry->url();
     passkeyObject["username"] = passkeyUtils()->getUsernameFromEntry(entry);
     passkeyObject["credentialId"] = passkeyUtils()->getCredentialIdFromEntry(entry);
-    passkeyObject["userHandle"] = entry->attributes()->value(BrowserPasskeys::KPEX_PASSKEY_USER_HANDLE);
-    passkeyObject["privateKey"] = entry->attributes()->value(BrowserPasskeys::KPEX_PASSKEY_PRIVATE_KEY_PEM);
+    passkeyObject["userHandle"] = entry->attributes()->value(EntryAttributes::KPEX_PASSKEY_USER_HANDLE);
+    passkeyObject["privateKey"] = entry->attributes()->value(EntryAttributes::KPEX_PASSKEY_PRIVATE_KEY_PEM);
 
     QJsonDocument document(passkeyObject);
     if (passkeyFile.write(document.toJson()) < 0) {

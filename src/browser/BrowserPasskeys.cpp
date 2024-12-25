@@ -58,17 +58,6 @@ const QString BrowserPasskeys::REQUIREMENT_REQUIRED = QStringLiteral("required")
 const QString BrowserPasskeys::PASSKEYS_ATTESTATION_DIRECT = QStringLiteral("direct");
 const QString BrowserPasskeys::PASSKEYS_ATTESTATION_NONE = QStringLiteral("none");
 
-const QString BrowserPasskeys::KPEX_PASSKEY_USERNAME = QStringLiteral("KPEX_PASSKEY_USERNAME");
-const QString BrowserPasskeys::KPEX_PASSKEY_CREDENTIAL_ID = QStringLiteral("KPEX_PASSKEY_CREDENTIAL_ID");
-
-// For compatibility with StrongBox
-const QString BrowserPasskeys::KPEX_PASSKEY_GENERATED_USER_ID = QStringLiteral("KPEX_PASSKEY_GENERATED_USER_ID");
-const QString BrowserPasskeys::KPXC_PASSKEY_USERNAME = QStringLiteral("KPXC_PASSKEY_USERNAME");
-
-const QString BrowserPasskeys::KPEX_PASSKEY_PRIVATE_KEY_PEM = QStringLiteral("KPEX_PASSKEY_PRIVATE_KEY_PEM");
-const QString BrowserPasskeys::KPEX_PASSKEY_RELYING_PARTY = QStringLiteral("KPEX_PASSKEY_RELYING_PARTY");
-const QString BrowserPasskeys::KPEX_PASSKEY_USER_HANDLE = QStringLiteral("KPEX_PASSKEY_USER_HANDLE");
-
 BrowserPasskeys* BrowserPasskeys::instance()
 {
     return s_browserPasskeys;

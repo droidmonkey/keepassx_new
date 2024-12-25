@@ -18,6 +18,8 @@ This section contains full details on advanced features available in KeePassXC.
 |{NOTES}         |Notes
 |{TOTP}          |Current TOTP value (if configured)
 |{S:&lt;ATTRIBUTE_NAME&gt;}   |Value for the given attribute (case sensitive)
+|{T-CONV:/&lt;PLACEHOLDER&gt;/&lt;METHOD&gt;/} |Text conversion for resolved placeholder (eg, {USERNAME}) using the following methods: UPPER, LOWER, BASE64, HEX, URI, URI-DEC
+|{T-REPLACE-RX:/&lt;PLACEHOLDER&gt;/&lt;REGEX&gt;/&lt;REPLACE&gt;/} |Use a regular expression to find and replace data from a resolved placeholder (eg, {USERNAME}). Refer to match groups using $1, $2, etc.
 |{URL:RMVSCM}	        |URL without scheme (e.g., https)
 |{URL:WITHOUTSCHEME}	|URL without scheme
 |{URL:SCM}	     |URL Scheme

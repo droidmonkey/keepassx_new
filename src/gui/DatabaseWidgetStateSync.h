@@ -32,13 +32,14 @@ public:
 
 public slots:
     void setActive(DatabaseWidget* dbWidget);
-    void restoreListView();
-    void restoreSearchView();
+    void applySplitterSizes();
+    void applyViewState();
 
 private slots:
     void blockUpdates();
     void updateSplitterSizes();
     void updateViewState();
+    void updateAll(bool forceSync = false);
     void sync();
 
 private:
@@ -48,6 +49,8 @@ private:
     QPointer<DatabaseWidget> m_activeDbWidget;
 
     bool m_blockUpdates;
+    QTimer m_syncTimer;
+
     QHash<Config::ConfigKey, QList<int>> m_splitterSizes;
 
     QByteArray m_listViewState;

@@ -514,6 +514,86 @@ void TestEntry::testResolveNonIdPlaceholdersToUuid()
     }
 }
 
+void TestEntry::testResolveConversionPlaceholders()
+{
+    Database db;
+    auto* root = db.rootGroup();
+
+    auto* entry1 = new Entry();
+    entry1->setGroup(root);
+    entry1->setUuid(QUuid::createUuid());
+    entry1->setTitle("Title1 {T-CONV:/{USERNAME}/lower/} {T-CONV:/{PASSWORD}/upper/}");
+    entry1->setUsername("Username1");
+    entry1->setPassword("Password1");
+    entry1->setUrl("https://example.com/?test=3423&h=sdsds");
+
+    auto* entry2 = new Entry();
+    entry2->setGroup(root);
+    entry2->setUuid(QUuid::createUuid());
+    entry2->setTitle("Title2");
+    entry2->setUsername(QString("{T-CONV:/{REF:U@I:%1}/UPPER/}").arg(entry1->uuidToHex()));
+    entry2->setPassword(QString("{REF:P@I:%1}").arg(entry1->uuidToHex()));
+    entry2->setUrl("cmd://ssh {USERNAME}@server.com -p {PASSWORD}");
+
+    // Test complicated and nested conversions
+    QCOMPARE(entry1->resolveMultiplePlaceholders(entry1->title()), QString("Title1 username1 PASSWORD1"));
+    QCOMPARE(entry2->resolveMultiplePlaceholders(entry2->url()),
+             QString("cmd://ssh USERNAME1@server.com -p Password1"));
+    // Test base64 and hex conversions
+    QCOMPARE(entry1->resolveMultiplePlaceholders("{T-CONV:/{PASSWORD}/base64/}"), QString("UGFzc3dvcmQx"));
+    QCOMPARE(entry1->resolveMultiplePlaceholders("{T-CONV:/{PASSWORD}/hex/}"), QString("50617373776f726431"));
+    // Test URL encode and decode
+    auto encodedURL = entry1->resolveMultiplePlaceholders("{T-CONV:/{URL}/uri/}");
+    QCOMPARE(encodedURL, QString("https%3A%2F%2Fexample.com%2F%3Ftest%3D3423%26h%3Dsdsds"));
+    QCOMPARE(entry1->resolveMultiplePlaceholders(
+                 "{T-CONV:/https%3A%2F%2Fexample.com%2F%3Ftest%3D3423%26h%3Dsdsds/uri-dec/}"),
+             entry1->url());
+    // Test invalid syntax
+    QString error;
+    entry1->resolveConversionPlaceholder("{T-CONV:/{USERNAME}/junk/}", &error);
+    QVERIFY(!error.isEmpty());
+    entry1->resolveConversionPlaceholder("{T-CONV:}", &error);
+    QVERIFY(!error.isEmpty());
+    // Check that error gets cleared
+    entry1->resolveConversionPlaceholder("{T-CONV:/a/upper/}", &error);
+    QVERIFY(error.isEmpty());
+}
+
+void TestEntry::testResolveReplacePlaceholders()
+{
+    Database db;
+    auto* root = db.rootGroup();
+
+    auto* entry1 = new Entry();
+    entry1->setGroup(root);
+    entry1->setUuid(QUuid::createUuid());
+    entry1->setTitle("Title1");
+    entry1->setUsername("Username1");
+    entry1->setPassword("Password1");
+
+    auto* entry2 = new Entry();
+    entry2->setGroup(root);
+    entry2->setUuid(QUuid::createUuid());
+    entry2->setTitle("SAP server1 12345");
+    entry2->setUsername(QString("{T-REPLACE-RX:/{REF:U@I:%1}/\\d$/2/}").arg(entry1->uuidToHex()));
+    entry2->setPassword(QString("{REF:P@I:%1}").arg(entry1->uuidToHex()));
+    entry2->setUrl(
+        R"(cmd://sap.exe -system={T-REPLACE-RX:/{Title}/(?i)^(.* )?(\w+(?=(\s* \d+$)))\3/$2/} -client={T-REPLACE-RX:/{Title}/(?i)^.* (?=\d+$)//} -user={USERNAME} -pw={PASSWORD})");
+
+    // Test complicated and nested replacements
+    QCOMPARE(entry2->resolveMultiplePlaceholders(entry2->url()),
+             QString("cmd://sap.exe -system=server1 -client=12345 -user=Username2 -pw=Password1"));
+    // Test invalid syntax
+    QString error;
+    entry1->resolveRegexPlaceholder("{T-REPLACE-RX:/{USERNAME}/.*+?/test/}", &error); // invalid regex
+    QVERIFY(!error.isEmpty());
+    entry1->resolveRegexPlaceholder("{T-REPLACE-RX:/{USERNAME}/.*/}", &error); // no replacement
+    QVERIFY(!error.isEmpty());
+    // Check that error gets cleared
+    entry1->resolveRegexPlaceholder("{T-REPLACE-RX:/{USERNAME}/\\d/2/}", &error);
+    QVERIFY(error.isEmpty());
+}
+
 void TestEntry::testResolveClonedEntry()
 {
     Database db;

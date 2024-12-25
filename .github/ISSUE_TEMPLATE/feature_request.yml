@@ -1,0 +1,34 @@
+name: Feature Request
+description: Tell us about a new feature you want.
+type: Feature
+
+body:
+  - type: checkboxes
+    attributes:
+      label: Have you searched for an existing feature request?
+      description: Use the issue search box to see if one already exists for the feature you want.
+      options:
+      - label: Yes, I tried searching
+        required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Brief Summary
+      description: |
+        Provide an overview of the feature you are interested in adding.
+        Provide screenshots if possible, but do NOT show sensitive data (use View -> Allow Screen Capture).
+    validations:
+      required: true
+
+  - type: textarea
+    id: example
+    attributes:
+      label: Example
+      description: Provide an example of how this feature would be used.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why does this feature matter to you? What unique circumstances do you have?

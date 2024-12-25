@@ -174,6 +174,8 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
+    Utils::setDefaultTextStreams();
+
     // Apply the configured theme before creating any GUI elements
     app.applyTheme();
 
@@ -192,9 +194,6 @@ int main(int argc, char** argv)
     mainWindow.setAllowScreenCapture(parser.isSet(allowScreenCaptureOption));
 
     const bool pwstdin = parser.isSet(pwstdinOption);
-    if (!fileNames.isEmpty() && pwstdin) {
-        Utils::setDefaultTextStreams();
-    }
     for (const QString& filename : fileNames) {
         QString password;
         if (pwstdin) {
@@ -227,6 +226,8 @@ int main(int argc, char** argv)
     __lsan_do_leak_check();
     __lsan_disable();
 #endif
+
+    Utils::resetTextStreams();
 
     return exitCode;
 }

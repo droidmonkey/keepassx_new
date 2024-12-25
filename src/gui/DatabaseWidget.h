@@ -137,6 +137,7 @@ signals:
     void databaseModified();
     void databaseNonDataChanged();
     void databaseSaved();
+    void databaseAboutToUnlock();
     void databaseUnlocked();
     void databaseLockRequested();
     void databaseLocked();
@@ -287,6 +288,7 @@ private slots:
     // Database autoreload slots
     void reloadDatabaseFile();
     void restoreGroupEntryFocus(const QUuid& groupUuid, const QUuid& EntryUuid);
+    void onConfigChanged(Config::ConfigKey key);
 
 private:
     int addChildWidget(QWidget* w);

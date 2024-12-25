@@ -145,6 +145,7 @@ public slots:
 
 private slots:
     void processClientMessage(QLocalSocket* socket, const QJsonObject& message);
+    void handleDatabaseUnlockDialogFinished(bool accepted, DatabaseWidget* dbWidget);
 
 private:
     enum Access

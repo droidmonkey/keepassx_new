@@ -821,6 +821,9 @@ void DatabaseTabWidget::handleDatabaseUnlockDialogFinished(bool accepted, Databa
         m_dbWidgetPendingLock = dbWidget;
     }
 
+    // If browser extension requested the unlock make sure cancel is handled
+    m_databaseOpenInProgress = false;
+
     // signal other objects that the dialog finished
     emit databaseUnlockDialogFinished(accepted, dbWidget);
 }

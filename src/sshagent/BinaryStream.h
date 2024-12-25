@@ -55,7 +55,7 @@ protected:
     bool write(const char* ptr, qint64 len);
 
 private:
-    int m_timeout;
+    int m_timeout = 3000;
     QString m_error;
     QIODevice* m_device;
     QScopedPointer<QBuffer> m_buffer;

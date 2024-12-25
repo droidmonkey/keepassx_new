@@ -128,6 +128,8 @@ DatabaseWidget::DatabaseWidget(QSharedPointer<Database> db, QWidget* parent)
     m_groupSplitter->setStretchFactor(0, 100);
     m_groupSplitter->setStretchFactor(1, 0);
     m_groupSplitter->setSizes({1, 1});
+    // Initial visibility based on config value
+    m_groupSplitter->setVisible(!config()->get(Config::GUI_HideGroupPanel).toBool());
 
     auto rightHandSideWidget = new QWidget(m_mainSplitter);
     auto rightHandSideVBox = new QVBoxLayout();
@@ -140,12 +142,11 @@ DatabaseWidget::DatabaseWidget(QSharedPointer<Database> db, QWidget* parent)
     rightHandSideWidget->setLayout(rightHandSideVBox);
     m_entryView = new EntryView(rightHandSideWidget);
 
-    m_mainSplitter->setChildrenCollapsible(true);
+    m_mainSplitter->setChildrenCollapsible(false);
     m_mainSplitter->addWidget(m_groupSplitter);
     m_mainSplitter->addWidget(rightHandSideWidget);
     m_mainSplitter->setStretchFactor(0, 0);
     m_mainSplitter->setStretchFactor(1, 100);
-    m_mainSplitter->setCollapsible(1, false);
     m_mainSplitter->setSizes({1, 1});
 
     m_previewSplitter->setOrientation(Qt::Vertical);
@@ -182,6 +183,7 @@ DatabaseWidget::DatabaseWidget(QSharedPointer<Database> db, QWidget* parent)
     m_previewSplitter->setSizes({1, 1});
 
     m_editEntryWidget->setObjectName("editEntryWidget");
+    m_historyEditEntryWidget->setObjectName("editEntryHistoryWidget");
     m_editGroupWidget->setObjectName("editGroupWidget");
     m_reportsDialog->setObjectName("reportsDialog");
     m_databaseSettingDialog->setObjectName("databaseSettingsDialog");
@@ -217,6 +219,7 @@ DatabaseWidget::DatabaseWidget(QSharedPointer<Database> db, QWidget* parent)
     connect(m_databaseOpenWidget, SIGNAL(dialogFinished(bool)), SLOT(loadDatabase(bool)));
     connect(this, SIGNAL(currentChanged(int)), SLOT(emitCurrentModeChanged()));
     connect(this, SIGNAL(requestGlobalAutoType(const QString&)), parent, SLOT(performGlobalAutoType(const QString&)));
+    connect(config(), &Config::changed, this, &DatabaseWidget::onConfigChanged);
     // clang-format on
 
     connectDatabaseSignals();
@@ -275,7 +278,7 @@ DatabaseWidget::Mode DatabaseWidget::currentMode() const
         mode = Mode::ReportsMode;
     } else if (widget == m_databaseSettingDialog) {
         mode = Mode::DatabaseSettingsMode;
-    } else if (widget == m_editEntryWidget) {
+    } else if (widget == m_editEntryWidget || widget == m_historyEditEntryWidget) {
         mode = Mode::EditEntryMode;
     } else if (widget == m_editGroupWidget) {
         mode = Mode::EditGroupMode;
@@ -405,6 +408,15 @@ void DatabaseWidget::setSplitterSizes(const QHash<Config::ConfigKey, QList<int>>
         default:
             break;
         }
+    }
+}
+
+void DatabaseWidget::onConfigChanged(Config::ConfigKey key)
+{
+    if (key == Config::GUI_HideGroupPanel) {
+        // Toggle the group splitter visibility and reset the size
+        m_groupSplitter->setVisible(!config()->get(Config::GUI_HideGroupPanel).toBool());
+        setSplitterSizes({{Config::GUI_SplitterState, QList<int>({})}});
     }
 }
 
@@ -1284,6 +1296,7 @@ void DatabaseWidget::loadDatabase(bool accepted)
     }
 
     if (accepted) {
+        emit databaseAboutToUnlock();
         replaceDatabase(openWidget->database());
         switchToMainView();
         processAutoOpen();
@@ -1440,6 +1453,7 @@ void DatabaseWidget::unlockDatabase(bool accepted)
         }
     }
 
+    emit databaseAboutToUnlock();
     QSharedPointer<Database> db;
     if (senderDialog) {
         db = senderDialog->database();

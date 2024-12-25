@@ -387,9 +387,13 @@
     <addaction name="actionCompactMode"/>
     <addaction name="actionAlwaysOnTop"/>
     <addaction name="actionAllowScreenCapture"/>
+    <addaction name="separator"/>
     <addaction name="actionShowPreviewPanel"/>
+    <addaction name="actionShowGroupPanel"/>
+    <addaction name="separator"/>
     <addaction name="actionShowMenubar"/>
     <addaction name="actionShowToolbar"/>
+    <addaction name="separator"/>
     <addaction name="actionHideUsernames"/>
     <addaction name="actionHidePasswords"/>
    </widget>
@@ -1283,6 +1287,20 @@
   <action name="actionImport">
    <property name="text">
     <string>Import…</string>
+   </property>
+  </action>
+  <action name="actionShowGroupPanel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Group Panel</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle Show Group Panel</string>
    </property>
   </action>
  </widget>

@@ -35,7 +35,7 @@ void DeviceListener::connectSignals(DEVICELISTENER_IMPL* listener)
 {
     connect(listener, &DEVICELISTENER_IMPL::devicePlugged, this, [&](bool state, void* ctx, void* device) {
         // Wait a few ms to prevent USB device access conflicts
-        QTimer::singleShot(50, [&] { emit devicePlugged(state, ctx, device); });
+        QTimer::singleShot(50, this, [&] { emit devicePlugged(state, ctx, device); });
     });
 }
 
