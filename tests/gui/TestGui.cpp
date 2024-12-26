@@ -871,11 +871,12 @@ void TestGui::testDicewareEntryEntropy()
         // Verify entropy and strength
         auto* entropyLabel = pwGeneratorWidget->findChild<QLabel*>("entropyLabel");
         auto* strengthLabel = pwGeneratorWidget->findChild<QLabel*>("strengthLabel");
-        auto* wordLengthLabel = pwGeneratorWidget->findChild<QLabel*>("charactersInPassphraseLabel");
+        auto* wordLengthLabel = pwGeneratorWidget->findChild<QLabel*>("passwordLengthLabel");
 
         QTRY_COMPARE_WITH_TIMEOUT(entropyLabel->text(), QString("Entropy: 77.55 bit"), 200);
         QCOMPARE(strengthLabel->text(), QString("Password Quality: Good"));
-        QCOMPARE(wordLengthLabel->text().toInt(), pwGeneratorWidget->getGeneratedPassword().size());
+        QCOMPARE(wordLengthLabel->text(),
+                 QString("Characters: %1").arg(QString::number(pwGeneratorWidget->getGeneratedPassword().length())));
 
         QTest::mouseClick(generatedPassword, Qt::LeftButton);
         QTest::keyClick(generatedPassword, Qt::Key_Escape););

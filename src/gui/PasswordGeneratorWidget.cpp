@@ -99,6 +99,7 @@ PasswordGeneratorWidget::PasswordGeneratorWidget(QWidget* parent)
     m_ui->wordCaseComboBox->addItem(tr("lower case"), PassphraseGenerator::LOWERCASE);
     m_ui->wordCaseComboBox->addItem(tr("UPPER CASE"), PassphraseGenerator::UPPERCASE);
     m_ui->wordCaseComboBox->addItem(tr("Title Case"), PassphraseGenerator::TITLECASE);
+    m_ui->wordCaseComboBox->addItem(tr("MIXED case"), PassphraseGenerator::MIXEDCASE);
 
     // load system-wide wordlists
     QDir path(resources()->wordlistPath(""));
@@ -276,7 +277,6 @@ void PasswordGeneratorWidget::updatePasswordStrength()
     PasswordHealth passwordHealth(0);
     if (m_ui->tabWidget->currentIndex() == Diceware) {
         passwordHealth.init(m_dicewareGenerator->estimateEntropy());
-        m_ui->charactersInPassphraseLabel->setText(QString::number(m_ui->editNewPassword->text().length()));
     } else {
         passwordHealth = PasswordHealth(m_ui->editNewPassword->text());
     }

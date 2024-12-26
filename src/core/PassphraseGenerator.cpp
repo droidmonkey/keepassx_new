@@ -122,6 +122,7 @@ QString PassphraseGenerator::generatePassphrase() const
     }
 
     QStringList words;
+    int randomIndex = randomGen()->randomUInt(static_cast<quint32>(m_wordCount));
     for (int i = 0; i < m_wordCount; ++i) {
         int wordIndex = randomGen()->randomUInt(static_cast<quint32>(m_wordlist.size()));
         auto tmpWord = m_wordlist.at(wordIndex);
@@ -133,6 +134,9 @@ QString PassphraseGenerator::generatePassphrase() const
             break;
         case TITLECASE:
             tmpWord = tmpWord.replace(0, 1, tmpWord.left(1).toUpper());
+            break;
+        case MIXEDCASE:
+            tmpWord = i == randomIndex ? tmpWord.toUpper() : tmpWord.toLower();
             break;
         case LOWERCASE:
             tmpWord = tmpWord.toLower();
