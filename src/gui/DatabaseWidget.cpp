@@ -2393,7 +2393,7 @@ bool DatabaseWidget::performSave(QString& errorMessage, const QString& fileName)
     QPointer<QWidget> focusWidget(qApp->focusWidget());
 
     // Lock out interactions
-    QWidget *mainWindow = this->window();
+    auto mainWindow = getMainWindow();
     if (mainWindow) {
         mainWindow->setDisabled(true);
     }
