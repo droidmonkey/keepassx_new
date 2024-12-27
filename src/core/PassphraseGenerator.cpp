@@ -72,6 +72,7 @@ void PassphraseGenerator::setWordList(const QString& path)
     }
 
     QTextStream in(&file);
+    in.setCodec("UTF-8");
     QString line = in.readLine();
     bool isSigned = line.startsWith("-----BEGIN PGP SIGNED MESSAGE-----");
     if (isSigned) {
