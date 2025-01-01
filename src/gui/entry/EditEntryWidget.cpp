@@ -739,32 +739,32 @@ void EditEntryWidget::updateSSHAgentKeyInfo()
     }
 }
 
-void EditEntryWidget::updateSSHAgentAttachments()
+void EditEntryWidget::updateSSHAgentDestinationConstraints()
 {
-    m_sshAgentUi->destinationConstraintsView->reset();
-
-    foreach (const auto& constraint, m_sshAgentSettings.destinationConstraints()) {
-        QString title
-    }
-
-    for (const QString& fileName : m_attachments->keys()) {
-        if (fileName == "KeeAgent.settings") {
-            continue;
-        }
-
-        m_sshAgentUi->attachmentComboBox->addItem(fileName);
-    }
-
-    m_sshAgentUi->attachmentComboBox->setCurrentText(m_sshAgentSettings.attachmentName());
-    m_sshAgentUi->externalFileEdit->setText(m_sshAgentSettings.fileName());
-
-    if (m_sshAgentSettings.selectedType() == "attachment") {
-        m_sshAgentUi->attachmentRadioButton->setChecked(true);
-    } else {
-        m_sshAgentUi->externalFileRadioButton->setChecked(true);
-    }
-
-    updateSSHAgentKeyInfo();
+    // m_sshAgentUi->destinationConstraintsView->reset();
+    //
+    // foreach (const auto& constraint, m_sshAgentSettings.destinationConstraints()) {
+    //     QString title
+    // }
+    //
+    // for (const QString& fileName : m_attachments->keys()) {
+    //     if (fileName == "KeeAgent.settings") {
+    //         continue;
+    //     }
+    //
+    //     m_sshAgentUi->attachmentComboBox->addItem(fileName);
+    // }
+    //
+    // m_sshAgentUi->attachmentComboBox->setCurrentText(m_sshAgentSettings.attachmentName());
+    // m_sshAgentUi->externalFileEdit->setText(m_sshAgentSettings.fileName());
+    //
+    // if (m_sshAgentSettings.selectedType() == "attachment") {
+    //     m_sshAgentUi->attachmentRadioButton->setChecked(true);
+    // } else {
+    //     m_sshAgentUi->externalFileRadioButton->setChecked(true);
+    // }
+    //
+    // updateSSHAgentKeyInfo();
 }
 
 void EditEntryWidget::toKeeAgentSettings(KeeAgentSettings& settings) const
