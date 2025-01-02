@@ -229,7 +229,7 @@ bool DatabaseSettingsWidgetDatabaseKey::saveSettings()
 
     m_db->setKey(newKey, true, false, false);
 
-    getQuickUnlock()->reset(m_db->publicUuid());
+    getQuickUnlock()->interface()->reset(m_db->publicUuid());
 
     emit editFinished(true);
     if (m_isDirty) {

@@ -15,19 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KEEPASSX_POLKIT_H
-#define KEEPASSX_POLKIT_H
+#ifndef KEEPASSXC_PINUNLOCK_H
+#define KEEPASSXC_PINUNLOCK_H
 
 #include "QuickUnlockInterface.h"
-#include "polkit_dbus.h"
-#include <QHash>
-#include <QScopedPointer>
 
-class Polkit : public QuickUnlockInterface
+#include <QHash>
+
+class PinUnlock : public QuickUnlockInterface
 {
 public:
-    Polkit();
-    ~Polkit() override;
+    PinUnlock() = default;
 
     bool isAvailable() const override;
     QString errorString() const override;
@@ -42,11 +40,10 @@ public:
     void reset() override;
 
 private:
-    bool m_available;
     QString m_error;
-    QHash<QUuid, QByteArray> m_encryptedMasterKeys;
+    QHash<QUuid, QPair<int, QByteArray>> m_encryptedKeys;
 
-    QScopedPointer<org::freedesktop::PolicyKit1::Authority> m_polkit;
+    Q_DISABLE_COPY(PinUnlock)
 };
 
-#endif // KEEPASSX_POLKIT_H
+#endif // KEEPASSXC_PINUNLOCK_H

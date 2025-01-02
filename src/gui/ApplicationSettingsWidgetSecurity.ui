@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>364</width>
-    <height>505</height>
+    <width>437</width>
+    <height>529</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -138,7 +138,7 @@
         <property name="sizeHint" stdset="0">
          <size>
           <width>40</width>
-          <height>20</height>
+          <height>0</height>
          </size>
         </property>
        </spacer>
@@ -168,7 +168,17 @@
       <item>
        <widget class="QCheckBox" name="quickUnlockCheckBox">
         <property name="text">
-         <string>Enable database quick unlock (Touch ID / Windows Hello)</string>
+         <string>Enable database quick unlock by default</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="quickUnlockRememberCheckBox">
+        <property name="toolTip">
+         <string>Quick unlock can only be remembered when using Touch ID or Windows Hello</string>
+        </property>
+        <property name="text">
+         <string>Remember quick unlock after database is closed (Touch ID / Windows Hello only)</string>
         </property>
        </widget>
       </item>

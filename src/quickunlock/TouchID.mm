@@ -68,7 +68,7 @@ void TouchID::deleteKeyEntry(const QString& accountName)
 
    // get data from the KeyChain
    OSStatus status = SecItemDelete(query);
-   LogStatusError("TouchID::deleteKeyEntry - Status deleting existing entry", status);
+   LogStatusError("TouchID::deleteKeyEntry - Error deleting existing entry", status);
 }
 
 QString TouchID::databaseKeyName(const QUuid& dbUuid)
@@ -85,44 +85,24 @@ QString TouchID::errorString() const
 
 void TouchID::reset()
 {
+    // TODO: Clear all credentials associated with KeePassXC
     m_encryptedMasterKeys.clear();
 }
 
-
-
-
-bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey, const bool ignoreTouchID)
+/**
+ * Store the serialized database key into the macOS key store. The OS handles encrypt/decrypt operations.
+ * https://developer.apple.com/documentation/security/keychain_services/keychain_items
+ */
+bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& key, const bool ignoreTouchID)
 {
-    if (passwordKey.isEmpty()) {
+    if (key.isEmpty()) {
         debug("TouchID::setKey - illegal arguments");
         return false;
     }
 
-    if (m_encryptedMasterKeys.contains(dbUuid)) {
-        debug("TouchID::setKey - Already stored key for this database");
-        return true;
-    }
-
-    // generate random AES 256bit key and IV
-    QByteArray randomKey = randomGen()->randomArray(SymmetricCipher::keySize(SymmetricCipher::Aes256_GCM));
-    QByteArray randomIV = randomGen()->randomArray(SymmetricCipher::defaultIvSize(SymmetricCipher::Aes256_GCM));
-
-    SymmetricCipher aes256Encrypt;
-    if (!aes256Encrypt.init(SymmetricCipher::Aes256_GCM, SymmetricCipher::Encrypt, randomKey, randomIV)) {
-        debug("TouchID::setKey - AES initialisation failed");
-        return false;
-    }
-
-    // encrypt and keep result in memory
-    QByteArray encryptedMasterKey = passwordKey;
-    if (!aes256Encrypt.finish(encryptedMasterKey)) {
-        debug("TouchID::getKey - AES encrypt failed: %s", aes256Encrypt.errorString().toUtf8().constData());
-        return false;
-    }
-
-    const QString keyName = databaseKeyName(dbUuid);
-
-    deleteKeyEntry(keyName); // Try to delete the existing key entry
+    const auto keyName = databaseKeyName(dbUuid);
+    // Try to delete the existing key entry
+    deleteKeyEntry(keyName);
 
     // prepare adding secure entry to the macOS KeyChain
     CFErrorRef error = NULL;
@@ -168,44 +148,45 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey, const b
        kCFAllocatorDefault, kSecAttrAccessibleWhenUnlockedThisDeviceOnly, accessControlFlags, &error);
 
     if (sacObject == NULL || error != NULL) {
-        NSError* e = (__bridge NSError*) error;
+        auto e = (__bridge NSError*) error;
         debug("TouchID::setKey - Error creating security flags: %s", e.localizedDescription.UTF8String);
         return false;
     }
 
-    NSString *accountName = keyName.toNSString(); // The NSString is released by Qt
+    auto accountName = keyName.toNSString();
+    auto keyBase64 = key.toBase64();
 
     // prepare data (key) to be stored
-    QByteArray keychainKeyValue = (randomKey + randomIV).toHex();
-    CFDataRef keychainValueData =
-        CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, reinterpret_cast<UInt8 *>(keychainKeyValue.data()),
-                                    keychainKeyValue.length(), kCFAllocatorDefault);
+    auto keyValueData = CFDataCreateWithBytesNoCopy(
+        kCFAllocatorDefault, reinterpret_cast<const UInt8 *>(keyBase64.data()),
+        keyBase64.length(), kCFAllocatorDefault);
 
-    CFMutableDictionaryRef attributes = makeDictionary();
+    auto attributes = makeDictionary();
     CFDictionarySetValue(attributes, kSecClass, kSecClassGenericPassword);
     CFDictionarySetValue(attributes, kSecAttrAccount, (__bridge CFStringRef) accountName);
-    CFDictionarySetValue(attributes, kSecValueData, (__bridge CFDataRef) keychainValueData);
+    CFDictionarySetValue(attributes, kSecValueData, (__bridge CFDataRef) keyValueData);
     CFDictionarySetValue(attributes, kSecAttrSynchronizable, kCFBooleanFalse);
     CFDictionarySetValue(attributes, kSecUseAuthenticationUI, kSecUseAuthenticationUIAllow);
+#ifndef QT_DEBUG
+    // Only use TouchID when in release build, also requires application entitlements and signing
     CFDictionarySetValue(attributes, kSecAttrAccessControl, sacObject);
+#endif
 
     // add to KeyChain
     OSStatus status = SecItemAdd(attributes, NULL);
-    LogStatusError("TouchID::setKey - Status adding new entry", status);
+    LogStatusError("TouchID::setKey - Error adding new keychain item", status);
 
     CFRelease(sacObject);
     CFRelease(attributes);
-    
-    // Cleanse the key information from the memory
-    Botan::secure_scrub_memory(randomKey.data(), randomKey.size());
-    Botan::secure_scrub_memory(randomIV.data(), randomIV.size());
 
+    // Cleanse the key information from the memory
     if (status != errSecSuccess) {
         return false;
     }
 
     // memorize which database the stored key is for
-    m_encryptedMasterKeys.insert(dbUuid, encryptedMasterKey);
+    // TODO: Do we need to store the db uuid's to do a full reset later?
+    //m_encryptedMasterKeys.insert(dbUuid, encryptedMasterKey);
     debug("TouchID::setKey - Success!");
     return true;
 }
@@ -226,12 +207,12 @@ bool TouchID::setKey(const QUuid& dbUuid, const QByteArray& passwordKey)
 }
 
 /**
- * Checks if an encrypted PasswordKey is available for the given database, tries to
- * decrypt it using the KeyChain and if successful, returns it.
+ * Retrieve serialized key data from the macOS Keychain after successful authentication
+ * with TouchID or Watch interface.
  */
-bool TouchID::getKey(const QUuid& dbUuid, QByteArray& passwordKey)
+bool TouchID::getKey(const QUuid& dbUuid, QByteArray& key)
 {
-    passwordKey.clear();
+    key.clear();
 
     if (!hasKey(dbUuid)) {
         debug("TouchID::getKey - No stored key found");
@@ -266,39 +247,30 @@ bool TouchID::getKey(const QUuid& dbUuid, QByteArray& passwordKey)
         return false;
     }
 
+    // Convert value returned to serialized key
     CFDataRef valueData = static_cast<CFDataRef>(dataTypeRef);
-    QByteArray dataBytes = QByteArray::fromHex(QByteArray(reinterpret_cast<const char*>(CFDataGetBytePtr(valueData)),
-                                                          CFDataGetLength(valueData)));
+    key = QByteArray::fromBase64(QByteArray(reinterpret_cast<const char*>(CFDataGetBytePtr(valueData)),
+                                 CFDataGetLength(valueData)));
     CFRelease(dataTypeRef);
-
-    // extract AES key and IV from data bytes
-    QByteArray key = dataBytes.left(SymmetricCipher::keySize(SymmetricCipher::Aes256_GCM));
-    QByteArray iv = dataBytes.right(SymmetricCipher::defaultIvSize(SymmetricCipher::Aes256_GCM));
-
-    SymmetricCipher aes256Decrypt;
-    if (!aes256Decrypt.init(SymmetricCipher::Aes256_GCM, SymmetricCipher::Decrypt, key, iv)) {
-        debug("TouchID::getKey - AES initialization failed");
-        return false;
-    }
-
-    // decrypt PasswordKey from memory using AES
-    passwordKey = m_encryptedMasterKeys[dbUuid];
-    if (!aes256Decrypt.finish(passwordKey)) {
-        passwordKey.clear();
-        debug("TouchID::getKey - AES decrypt failed: %s", aes256Decrypt.errorString().toUtf8().constData());
-        return false;
-    }
-
-    // Cleanse the key information from the memory
-    Botan::secure_scrub_memory(key.data(), key.size());
-    Botan::secure_scrub_memory(iv.data(), iv.size());
 
     return true;
 }
 
 bool TouchID::hasKey(const QUuid& dbUuid) const
 {
-    return m_encryptedMasterKeys.contains(dbUuid);
+    const QString keyName = databaseKeyName(dbUuid);
+    NSString* accountName = keyName.toNSString(); // The NSString is released by Qt
+
+    CFMutableDictionaryRef query = makeDictionary();
+    CFDictionarySetValue(query, kSecClass, kSecClassGenericPassword);
+    CFDictionarySetValue(query, kSecAttrAccount, (__bridge CFStringRef) accountName);
+    CFDictionarySetValue(query, kSecReturnData, kCFBooleanFalse);
+
+    CFTypeRef item = NULL;
+    OSStatus status = SecItemCopyMatching(query, &item);
+    CFRelease(query);
+
+    return status == errSecSuccess;
 }
 
 // TODO: Both functions below should probably handle the returned errors to
@@ -320,11 +292,7 @@ bool TouchID::isWatchAvailable()
       bool canAuthenticate = [context canEvaluatePolicy:policyCode error:&error];
       [context release];
       if (error) {
-         debug("Apple Wach available: %d (%ld / %s / %s)", canAuthenticate,
-               (long)error.code, error.description.UTF8String,
-               error.localizedDescription.UTF8String);
-      } else {
-          debug("Apple Wach available: %d", canAuthenticate);
+         debug("Apple Watch is not available: %s", error.localizedDescription.UTF8String);
       }
       return canAuthenticate;
    } @catch (NSException *) {
@@ -348,11 +316,7 @@ bool TouchID::isTouchIdAvailable()
       bool canAuthenticate = [context canEvaluatePolicy:policyCode error:&error];
       [context release];
       if (error) {
-         debug("Touch ID available: %d (%ld / %s / %s)", canAuthenticate,
-               (long)error.code, error.description.UTF8String,
-               error.localizedDescription.UTF8String);
-      } else {
-          debug("Touch ID available: %d", canAuthenticate);
+         debug("Touch ID is not available: %s", error.localizedDescription.UTF8String);
       }
       return canAuthenticate;
    } @catch (NSException *) {
@@ -399,10 +363,15 @@ bool TouchID::isAvailable() const
    return  isWatchAvailable() || isTouchIdAvailable() || isPasswordFallbackPossible();
 }
 
+bool TouchID::canRemember() const
+{
+    return true;
+}
+
 /**
  * Resets the inner state either for all or for the given database
  */
 void TouchID::reset(const QUuid& dbUuid)
 {
-    m_encryptedMasterKeys.remove(dbUuid);
+   deleteKeyEntry(databaseKeyName(dbUuid));
 }

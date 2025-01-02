@@ -19,7 +19,6 @@
 #ifndef KEEPASSX_DATABASEOPENWIDGET_H
 #define KEEPASSX_DATABASEOPENWIDGET_H
 
-#include <QPointer>
 #include <QScopedPointer>
 #include <QTimer>
 
@@ -45,19 +44,15 @@ class DatabaseOpenWidget : public DialogyWidget
 public:
     explicit DatabaseOpenWidget(QWidget* parent = nullptr);
     ~DatabaseOpenWidget() override;
+
     void load(const QString& filename);
     QString filename();
+    QSharedPointer<Database> database();
+
     void clearForms();
     void enterKey(const QString& pw, const QString& keyFile);
-    QSharedPointer<Database> database();
-    bool unlockingDatabase();
-
-    // Quick Unlock helper functions
-    bool canPerformQuickUnlock() const;
-    bool isOnQuickUnlockScreen() const;
-    void toggleQuickUnlockScreen();
     void triggerQuickUnlock();
-    void resetQuickUnlock();
+    bool unlockingDatabase();
 
 signals:
     void dialogFinished(bool accepted);
@@ -69,8 +64,6 @@ protected:
 
     const QScopedPointer<Ui::DatabaseOpenWidget> m_ui;
     QSharedPointer<Database> m_db;
-    QString m_filename;
-    bool m_retryUnlockWithEmptyPassword = false;
 
 protected slots:
     virtual void openDatabase();
@@ -81,15 +74,25 @@ private slots:
     void toggleHardwareKeyComponent(bool state);
     void pollHardwareKey(bool manualTrigger = false);
     void hardwareKeyResponse(bool found);
+    void resetQuickUnlock();
 
 private:
+    // Quick Unlock helper functions
+    bool isQuickUnlockAvailable() const;
+    bool canPerformQuickUnlock() const;
+    bool isOnQuickUnlockScreen() const;
+    void toggleQuickUnlockScreen();
+
 #ifdef WITH_XC_YUBIKEY
     QPointer<DeviceListener> m_deviceListener;
 #endif
     bool m_pollingHardwareKey = false;
     bool m_manualHardwareKeyRefresh = false;
-    bool m_blockQuickUnlock = false;
     bool m_unlockingDatabase = false;
+    bool m_retryUnlockWithEmptyPassword = false;
+
+    QString m_filename;
+
     QTimer m_hideTimer;
     QTimer m_hideNoHardwareKeysFoundTimer;
 

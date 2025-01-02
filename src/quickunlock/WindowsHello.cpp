@@ -19,6 +19,7 @@
 
 #include <Userconsentverifierinterop.h>
 #include <winrt/base.h>
+#include <winrt/windows.foundation.collections.h>
 #include <winrt/windows.foundation.h>
 #include <winrt/windows.security.credentials.h>
 #include <winrt/windows.security.cryptography.h>
@@ -34,6 +35,7 @@
 
 using namespace winrt;
 using namespace Windows::Foundation;
+using namespace Windows::Foundation::Collections;
 using namespace Windows::Security::Credentials;
 using namespace Windows::Security::Cryptography;
 using namespace Windows::Storage::Streams;
@@ -97,6 +99,47 @@ namespace
             }
         });
     }
+
+    void storeCredential(const QUuid& uuid, const QByteArray& data)
+    {
+        auto vault = PasswordVault();
+        vault.Add({s_winHelloKeyName,
+                   winrt::to_hstring(uuid.toString().toStdString()),
+                   winrt::to_hstring(data.toBase64().toStdString())});
+    }
+
+    void removeCredential(const QUuid& uuid)
+    {
+        try {
+            auto vault = PasswordVault();
+            vault.Remove({s_winHelloKeyName, winrt::to_hstring(uuid.toString().toStdString()), L"blah"});
+        } catch (winrt::hresult_error const& ex) {
+        }
+    }
+
+    void resetCredentials()
+    {
+        auto vault = PasswordVault();
+        auto credentials = vault.FindAllByResource(s_winHelloKeyName);
+        for (const auto& credential : credentials) {
+            try {
+                vault.Remove(credential);
+            } catch (winrt::hresult_error const& ex) {
+            }
+        }
+    }
+
+    QByteArray loadCredential(const QUuid& uuid)
+    {
+        QByteArray data;
+        try {
+            auto vault = PasswordVault();
+            auto credential = vault.Retrieve(s_winHelloKeyName, winrt::to_hstring(uuid.toString().toStdString()));
+            data = QByteArray::fromBase64(QByteArray::fromStdString(winrt::to_string(credential.Password())));
+        } catch (winrt::hresult_error const& ex) {
+        }
+        return data;
+    }
 } // namespace
 
 bool WindowsHello::isAvailable() const
@@ -120,6 +163,7 @@ bool WindowsHello::setKey(const QUuid& dbUuid, const QByteArray& data)
     auto challenge = Random::instance()->randomArray(ivSize);
     QByteArray key;
     if (!deriveEncryptionKey(challenge, key, m_error)) {
+        m_error = QObject::tr("Windows Hello setup was canceled or failed. Quick unlock has not been enabled.");
         return false;
     }
 
@@ -137,7 +181,7 @@ bool WindowsHello::setKey(const QUuid& dbUuid, const QByteArray& data)
 
     // Prepend the challenge/IV to the encrypted data
     encrypted.prepend(challenge);
-    m_encryptedKeys.insert(dbUuid, encrypted);
+    storeCredential(dbUuid, encrypted);
     return true;
 }
 
@@ -153,7 +197,7 @@ bool WindowsHello::getKey(const QUuid& dbUuid, QByteArray& data)
 
     // Read the previously used challenge and encrypted data
     auto ivSize = SymmetricCipher::defaultIvSize(SymmetricCipher::Aes256_GCM);
-    const auto& keydata = m_encryptedKeys.value(dbUuid);
+    const auto& keydata = loadCredential(dbUuid);
     auto challenge = keydata.left(ivSize);
     auto encrypted = keydata.mid(ivSize);
     QByteArray key;
@@ -182,15 +226,20 @@ bool WindowsHello::getKey(const QUuid& dbUuid, QByteArray& data)
 
 void WindowsHello::reset(const QUuid& dbUuid)
 {
-    m_encryptedKeys.remove(dbUuid);
+    removeCredential(dbUuid);
 }
 
 bool WindowsHello::hasKey(const QUuid& dbUuid) const
 {
-    return m_encryptedKeys.contains(dbUuid);
+    return !loadCredential(dbUuid).isEmpty();
+}
+
+bool WindowsHello::canRemember() const
+{
+    return true;
 }
 
 void WindowsHello::reset()
 {
-    m_encryptedKeys.clear();
+    resetCredentials();
 }

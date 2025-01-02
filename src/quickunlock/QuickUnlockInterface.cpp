@@ -16,66 +16,63 @@
  */
 
 #include "QuickUnlockInterface.h"
+#include "PinUnlock.h"
+
 #include <QObject>
 
 #if defined(Q_OS_MACOS)
 #include "TouchID.h"
-#define QUICKUNLOCK_IMPLEMENTATION TouchID
 #elif defined(Q_CC_MSVC)
 #include "WindowsHello.h"
-#define QUICKUNLOCK_IMPLEMENTATION WindowsHello
 #elif defined(Q_OS_LINUX)
 #include "Polkit.h"
-#define QUICKUNLOCK_IMPLEMENTATION Polkit
-#else
-#define QUICKUNLOCK_IMPLEMENTATION NoQuickUnlock
 #endif
 
-QUICKUNLOCK_IMPLEMENTATION* quickUnlockInstance = {nullptr};
+QuickUnlockManager* g_quickUnlockManager = nullptr;
 
-QuickUnlockInterface* getQuickUnlock()
+QuickUnlockManager* getQuickUnlock()
 {
-    if (!quickUnlockInstance) {
-        quickUnlockInstance = new QUICKUNLOCK_IMPLEMENTATION();
+    if (!g_quickUnlockManager) {
+        g_quickUnlockManager = new QuickUnlockManager();
     }
-    return quickUnlockInstance;
+    return g_quickUnlockManager;
 }
 
-bool NoQuickUnlock::isAvailable() const
+QuickUnlockManager::QuickUnlockManager()
 {
-    return false;
+    // Create the native interface based on the platform
+#if defined(Q_OS_MACOS)
+    m_nativeInterface.reset(new TouchID());
+#elif defined(Q_CC_MSVC)
+    m_nativeInterface.reset(new WindowsHello());
+#elif defined(Q_OS_LINUX)
+    m_nativeInterface.reset(new Polkit());
+#endif
+    // Always create the fallback interface
+    m_fallbackInterface.reset(new PinUnlock());
 }
 
-QString NoQuickUnlock::errorString() const
-{
-    return QObject::tr("No Quick Unlock provider is available");
-}
-
-void NoQuickUnlock::reset()
+QuickUnlockManager::~QuickUnlockManager()
 {
 }
 
-bool NoQuickUnlock::setKey(const QUuid& dbUuid, const QByteArray& key)
+QSharedPointer<QuickUnlockInterface> QuickUnlockManager::interface() const
 {
-    Q_UNUSED(dbUuid)
-    Q_UNUSED(key)
-    return false;
+    if (isNativeAvailable()) {
+        return m_nativeInterface;
+    }
+    return m_fallbackInterface;
 }
 
-bool NoQuickUnlock::getKey(const QUuid& dbUuid, QByteArray& key)
+bool QuickUnlockManager::isNativeAvailable() const
 {
-    Q_UNUSED(dbUuid)
-    Q_UNUSED(key)
-    return false;
+    return m_nativeInterface && m_nativeInterface->isAvailable();
 }
 
-bool NoQuickUnlock::hasKey(const QUuid& dbUuid) const
+bool QuickUnlockManager::isRememberAvailable() const
 {
-    Q_UNUSED(dbUuid)
-    return false;
-}
-
-void NoQuickUnlock::reset(const QUuid& dbUuid)
-{
-    Q_UNUSED(dbUuid)
+    if (isNativeAvailable()) {
+        return m_nativeInterface->canRemember();
+    }
+    return m_fallbackInterface->canRemember();
 }

@@ -110,14 +110,14 @@ bool Polkit::setKey(const QUuid& dbUuid, const QByteArray& key)
 
     SymmetricCipher aes256Encrypt;
     if (!aes256Encrypt.init(SymmetricCipher::Aes256_GCM, SymmetricCipher::Encrypt, randomKey, randomIV)) {
-        m_error = QObject::tr("AES initialization failed");
+        m_error = QObject::tr("Failed to init KeePassXC crypto.");
         return false;
     }
 
     // Encrypt the master password
     QByteArray encryptedMasterKey = key;
     if (!aes256Encrypt.finish(encryptedMasterKey)) {
-        m_error = QObject::tr("AES encrypt failed");
+        m_error = QObject::tr("Failed to encrypt key data.");
         qDebug() << "polkit aes encrypt failed: " << aes256Encrypt.errorString();
         return false;
     }
@@ -129,7 +129,7 @@ bool Polkit::setKey(const QUuid& dbUuid, const QByteArray& key)
                                       keychainKeyValue.size(),
                                       KEY_SPEC_PROCESS_KEYRING);
     if (key_serial < 0) {
-        m_error = QObject::tr("Failed to store in Linux Keyring");
+        m_error = QObject::tr("Failed to store key in Linux Keyring. Quick unlock has not been enabled.");
         qDebug() << "polkit keyring failed to store: " << errno;
         return false;
     }
@@ -181,7 +181,7 @@ bool Polkit::getKey(const QUuid& dbUuid, QByteArray& key)
             find_key_by_type_and_desc("user", getKeyName(dbUuid).toStdString().c_str(), KEY_SPEC_PROCESS_KEYRING);
 
         if (keySerial == -1) {
-            m_error = QObject::tr("Could not locate key in keyring");
+            m_error = QObject::tr("Could not locate key in Linux Keyring.");
             qDebug() << "polkit keyring failed to find: " << errno;
             return false;
         }
@@ -190,7 +190,7 @@ bool Polkit::getKey(const QUuid& dbUuid, QByteArray& key)
         long keychainDataSize = keyctl_read_alloc(keySerial, &keychainBuffer);
 
         if (keychainDataSize == -1) {
-            m_error = QObject::tr("Could not read key in keyring");
+            m_error = QObject::tr("Could not read key in Linux Keyring.");
             qDebug() << "polkit keyring failed to read: " << errno;
             return false;
         }
@@ -205,7 +205,7 @@ bool Polkit::getKey(const QUuid& dbUuid, QByteArray& key)
 
         SymmetricCipher aes256Decrypt;
         if (!aes256Decrypt.init(SymmetricCipher::Aes256_GCM, SymmetricCipher::Decrypt, keychainKey, keychainIv)) {
-            m_error = QObject::tr("AES initialization failed");
+            m_error = QObject::tr("Failed to init KeePassXC crypto.");
             qDebug() << "polkit aes init failed";
             return false;
         }
@@ -213,7 +213,7 @@ bool Polkit::getKey(const QUuid& dbUuid, QByteArray& key)
         key = encryptedMasterKey;
         if (!aes256Decrypt.finish(key)) {
             key.clear();
-            m_error = QObject::tr("AES decrypt failed");
+            m_error = QObject::tr("Failed to decrypt key data.");
             qDebug() << "polkit aes decrypt failed: " << aes256Decrypt.errorString();
             return false;
         }
@@ -229,11 +229,16 @@ bool Polkit::getKey(const QUuid& dbUuid, QByteArray& key)
 
     // Failed to authenticate
     if (authResult.is_challenge) {
-        m_error = QObject::tr("No Polkit authentication agent was available");
+        m_error = QObject::tr("No Polkit authentication agent was available.");
     } else {
-        m_error = QObject::tr("Polkit authorization failed");
+        m_error = QObject::tr("Polkit authorization failed.");
     }
 
+    return false;
+}
+
+bool Polkit::canRemember() const
+{
     return false;
 }
 

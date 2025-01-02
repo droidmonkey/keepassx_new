@@ -31,6 +31,8 @@ public:
     bool getKey(const QUuid& dbUuid, QByteArray& passwordKey) override;
     bool hasKey(const QUuid& dbUuid) const override;
 
+    bool canRemember() const override;
+
     void reset(const QUuid& dbUuid = "") override;
     void reset() override;
 
