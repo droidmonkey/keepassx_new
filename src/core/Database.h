@@ -20,6 +20,7 @@
 #define KEEPASSX_DATABASE_H
 
 #include <QDateTime>
+#include <QDebug>
 #include <QHash>
 #include <QMutex>
 #include <QPointer>
@@ -29,6 +30,7 @@
 #include "core/ModifiableObject.h"
 #include "crypto/kdf/AesKdf.h"
 #include "format/KeePass2.h"
+#include "format/multifactor/AuthenticationFactorInfo.h"
 #include "keys/CompositeKey.h"
 #include "keys/PasswordKey.h"
 
@@ -160,6 +162,10 @@ public:
     void markAsTemporaryDatabase();
     bool isTemporaryDatabase();
 
+    void setAuthenticationFactorInfo(const QSharedPointer<AuthenticationFactorInfo>& authenticationFactorInfo);
+    QSharedPointer<AuthenticationFactorInfo> authenticationFactorInfo();
+    const QSharedPointer<AuthenticationFactorInfo>& authenticationFactorInfo() const;
+
     static Database* databaseByUuid(const QUuid& uuid);
 
 public slots:
@@ -202,6 +208,8 @@ private:
 
         QVariantMap publicCustomData;
 
+        QSharedPointer<AuthenticationFactorInfo> authenticationFactorInfo;
+
         DatabaseData()
         {
             clear();
@@ -221,6 +229,9 @@ private:
             challengeResponseKey.reset(new PasswordKey());
 
             key.reset();
+
+            publicCustomData.clear();
+            authenticationFactorInfo.clear();
 
             // Default to AES KDF, KDBX4 databases overwrite this
             kdf.reset(new AesKdf(true));

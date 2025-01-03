@@ -40,6 +40,7 @@ public:
         ChaCha20,
         Salsa20,
         Aes256_GCM,
+        Aes256_CBC_UNPADDED,
         InvalidMode = -1,
     };
 

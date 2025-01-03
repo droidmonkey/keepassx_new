@@ -20,6 +20,7 @@
 #include "core/Database.h"
 #include "core/Endian.h"
 #include "crypto/SymmetricCipher.h"
+#include "keys/MultiAuthenticationHeaderKey.h"
 #include "streams/StoreDataStream.h"
 
 #define UUID_LENGTH 16
@@ -93,6 +94,29 @@ bool KdbxReader::readDatabase(QIODevice* device, QSharedPointer<const CompositeK
 
     if (hasError()) {
         return false;
+    }
+
+    auto authenticationFactorInfo = m_db->authenticationFactorInfo();
+    if (!authenticationFactorInfo.isNull()) {
+        // Augment (or replace) the given composite key with factors from the header
+        auto newCompositeKey = QSharedPointer<CompositeKey>::create();
+        if (!authenticationFactorInfo->isComprehensive() && !key.isNull()) {
+            // New composite should start with old key info
+            for (const auto& keyPart : key->keys()) {
+                newCompositeKey->addKey(keyPart);
+            }
+        }
+
+        auto headerInfoKey = QSharedPointer<MultiAuthenticationHeaderKey>::create(authenticationFactorInfo, key);
+        if (!headerInfoKey->process()) {
+            m_error = true;
+            m_errorStr = headerInfoKey->error();
+            return false;
+        }
+
+        newCompositeKey->addKey(headerInfoKey);
+
+        key = newCompositeKey;
     }
 
     // No key provided - don't proceed to load payload
