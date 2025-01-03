@@ -75,8 +75,9 @@ bool YubiKey::findValidKeys()
 {
     QMutexLocker lock(&s_interfaceMutex);
 
-    m_usbKeys = YubiKeyInterfaceUSB::instance()->findValidKeys();
-    m_pcscKeys = YubiKeyInterfacePCSC::instance()->findValidKeys();
+    m_connectedKeys = 0;
+    m_usbKeys = YubiKeyInterfaceUSB::instance()->findValidKeys(m_connectedKeys);
+    m_pcscKeys = YubiKeyInterfacePCSC::instance()->findValidKeys(m_connectedKeys);
 
     return !m_usbKeys.isEmpty() || !m_pcscKeys.isEmpty();
 }
@@ -89,17 +90,15 @@ void YubiKey::findValidKeysAsync()
 YubiKey::KeyMap YubiKey::foundKeys()
 {
     QMutexLocker lock(&s_interfaceMutex);
-    KeyMap foundKeys;
-
-    for (auto i = m_usbKeys.cbegin(); i != m_usbKeys.cend(); ++i) {
-        foundKeys.insert(i.key(), i.value());
-    }
-
-    for (auto i = m_pcscKeys.cbegin(); i != m_pcscKeys.cend(); ++i) {
-        foundKeys.insert(i.key(), i.value());
-    }
+    KeyMap foundKeys = m_usbKeys;
+    foundKeys.unite(m_pcscKeys);
 
     return foundKeys;
+}
+
+int YubiKey::connectedKeys()
+{
+    return m_connectedKeys;
 }
 
 QString YubiKey::errorMessage()

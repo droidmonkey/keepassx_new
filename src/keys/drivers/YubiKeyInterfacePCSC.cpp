@@ -20,6 +20,8 @@
 #include "core/Tools.h"
 #include "crypto/Random.h"
 
+#include <QScopeGuard>
+
 // MSYS2 does not define these macros
 // So set them to the value used by pcsc-lite
 #ifndef MAX_ATR_SIZE
@@ -511,7 +513,6 @@ namespace
             return rv;
         });
     }
-
 } // namespace
 
 YubiKeyInterfacePCSC::YubiKeyInterfacePCSC()
@@ -542,7 +543,7 @@ YubiKeyInterfacePCSC* YubiKeyInterfacePCSC::instance()
     return m_instance;
 }
 
-YubiKey::KeyMap YubiKeyInterfacePCSC::findValidKeys()
+YubiKey::KeyMap YubiKeyInterfacePCSC::findValidKeys(int& connectedKeys)
 {
     m_error.clear();
     if (!isInitialized()) {
@@ -578,6 +579,8 @@ YubiKey::KeyMap YubiKeyInterfacePCSC::findValidKeys()
             continue;
         }
 
+        auto finally = qScopeGuard([hCard]() { SCardDisconnect(hCard, SCARD_LEAVE_CARD); });
+
         // Read the protocol and the ATR record
         char pbReader[MAX_READERNAME] = {0};
         SCUINT dwReaderLen = sizeof(pbReader);
@@ -604,6 +607,8 @@ YubiKey::KeyMap YubiKeyInterfacePCSC::findValidKeys()
 
             unsigned int serial = 0;
             getSerial(satr, serial);
+
+            ++connectedKeys;
 
             /* This variable indicates that the key is locked / timed out.
                 When using the key via NFC, the user has to re-present the key to clear the timeout.

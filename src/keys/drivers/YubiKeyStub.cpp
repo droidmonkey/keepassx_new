@@ -52,6 +52,11 @@ YubiKey::KeyMap YubiKey::foundKeys()
     return {};
 }
 
+int YubiKey::connectedKeys()
+{
+    return 0;
+}
+
 QString YubiKey::errorMessage()
 {
     return {};

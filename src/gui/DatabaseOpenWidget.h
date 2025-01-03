@@ -79,7 +79,7 @@ protected slots:
 private slots:
     bool browseKeyFile();
     void toggleHardwareKeyComponent(bool state);
-    void pollHardwareKey(bool manualTrigger = false);
+    void pollHardwareKey(bool manualTrigger = false, int delay = 0);
     void hardwareKeyResponse(bool found);
 
 private:

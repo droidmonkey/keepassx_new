@@ -52,7 +52,7 @@ class YubiKeyInterfacePCSC : public YubiKeyInterface
 public:
     static YubiKeyInterfacePCSC* instance();
 
-    YubiKey::KeyMap findValidKeys() override;
+    YubiKey::KeyMap findValidKeys(int& connectedKeys) override;
 
     YubiKey::ChallengeResult
     challenge(YubiKeySlot slot, const QByteArray& challenge, Botan::secure_vector<char>& response) override;

@@ -1706,6 +1706,10 @@ Are you sure you want to continue with this file?.</source>
         <source>Failed to authenticate with Windows Hello: %1</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Hardware keys found, but no slots are configured.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DatabaseSettingWidgetMetaData</name>
@@ -9795,6 +9799,10 @@ Example: JBSWY3DPEHPK3PXP</source>
     </message>
     <message>
         <source>No hardware keys detected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Hardware keys found, but no slots are configured</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

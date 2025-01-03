@@ -24,6 +24,7 @@
 #include "keys/ChallengeResponseKey.h"
 
 #include <QCryptographicHash>
+#include <QRegularExpression>
 #include <QSignalSpy>
 #include <QTest>
 
@@ -45,9 +46,12 @@ void TestYubiKeyChallengeResponse::testDetectDevices()
 
     // Look at the information retrieved from the key(s)
     const auto foundKeys = YubiKey::instance()->foundKeys();
+    QRegularExpression exp{"\\w+\\s+\\[\\d+\\]\\s+-\\s+Slot\\s+\\d"};
+
     for (auto i = foundKeys.cbegin(); i != foundKeys.cend(); ++i) {
         const auto& displayName = i.value();
-        QVERIFY(displayName.contains("Challenge-Response - Slot") || displayName.contains("Configured Slot -"));
+        auto match = exp.match(displayName);
+        QVERIFY(match.hasMatch());
         QVERIFY(displayName.contains(QString::number(i.key().first)));
         QVERIFY(displayName.contains(QString::number(i.key().second)));
     }

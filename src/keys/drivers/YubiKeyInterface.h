@@ -32,7 +32,7 @@ class YubiKeyInterface : public QObject
 public:
     bool isInitialized() const;
 
-    virtual YubiKey::KeyMap findValidKeys() = 0;
+    virtual YubiKey::KeyMap findValidKeys(int& connectedKeys) = 0;
     virtual YubiKey::ChallengeResult
     challenge(YubiKeySlot slot, const QByteArray& challenge, Botan::secure_vector<char>& response) = 0;
     virtual bool testChallenge(YubiKeySlot slot, bool* wouldBlock) = 0;
