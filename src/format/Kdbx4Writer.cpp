@@ -225,7 +225,6 @@ KdbxXmlWriter::BinaryIdxMap Kdbx4Writer::writeAttachments(QIODevice* device, Dat
             data.append(entry->attachments()->value(key));
 
             CryptoHash hash(CryptoHash::Sha256);
-#ifdef WITH_XC_KEESHARE
             // Namespace KeeShare attachments so they don't get deduplicated together with attachments
             // from other databases. Prevents potential filesize side channels.
             auto group = entry->group();
@@ -237,7 +236,6 @@ KdbxXmlWriter::BinaryIdxMap Kdbx4Writer::writeAttachments(QIODevice* device, Dat
             } else {
                 hash.addData(db->uuid().toByteArray());
             }
-#endif
             hash.addData(data);
 
             // Deduplicate attachments with the same hash

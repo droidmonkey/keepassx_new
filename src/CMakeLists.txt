@@ -1,4 +1,4 @@
-#  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
+#  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
 #  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -15,18 +15,6 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-
-add_feature_info(Auto-Type WITH_XC_AUTOTYPE "Automatic password typing")
-add_feature_info(Networking WITH_XC_NETWORKING "Compile KeePassXC with network access code (e.g. for downloading website icons)")
-add_feature_info(KeePassXC-Browser WITH_XC_BROWSER "Browser integration with KeePassXC-Browser")
-add_feature_info(Passkeys WITH_XC_BROWSER_PASSKEYS "Passkeys support for browser integration")
-add_feature_info(SSHAgent WITH_XC_SSHAGENT "SSH agent integration compatible with KeeAgent")
-add_feature_info(KeeShare WITH_XC_KEESHARE "Sharing integration with KeeShare")
-add_feature_info(YubiKey WITH_XC_YUBIKEY "YubiKey HMAC-SHA1 challenge-response")
-add_feature_info(UpdateCheck WITH_XC_UPDATECHECK "Automatic update checking")
-if(UNIX AND NOT APPLE)
-    add_feature_info(FdoSecrets WITH_XC_FDOSECRETS "Implement freedesktop.org Secret Storage Spec server side API.")
-endif()
 
 set(core_SOURCES
         core/Alloc.cpp
@@ -94,6 +82,11 @@ set(core_SOURCES
         keys/FileKey.cpp
         keys/PasswordKey.cpp
         keys/ChallengeResponseKey.cpp
+        keys/drivers/YubiKey.h
+        keys/drivers/YubiKey.cpp
+        keys/drivers/YubiKeyInterface.cpp
+        keys/drivers/YubiKeyInterfaceUSB.cpp
+        keys/drivers/YubiKeyInterfacePCSC.cpp
         streams/HashedBlockStream.cpp
         streams/HmacBlockStream.cpp
         streams/LayeredStream.cpp
@@ -189,6 +182,7 @@ set(gui_SOURCES
         gui/reports/ReportsPageHibp.cpp
         gui/reports/ReportsWidgetStatistics.cpp
         gui/reports/ReportsPageStatistics.cpp
+        gui/osutils/DeviceListener.cpp
         gui/osutils/OSUtilsBase.cpp
         gui/osutils/ScreenLockListener.cpp
         gui/osutils/ScreenLockListenerPrivate.cpp
@@ -210,6 +204,7 @@ set(gui_SOURCES
 
 if(APPLE)
     list(APPEND gui_SOURCES
+            gui/osutils/macutils/DeviceListenerMac.cpp
             gui/osutils/macutils/MacPasteboard.cpp
             gui/osutils/macutils/MacUtils.cpp
             gui/osutils/macutils/ScreenLockListenerMac.cpp
@@ -223,14 +218,16 @@ endif()
 
 if(UNIX AND NOT APPLE)
     list(APPEND gui_SOURCES
+            gui/osutils/nixutils/DeviceListenerLibUsb.cpp
+            gui/osutils/nixutils/NixUtils.cpp
             gui/osutils/nixutils/ScreenLockListenerDBus.cpp
-            gui/osutils/nixutils/NixUtils.cpp)
+    )
     if("${CMAKE_SYSTEM}" MATCHES "Linux")
         list(APPEND core_SOURCES
                 quickunlock/Polkit.cpp
                 quickunlock/PolkitDbusTypes.cpp)
     endif()
-    if(WITH_XC_X11)
+    if(WITH_X11)
         list(APPEND gui_SOURCES
             gui/osutils/nixutils/X11Funcs.cpp)
     endif()
@@ -248,15 +245,11 @@ if(UNIX AND NOT APPLE)
         quickunlock/dbus/org.freedesktop.PolicyKit1.Authority.xml
         polkit_dbus
     )
-
-    find_library(KEYUTILS_LIBRARIES NAMES keyutils)
-    if(NOT KEYUTILS_LIBRARIES)
-		message(FATAL_ERROR "Could not find libkeyutils")
-    endif()
 endif()
 
 if(WIN32)
     list(APPEND gui_SOURCES
+            gui/osutils/winutils/DeviceListenerWin.cpp
             gui/osutils/winutils/ScreenLockListenerWin.cpp
             gui/osutils/winutils/WinUtils.cpp)
     if (MSVC)
@@ -264,86 +257,24 @@ if(WIN32)
     endif()
 endif()
 
-if(WITH_XC_YUBIKEY)
-    list(APPEND gui_SOURCES gui/osutils/DeviceListener.cpp)
-    if(APPLE)
-        list(APPEND gui_SOURCES gui/osutils/macutils/DeviceListenerMac.cpp)
-    elseif(UNIX)
-        list(APPEND gui_SOURCES gui/osutils/nixutils/DeviceListenerLibUsb.cpp)
-    elseif(WIN32)
-        list(APPEND gui_SOURCES gui/osutils/winutils/DeviceListenerWin.cpp)
-    endif()
-endif()
-
 add_subdirectory(browser)
 add_subdirectory(proxy)
-if(WITH_XC_BROWSER)
+if(KPXC_FEATURE_BROWSER)
     set(browser_LIB browser)
     list(APPEND gui_SOURCES
             gui/dbsettings/DatabaseSettingsWidgetBrowser.cpp
             gui/entry/EntryURLModel.cpp
-            gui/reports/ReportsWidgetBrowserStatistics.cpp
-            gui/reports/ReportsPageBrowserStatistics.cpp)
-endif()
-
-if(WITH_XC_BROWSER_PASSKEYS)
-    list(APPEND gui_SOURCES
-            gui/reports/ReportsWidgetPasskeys.cpp
+            gui/reports/ReportsPageBrowserStatistics.cpp
             gui/reports/ReportsPagePasskeys.cpp
+            gui/reports/ReportsWidgetBrowserStatistics.cpp
+            gui/reports/ReportsWidgetPasskeys.cpp
             gui/passkeys/PasskeyExporter.cpp
             gui/passkeys/PasskeyExportDialog.cpp
             gui/passkeys/PasskeyImporter.cpp
             gui/passkeys/PasskeyImportDialog.cpp)
 endif()
 
-add_subdirectory(autotype)
-add_subdirectory(cli)
-add_subdirectory(qrcode)
-set(qrcode_LIB qrcode)
-
-add_subdirectory(keeshare)
-if(WITH_XC_KEESHARE)
-    set(keeshare_LIB keeshare)
-endif()
-
-add_subdirectory(sshagent)
-if(WITH_XC_SSHAGENT)
-    set(sshagent_LIB sshagent)
-endif()
-
-add_subdirectory(fdosecrets)
-if(WITH_XC_FDOSECRETS)
-    set(fdosecrets_LIB fdosecrets)
-endif()
-
-add_subdirectory(thirdparty)
-
-set(autotype_SOURCES
-        autotype/AutoType.cpp
-        autotype/AutoTypeAction.cpp
-        autotype/AutoTypeMatchModel.cpp
-        autotype/AutoTypeMatchView.cpp
-        autotype/AutoTypeSelectDialog.cpp
-        autotype/PickcharsDialog.cpp
-        autotype/WindowSelectComboBox.cpp)
-
-add_library(autotype STATIC ${autotype_SOURCES})
-target_link_libraries(autotype Qt5::Core Qt5::Widgets)
-
-if(WITH_XC_YUBIKEY)
-    list(APPEND core_SOURCES
-        keys/drivers/YubiKey.h
-        keys/drivers/YubiKey.cpp
-        keys/drivers/YubiKeyInterface.cpp
-        keys/drivers/YubiKeyInterfaceUSB.cpp
-        keys/drivers/YubiKeyInterfacePCSC.cpp)
-else()
-    list(APPEND core_SOURCES
-        keys/drivers/YubiKey.h
-        keys/drivers/YubiKeyStub.cpp)
-endif()
-
-if(WITH_XC_NETWORKING)
+if(KPXC_FEATURE_NETWORK)
     list(APPEND gui_SOURCES
             networking/HibpDownloader.cpp
             networking/NetworkManager.cpp
@@ -353,12 +284,36 @@ if(WITH_XC_NETWORKING)
             gui/IconDownloaderDialog.cpp)
 endif()
 
+add_subdirectory(cli)
+add_subdirectory(thirdparty)
+
+add_subdirectory(autotype)
+set(autotype_LIB autotype)
+
+# TODO: Refactor to gui sources
+add_subdirectory(qrcode)
+set(qrcode_LIB qrcode)
+
+# TODO: Move to gui sources on refactor
+add_subdirectory(keeshare)
+set(keeshare_LIB keeshare)
+
+add_subdirectory(sshagent)
+if(KPXC_FEATURE_SSHAGENT)
+    set(sshagent_LIB sshagent)
+endif()
+
+add_subdirectory(fdosecrets)
+if(KPXC_FEATURE_FDOSECRETS)
+    set(fdosecrets_LIB fdosecrets)
+endif()
+
 configure_file(config-keepassx.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-keepassx.h)
 configure_file(git-info.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/git-info.h)
 
 # Core Library Definition
 add_library(keepassxc_core STATIC ${core_SOURCES})
-set_target_properties(keepassxc_core PROPERTIES COMPILE_DEFINITIONS KEEPASSX_BUILDING_CORE)
+set_target_properties(keepassxc_core PROPERTIES COMPILE_DEFINITIONS KPXC_BUILDING_CORE)
 target_link_libraries(keepassxc_core 
         ${qrcode_LIB}
         Qt5::Core
@@ -374,12 +329,12 @@ target_link_libraries(keepassxc_core
 
 # GUI Library Definition
 add_library(keepassxc_gui STATIC ${gui_SOURCES})
-set_target_properties(keepassxc_gui PROPERTIES COMPILE_DEFINITIONS KEEPASSX_BUILDING_CORE)
+set_target_properties(keepassxc_gui PROPERTIES COMPILE_DEFINITIONS KPXC_BUILDING_CORE)
 target_link_libraries(keepassxc_gui
         keepassxc_core
         Qt5::Network
         Qt5::Widgets
-        autotype
+        ${autotype_LIB}
         ${browser_LIB}
         ${fdosecrets_LIB}
         ${keeshare_LIB}
@@ -396,7 +351,7 @@ if(HAIKU)
 endif()
 if(UNIX AND NOT APPLE)
     target_link_libraries(keepassxc_core Qt5::DBus ${LIBUSB_LIBRARIES})
-    if(WITH_XC_X11)
+    if(WITH_X11)
         target_link_libraries(keepassxc_gui Qt5::X11Extras X11)
     endif()
     include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
@@ -534,7 +489,7 @@ if(WIN32)
                 COMPONENT Runtime)
 
         # install OpenSSL library
-        if(WITH_XC_NETWORKING)
+        if(KPXC_FEATURE_NETWORK)
             find_file(OPENSSL_DLL
                     NAMES libssl-3.dll libssl-3-x64.dll
                     HINTS "${OPENSSL_ROOT_DIR}/bin"

@@ -13,7 +13,5 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if(WITH_XC_YUBIKEY)
-    add_subdirectory(ykcore)
-    set(thirdparty_LIBRARIES ${thirdparty_LIBRARIES} ykcore PARENT_SCOPE)
-endif()
+add_subdirectory(ykcore)
+set(thirdparty_LIBRARIES ${thirdparty_LIBRARIES} ykcore PARENT_SCOPE)

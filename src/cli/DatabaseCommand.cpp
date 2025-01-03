@@ -27,9 +27,7 @@ DatabaseCommand::DatabaseCommand()
     positionalArguments.append({QString("database"), QObject::tr("Path of the database."), QString("")});
     options.append(Command::KeyFileOption);
     options.append(Command::NoPasswordOption);
-#ifdef WITH_XC_YUBIKEY
     options.append(Command::YubiKeyOption);
-#endif
 }
 
 int DatabaseCommand::execute(const QStringList& arguments)
@@ -55,11 +53,7 @@ int DatabaseCommand::execute(const QStringList& arguments)
         db = Utils::unlockDatabase(args.at(0),
                                    !parser->isSet(Command::NoPasswordOption),
                                    parser->value(Command::KeyFileOption),
-#ifdef WITH_XC_YUBIKEY
                                    parser->value(Command::YubiKeyOption),
-#else
-                                   "",
-#endif
                                    parser->isSet(Command::QuietOption));
         if (!db) {
             return EXIT_FAILURE;

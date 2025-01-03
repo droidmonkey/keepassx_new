@@ -273,7 +273,7 @@ BrowserPasskeys::buildCredentialPrivateKey(int alg, const QString& predefinedFir
             try {
                 Botan::Ed25519_PrivateKey key(*randomGen()->getRng());
                 auto publicKey = key.get_public_key();
-#ifdef WITH_XC_BOTAN3
+#ifdef WITH_BOTAN3
                 auto privateKey = key.raw_private_key_bits();
 #else
                 auto privateKey = key.get_private_key();
@@ -322,7 +322,7 @@ QByteArray BrowserPasskeys::buildSignature(const QByteArray& authenticatorData,
         std::vector<uint8_t> rawSignature;
         if (algName == "ECDSA") {
             Botan::ECDSA_PrivateKey privateKey(algId, privateKeyBytes);
-#ifdef WITH_XC_BOTAN3
+#ifdef WITH_BOTAN3
             Botan::PK_Signer signer(
                 privateKey, *randomGen()->getRng(), "EMSA1(SHA-256)", Botan::Signature_Format::DerSequence);
 #else

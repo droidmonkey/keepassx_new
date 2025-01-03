@@ -51,9 +51,8 @@ Merge::Merge()
     options.append(Merge::KeyFileFromOption);
     options.append(Merge::NoPasswordFromOption);
     options.append(Merge::DryRunOption);
-#ifdef WITH_XC_YUBIKEY
     options.append(Merge::YubiKeyFromOption);
-#endif
+
     positionalArguments.append({QString("database2"), QObject::tr("Path of the database to merge from."), QString("")});
 }
 

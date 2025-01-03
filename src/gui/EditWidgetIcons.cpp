@@ -28,7 +28,7 @@
 #include "gui/IconModels.h"
 #include "gui/Icons.h"
 #include "gui/MessageBox.h"
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
 #include "gui/IconDownloader.h"
 #endif
 
@@ -48,7 +48,7 @@ EditWidgetIcons::EditWidgetIcons(QWidget* parent)
     , m_applyIconTo(ApplyIconToOptions::THIS_ONLY)
     , m_defaultIconModel(new DefaultIconModel(this))
     , m_customIconModel(new CustomIconModel(this))
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
     , m_downloader(new IconDownloader())
 #endif
 {
@@ -73,14 +73,14 @@ EditWidgetIcons::EditWidgetIcons(QWidget* parent)
             this, SIGNAL(widgetUpdated()));
     connect(m_ui->customIconsView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this, SIGNAL(widgetUpdated()));
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
     connect(m_downloader.data(),
             SIGNAL(finished(const QString&, const QImage&)),
             SLOT(iconReceived(const QString&, const QImage&)));
 #endif
     // clang-format on
 
-#ifndef WITH_XC_NETWORKING
+#ifndef KPXC_FEATURE_NETWORK
     m_ui->faviconButton->setVisible(false);
     m_ui->faviconURL->setVisible(false);
 #endif
@@ -188,7 +188,7 @@ void EditWidgetIcons::keyPressEvent(QKeyEvent* event)
 
 void EditWidgetIcons::setUrl(const QString& url)
 {
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
     QUrl urlCheck(url);
     if (urlCheck.scheme().startsWith("http")) {
         m_ui->faviconURL->setText(urlCheck.url(QUrl::RemovePath | QUrl::RemoveQuery | QUrl::RemoveFragment));
@@ -203,7 +203,7 @@ void EditWidgetIcons::setUrl(const QString& url)
 
 void EditWidgetIcons::downloadFavicon()
 {
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
     auto url = m_ui->faviconURL->text();
     if (!url.isEmpty()) {
         m_downloader->setUrl(url);
@@ -214,7 +214,7 @@ void EditWidgetIcons::downloadFavicon()
 
 void EditWidgetIcons::iconReceived(const QString& url, const QImage& icon)
 {
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
     Q_UNUSED(url);
     if (icon.isNull()) {
         QString message(tr("Unable to fetch favicon."));
@@ -237,7 +237,7 @@ void EditWidgetIcons::iconReceived(const QString& url, const QImage& icon)
 
 void EditWidgetIcons::abortRequests()
 {
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
     if (m_downloader) {
         m_downloader->abortDownload();
     }

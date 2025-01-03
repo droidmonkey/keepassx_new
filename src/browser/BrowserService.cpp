@@ -23,20 +23,18 @@
 #include "BrowserEntrySaveDialog.h"
 #include "BrowserHost.h"
 #include "BrowserMessageBuilder.h"
+#include "BrowserPasskeys.h"
+#include "BrowserPasskeysClient.h"
+#include "BrowserPasskeysConfirmationDialog.h"
 #include "BrowserSettings.h"
+#include "PasskeyUtils.h"
 #include "core/EntryAttributes.h"
 #include "core/Tools.h"
 #include "gui/MainWindow.h"
 #include "gui/MessageBox.h"
 #include "gui/UrlTools.h"
 #include "gui/osutils/OSUtils.h"
-#ifdef WITH_XC_BROWSER_PASSKEYS
-#include "BrowserPasskeys.h"
-#include "BrowserPasskeysClient.h"
-#include "BrowserPasskeysConfirmationDialog.h"
-#include "PasskeyUtils.h"
 #include "gui/passkeys/PasskeyImporter.h"
-#endif
 #ifdef Q_OS_MACOS
 #include "gui/osutils/macutils/MacUtils.h"
 #endif
@@ -56,11 +54,9 @@
 const QString BrowserService::KEEPASSXCBROWSER_NAME = QStringLiteral("KeePassXC-Browser Settings");
 const QString BrowserService::KEEPASSXCBROWSER_OLD_NAME = QStringLiteral("keepassxc-browser Settings");
 static const QString KEEPASSXCBROWSER_GROUP_NAME = QStringLiteral("KeePassXC-Browser Passwords");
-static int KEEPASSXCBROWSER_DEFAULT_ICON = 1;
-#ifdef WITH_XC_BROWSER_PASSKEYS
-static int KEEPASSXCBROWSER_PASSKEY_ICON = 13;
 static const QString PASSKEYS_DEFAULT_GROUP_NAME = QStringLiteral("KeePassXC-Browser Passkeys");
-#endif
+static int KEEPASSXCBROWSER_DEFAULT_ICON = 1;
+static int KEEPASSXCBROWSER_PASSKEY_ICON = 13;
 // These are for the settings and password conversion
 static const QString KEEPASSHTTP_NAME = QStringLiteral("KeePassHttp Settings");
 static const QString KEEPASSHTTP_GROUP_NAME = QStringLiteral("KeePassHttp Passwords");
@@ -632,7 +628,6 @@ QString BrowserService::getKey(const QString& id)
     return db->metadata()->customData()->value(CustomData::getKeyWithPrefix(CustomData::BrowserKeyPrefix, id));
 }
 
-#ifdef WITH_XC_BROWSER_PASSKEYS
 // Passkey registration
 QJsonObject BrowserService::showPasskeysRegisterPrompt(const QJsonObject& publicKeyOptions,
                                                        const QString& origin,
@@ -858,7 +853,6 @@ void BrowserService::addPasskeyToEntry(Entry* entry,
 
     entry->endUpdate();
 }
-#endif
 
 void BrowserService::addEntry(const EntryParameters& entryParameters,
                               const QString& group,
@@ -1046,12 +1040,10 @@ QList<Entry*> BrowserService::searchEntries(const QSharedPointer<Database>& db,
                 continue;
             }
 
-#ifdef WITH_XC_BROWSER_PASSKEYS
             // With Passkeys, check for the Relying Party instead of URL
             if (passkey && entry->attributes()->value(EntryAttributes::KPEX_PASSKEY_RELYING_PARTY) != siteUrl) {
                 continue;
             }
-#endif
 
             // Additional URL check may have already inserted the entry to the list
             if (!entries.contains(entry)) {
@@ -1385,7 +1377,6 @@ bool BrowserService::shouldIncludeEntry(Entry* entry,
     return false;
 }
 
-#ifdef WITH_XC_BROWSER_PASSKEYS
 // Returns all Passkey entries for the current Relying Party
 QList<Entry*> BrowserService::getPasskeyEntries(const QString& rpId, const StringPairList& keyList)
 {
@@ -1460,7 +1451,6 @@ QJsonObject BrowserService::getPasskeyError(int errorCode) const
 {
     return QJsonObject({{"errorCode", errorCode}});
 }
-#endif
 
 bool BrowserService::handleURL(const QString& entryUrl,
                                const QString& siteUrl,

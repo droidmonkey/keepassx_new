@@ -20,13 +20,13 @@
 
 #include "config-keepassx.h"
 
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
 
 class QNetworkAccessManager;
 
 QNetworkAccessManager* getNetMgr();
 #else
-Q_STATIC_ASSERT_X(false, "Qt Networking used when WITH_XC_NETWORKING is disabled!");
+Q_STATIC_ASSERT_X(false, "Qt Networking used when KPXC_FEATURE_NETWORK is disabled!");
 #endif
 
 #endif // KEEPASSXC_NETWORKMANAGER_H

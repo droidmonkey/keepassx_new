@@ -47,7 +47,6 @@ CMAKE_OPTIONS=""
 CPACK_GENERATORS="WIX;ZIP"
 COMPILER="g++"
 MAKE_OPTIONS="-j$(getconf _NPROCESSORS_ONLN)"
-BUILD_PLUGINS="all"
 INSTALL_PREFIX="/usr/local"
 ORIG_BRANCH=""
 ORIG_CWD="$(pwd)"
@@ -132,8 +131,6 @@ Options:
   -m, --make-options      Make options for compiling sources (default: '${MAKE_OPTIONS}')
   -g, --generators        Additional CPack generators (default: '${CPACK_GENERATORS}')
   -i, --install-prefix    Install prefix (default: '${INSTALL_PREFIX}')
-  -p, --plugins           Space-separated list of plugins to build
-                          (default: ${BUILD_PLUGINS})
       --snapshot          Don't checkout the release tag
   -n, --no-source-tarball Don't build source tarball
   -h, --help              Show this help
@@ -829,10 +826,6 @@ build() {
                 INSTALL_PREFIX="$2"
                 shift ;;
 
-            -p|--plugins)
-                BUILD_PLUGINS="$2"
-                shift ;;
-
             -n|--no-source-tarball)
                 build_source_tarball=false ;;
 
@@ -870,13 +863,9 @@ build() {
         CMAKE_OPTIONS="${CMAKE_OPTIONS} -DKEEPASSXC_BUILD_TYPE=Snapshot -DOVERRIDE_VERSION=${RELEASE_NAME}"
     else
         checkWorkingTreeClean
-        if echo "$TAG_NAME" | grep -qE '\-(alpha|beta)[0-9]+$'; then
-            CMAKE_OPTIONS="${CMAKE_OPTIONS} -DKEEPASSXC_BUILD_TYPE=PreRelease"
-            logInfo "Checking out pre-release tag '${TAG_NAME}'..."
-        else
-            CMAKE_OPTIONS="${CMAKE_OPTIONS} -DKEEPASSXC_BUILD_TYPE=Release"
-            logInfo "Checking out release tag '${TAG_NAME}'..."
-        fi
+        
+        CMAKE_OPTIONS="${CMAKE_OPTIONS} -DKEEPASSXC_BUILD_TYPE=Release"
+        logInfo "Checking out release tag '${TAG_NAME}'..."
 
         if ! git checkout "$TAG_NAME" > /dev/null 2>&1; then
             exitError "Failed to check out target branch."
@@ -922,9 +911,6 @@ build() {
     cd "${OUTPUT_DIR}/build-release"
 
     logInfo "Configuring sources..."
-    for p in ${BUILD_PLUGINS}; do
-        CMAKE_OPTIONS="${CMAKE_OPTIONS} -DWITH_XC_$(echo $p | tr '[:lower:]' '[:upper:]')=On"
-    done
     if [ -n "$OS_LINUX" ] && ${build_appimage}; then
         CMAKE_OPTIONS="${CMAKE_OPTIONS} -DKEEPASSXC_DIST_TYPE=AppImage"
         # linuxdeploy requires /usr as install prefix

@@ -19,7 +19,6 @@
 #define KEEPASSXC_DATABASESETTINGSWIDGETDATABASEKEY_H
 
 #include "DatabaseSettingsWidget.h"
-#include "config-keepassx.h"
 
 #include <QPointer>
 
@@ -72,9 +71,7 @@ private:
     const QPointer<QWidget> m_additionalKeyOptions;
     const QPointer<PasswordEditWidget> m_passwordEditWidget;
     const QPointer<KeyFileEditWidget> m_keyFileEditWidget;
-#ifdef WITH_XC_YUBIKEY
     const QPointer<YubiKeyEditWidget> m_yubiKeyEditWidget;
-#endif
 };
 
 #endif // KEEPASSXC_DATABASESETTINGSWIDGETDATABASEKEY_H

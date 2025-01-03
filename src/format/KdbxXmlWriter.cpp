@@ -109,7 +109,6 @@ void KdbxXmlWriter::fillBinaryIdxMap()
         for (const QString& key : attachmentKeys) {
             QByteArray data = entry->attachments()->value(key);
             CryptoHash hash(CryptoHash::Sha256);
-#ifdef WITH_XC_KEESHARE
             // Namespace KeeShare attachments so they don't get deduplicated together with attachments
             // from other databases. Prevents potential filesize side channels.
             auto group = entry->group();
@@ -121,7 +120,6 @@ void KdbxXmlWriter::fillBinaryIdxMap()
             } else {
                 hash.addData(m_db->uuid().toByteArray());
             }
-#endif
             hash.addData(data);
 
             const auto hashResult = hash.result();

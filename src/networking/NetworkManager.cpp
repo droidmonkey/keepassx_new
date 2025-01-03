@@ -17,7 +17,7 @@
 
 #include "config-keepassx.h"
 
-#ifdef WITH_XC_NETWORKING
+#ifdef KPXC_FEATURE_NETWORK
 
 #include "NetworkManager.h"
 

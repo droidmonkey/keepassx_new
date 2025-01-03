@@ -19,10 +19,7 @@
 #define KEEPASSXC_YUBIKEYEDITWIDGET_H
 
 #include "KeyComponentWidget.h"
-#include "config-keepassx.h"
-#ifdef WITH_XC_YUBIKEY
 #include "gui/osutils/DeviceListener.h"
-#endif
 
 namespace Ui
 {
@@ -57,9 +54,7 @@ private slots:
 private:
     const QScopedPointer<Ui::YubiKeyEditWidget> m_compUi;
     QPointer<QWidget> m_compEditWidget;
-#ifdef WITH_XC_YUBIKEY
     QPointer<DeviceListener> m_deviceListener;
-#endif
     bool m_isDetected = false;
 };
 

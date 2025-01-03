@@ -87,7 +87,7 @@ public:
     QSharedPointer<Database> getDatabase(const QUuid& rootGroupUuid = {});
     QSharedPointer<Database> selectedDatabase();
     QList<QSharedPointer<Database>> getOpenDatabases();
-#ifdef WITH_XC_BROWSER_PASSKEYS
+
     QJsonObject showPasskeysRegisterPrompt(const QJsonObject& publicKeyOptions,
                                            const QString& origin,
                                            const QString& groupName,
@@ -111,7 +111,7 @@ public:
                            const QString& credentialId,
                            const QString& userHandle,
                            const QString& privateKey);
-#endif
+
     void addEntry(const EntryParameters& entryParameters,
                   const QString& group,
                   const QString& groupUuid,
@@ -185,7 +185,7 @@ private:
     bool removeFirstDomain(QString& hostname);
     bool
     shouldIncludeEntry(Entry* entry, const QString& url, const QString& submitUrl, const bool omitWwwSubdomain = false);
-#ifdef WITH_XC_BROWSER_PASSKEYS
+
     QList<Entry*> getPasskeyEntries(const QString& rpId, const StringPairList& keyList);
     QList<Entry*>
     getPasskeyEntriesWithUserHandle(const QString& rpId, const QString& userId, const StringPairList& keyList);
@@ -195,7 +195,7 @@ private:
                                      const QString& rpId,
                                      const StringPairList& keyList);
     QJsonObject getPasskeyError(int errorCode) const;
-#endif
+
     bool handleURL(const QString& entryUrl,
                    const QString& siteUrl,
                    const QString& formUrl,
@@ -220,9 +220,7 @@ private:
     Q_DISABLE_COPY(BrowserService);
 
     friend class TestBrowser;
-#ifdef WITH_XC_BROWSER_PASSKEYS
     friend class TestPasskeys;
-#endif
 };
 
 static inline BrowserService* browserService()

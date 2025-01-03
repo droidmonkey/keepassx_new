@@ -21,10 +21,8 @@
 #include "core/Entry.h"
 #include "core/EntryAttributes.h"
 #include "core/Global.h"
-#include "keys/FileKey.h"
-#ifdef WITH_XC_YUBIKEY
 #include "keys/ChallengeResponseKey.h"
-#endif
+#include "keys/FileKey.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -170,7 +168,6 @@ namespace Utils
             compositeKey->addKey(fileKey);
         }
 
-#ifdef WITH_XC_YUBIKEY
         if (!yubiKeySlot.isEmpty()) {
             unsigned int serial = 0;
             int slot;
@@ -201,18 +198,14 @@ namespace Utils
 
             YubiKey::instance()->findValidKeys();
         }
-#else
-        Q_UNUSED(yubiKeySlot);
-#endif // WITH_XC_YUBIKEY
 
         auto db = QSharedPointer<Database>::create();
         QString error;
-        if (db->open(databaseFilename, compositeKey, &error)) {
-            return db;
-        } else {
+        if (!db->open(databaseFilename, compositeKey, &error)) {
             err << error << Qt::endl;
             return {};
         }
+        return db;
     }
 
     /**

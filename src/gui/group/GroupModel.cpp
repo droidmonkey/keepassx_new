@@ -125,9 +125,7 @@ QVariant GroupModel::data(const QModelIndex& index, int role) const
 
     if (role == Qt::DisplayRole) {
         QString nameTemplate = "%1";
-#if defined(WITH_XC_KEESHARE)
         nameTemplate = KeeShare::indicatorSuffix(group, nameTemplate);
-#endif
         return nameTemplate.arg(group->name());
     } else if (role == Qt::DecorationRole) {
         return Icons::groupIconPixmap(group);

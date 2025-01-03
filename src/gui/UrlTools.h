@@ -22,7 +22,7 @@
 #include <QObject>
 #include <QUrl>
 #include <QVariant>
-#if defined(WITH_XC_NETWORKING) || defined(WITH_XC_BROWSER)
+#if defined(KPXC_FEATURE_NETWORK) || defined(KPXC_FEATURE_BROWSER)
 #include <QNetworkReply>
 #endif
 
@@ -34,7 +34,7 @@ public:
     explicit UrlTools() = default;
     static UrlTools* instance();
 
-#if defined(WITH_XC_NETWORKING) || defined(WITH_XC_BROWSER)
+#if defined(KPXC_FEATURE_NETWORK) || defined(KPXC_FEATURE_BROWSER)
     QUrl getRedirectTarget(QNetworkReply* reply) const;
     QString getBaseDomainFromUrl(const QString& url) const;
     QString getTopLevelDomainFromUrl(const QString& url) const;

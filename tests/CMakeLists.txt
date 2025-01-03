@@ -76,18 +76,6 @@ macro(add_unit_test)
     endif(KDE4_TEST_OUTPUT STREQUAL "xml")
 
     set_tests_properties(${_test_NAME} PROPERTIES ENVIRONMENT "LANG=en_US.UTF-8")
-
-    if(NOT MSVC_IDE)   #not needed for the ide
-        # if the tests are EXCLUDE_FROM_ALL, add a target "buildtests" to build all tests
-        if(NOT WITH_TESTS)
-            get_directory_property(_buildtestsAdded BUILDTESTS_ADDED)
-            if(NOT _buildtestsAdded)
-                add_custom_target(buildtests)
-                set_directory_properties(PROPERTIES BUILDTESTS_ADDED TRUE)
-            endif()
-            add_dependencies(buildtests ${_test_NAME})
-        endif()
-    endif()
 endmacro(add_unit_test)
 
 set(TEST_LIBRARIES keepassxc_gui Qt5::Test)
@@ -145,27 +133,9 @@ add_unit_test(NAME testkeepass1reader SOURCES TestKeePass1Reader.cpp
 add_unit_test(NAME testimports SOURCES TestImports.cpp
         LIBS ${TEST_LIBRARIES})
 
-if(WITH_XC_NETWORKING)
-    add_unit_test(NAME testupdatecheck SOURCES TestUpdateCheck.cpp
-            LIBS ${TEST_LIBRARIES})
-
-    add_unit_test(NAME testicondownloader SOURCES TestIconDownloader.cpp LIBS ${TEST_LIBRARIES})
-endif()
-
-if(WITH_XC_AUTOTYPE)
-    add_unit_test(NAME testautotype SOURCES TestAutoType.cpp
-            LIBS ${TEST_LIBRARIES})
-    set_target_properties(testautotype PROPERTIES ENABLE_EXPORTS ON)
-endif()
-
-if(WITH_XC_SSHAGENT)
-    add_unit_test(NAME testopensshkey SOURCES TestOpenSSHKey.cpp
-            LIBS sshagent ${TEST_LIBRARIES})
-    if(NOT WIN32)
-        add_unit_test(NAME testsshagent SOURCES TestSSHAgent.cpp
-                LIBS sshagent ${TEST_LIBRARIES})
-    endif()
-endif()
+add_unit_test(NAME testautotype SOURCES TestAutoType.cpp
+        LIBS ${TEST_LIBRARIES})
+set_target_properties(testautotype PROPERTIES ENABLE_EXPORTS ON)
 
 add_unit_test(NAME testentry SOURCES TestEntry.cpp
         LIBS ${TEST_LIBRARIES})
@@ -203,16 +173,11 @@ add_unit_test(NAME testentrysearcher SOURCES TestEntrySearcher.cpp
 add_unit_test(NAME testcsvexporter SOURCES TestCsvExporter.cpp
         LIBS ${TEST_LIBRARIES})
 
-if(WITH_XC_YUBIKEY)
-    add_unit_test(NAME testykchallengeresponsekey
-        SOURCES TestYkChallengeResponseKey.cpp
+add_unit_test(NAME testykchallengeresponsekey SOURCES TestYkChallengeResponseKey.cpp
         LIBS ${TEST_LIBRARIES})
-endif()
 
-if(WITH_XC_KEESHARE)
-    add_unit_test(NAME testsharing SOURCES TestSharing.cpp
+add_unit_test(NAME testsharing SOURCES TestSharing.cpp
         LIBS testsupport ${TEST_LIBRARIES})
-endif()
 
 add_unit_test(NAME testdatabase SOURCES TestDatabase.cpp
         LIBS testsupport ${TEST_LIBRARIES})
@@ -223,29 +188,44 @@ add_unit_test(NAME testtools SOURCES TestTools.cpp
 add_unit_test(NAME testconfig SOURCES TestConfig.cpp
         LIBS testsupport ${TEST_LIBRARIES})
 
-if(WITH_XC_FDOSECRETS)
-    add_unit_test(NAME testfdosecrets SOURCES TestFdoSecrets.cpp
-        LIBS testsupport fdosecrets ${TEST_LIBRARIES})
-endif()
-
-if(WITH_XC_BROWSER)
-    add_unit_test(NAME testbrowser SOURCES TestBrowser.cpp
-        LIBS browser ${TEST_LIBRARIES})
-
-    if(WITH_XC_BROWSER_PASSKEYS)
-        add_unit_test(NAME testpasskeys SOURCES TestPasskeys.cpp
-            LIBS browser ${TEST_LIBRARIES})
-    endif()
-endif()
-
-if(WITH_XC_NETWORKING OR WITH_XC_BROWSER)
-    add_unit_test(NAME testurltools SOURCES TestUrlTools.cpp LIBS ${TEST_LIBRARIES})
-endif()
-
 add_unit_test(NAME testcli SOURCES TestCli.cpp
         LIBS testsupport cli ${ZXCVBN_LIBRARIES} ${TEST_LIBRARIES})
 target_compile_definitions(testcli PRIVATE KEEPASSX_CLI_PATH="$<TARGET_FILE:keepassxc-cli>")
 
+if(KPXC_FEATURE_SSHAGENT)
+    add_unit_test(NAME testopensshkey SOURCES TestOpenSSHKey.cpp
+            LIBS sshagent ${TEST_LIBRARIES})
+    if(NOT WIN32)
+        add_unit_test(NAME testsshagent SOURCES TestSSHAgent.cpp
+                LIBS sshagent ${TEST_LIBRARIES})
+    endif()
+endif()
+
+if(KPXC_FEATURE_FDOSECRETS)
+    add_unit_test(NAME testfdosecrets SOURCES TestFdoSecrets.cpp
+        LIBS testsupport fdosecrets ${TEST_LIBRARIES})
+endif()
+
+if(KPXC_FEATURE_BROWSER)
+    add_unit_test(NAME testbrowser SOURCES TestBrowser.cpp
+        LIBS browser ${TEST_LIBRARIES})
+
+    add_unit_test(NAME testpasskeys SOURCES TestPasskeys.cpp
+        LIBS browser ${TEST_LIBRARIES})
+endif()
+
+if(KPXC_FEATURE_NETWORK OR KPXC_FEATURE_BROWSER)
+    add_unit_test(NAME testurltools SOURCES TestUrlTools.cpp LIBS ${TEST_LIBRARIES})
+endif()
+
+if(KPXC_FEATURE_NETWORK)
+    add_unit_test(NAME testupdatecheck SOURCES TestUpdateCheck.cpp
+        LIBS ${TEST_LIBRARIES})
+
+    add_unit_test(NAME testicondownloader SOURCES TestIconDownloader.cpp 
+        LIBS ${TEST_LIBRARIES})
+endif()
+
 if(WITH_GUI_TESTS)
     add_subdirectory(gui)
-endif(WITH_GUI_TESTS)
+endif()

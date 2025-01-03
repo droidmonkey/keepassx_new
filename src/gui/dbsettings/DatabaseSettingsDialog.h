@@ -28,13 +28,11 @@ class Database;
 class DatabaseSettingsWidgetGeneral;
 class DatabaseSettingsWidgetEncryption;
 class DatabaseSettingsWidgetDatabaseKey;
-#ifdef WITH_XC_BROWSER
+#ifdef KPXC_FEATURE_BROWSER
 class DatabaseSettingsWidgetBrowser;
 #endif
-#ifdef WITH_XC_KEESHARE
 class DatabaseSettingsWidgetKeeShare;
-#endif
-#ifdef WITH_XC_FDOSECRETS
+#ifdef KPXC_FEATURE_FDOSECRETS
 class DatabaseSettingsWidgetFdoSecrets;
 #endif
 class DatabaseSettingsWidgetMaintenance;
@@ -67,13 +65,11 @@ private:
     QPointer<QTabWidget> m_securityTabWidget;
     QPointer<DatabaseSettingsWidgetDatabaseKey> m_databaseKeyWidget;
     QPointer<DatabaseSettingsWidgetEncryption> m_encryptionWidget;
-#ifdef WITH_XC_BROWSER
+#ifdef KPXC_FEATURE_BROWSER
     QPointer<DatabaseSettingsWidgetBrowser> m_browserWidget;
 #endif
-#ifdef WITH_XC_KEESHARE
     QPointer<DatabaseSettingsWidgetKeeShare> m_keeShareWidget;
-#endif
-#ifdef WITH_XC_FDOSECRETS
+#ifdef KPXC_FEATURE_FDOSECRETS
     QPointer<DatabaseSettingsWidgetFdoSecrets> m_fdoSecretsWidget;
 #endif
     QPointer<DatabaseSettingsWidgetMaintenance> m_maintenanceWidget;
