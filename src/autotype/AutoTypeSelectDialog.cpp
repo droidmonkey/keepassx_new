@@ -336,17 +336,7 @@ void AutoTypeSelectDialog::buildActionMenu()
     });
 #endif
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
-    // Qt 5.10 introduced a new "feature" to hide shortcuts in context menus
-    // Unfortunately, Qt::AA_DontShowShortcutsInContextMenus is broken, have to manually enable them
-    typeUsernameAction->setShortcutVisibleInContextMenu(true);
-    typePasswordAction->setShortcutVisibleInContextMenu(true);
-    typeTotpAction->setShortcutVisibleInContextMenu(true);
-#ifdef Q_OS_WIN
-    typeVirtualAction->setShortcutVisibleInContextMenu(true);
-#endif
-#endif
-
+    copyUsernameAction->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_1);
     copyUsernameAction->setProperty(MENU_FIELD_PROP_NAME, MENU_FIELD::USERNAME);
     connect(copyUsernameAction, &QAction::triggered, this, [&] {
         auto entry = m_ui->view->currentMatch().first;
@@ -356,6 +346,7 @@ void AutoTypeSelectDialog::buildActionMenu()
         }
     });
 
+    copyPasswordAction->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_2);
     copyPasswordAction->setProperty(MENU_FIELD_PROP_NAME, MENU_FIELD::PASSWORD);
     connect(copyPasswordAction, &QAction::triggered, this, [&] {
         auto entry = m_ui->view->currentMatch().first;
@@ -365,6 +356,7 @@ void AutoTypeSelectDialog::buildActionMenu()
         }
     });
 
+    copyTotpAction->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_3);
     copyTotpAction->setProperty(MENU_FIELD_PROP_NAME, MENU_FIELD::TOTP);
     connect(copyTotpAction, &QAction::triggered, this, [&] {
         auto entry = m_ui->view->currentMatch().first;
@@ -373,6 +365,20 @@ void AutoTypeSelectDialog::buildActionMenu()
             reject();
         }
     });
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
+    // Qt 5.10 introduced a new "feature" to hide shortcuts in context menus
+    // Unfortunately, Qt::AA_DontShowShortcutsInContextMenus is broken, have to manually enable them
+    typeUsernameAction->setShortcutVisibleInContextMenu(true);
+    typePasswordAction->setShortcutVisibleInContextMenu(true);
+    typeTotpAction->setShortcutVisibleInContextMenu(true);
+#if defined(Q_OS_WIN)
+    typeVirtualAction->setShortcutVisibleInContextMenu(true);
+#endif
+    copyUsernameAction->setShortcutVisibleInContextMenu(true);
+    copyPasswordAction->setShortcutVisibleInContextMenu(true);
+    copyTotpAction->setShortcutVisibleInContextMenu(true);
+#endif
 }
 
 void AutoTypeSelectDialog::showEvent(QShowEvent* event)
