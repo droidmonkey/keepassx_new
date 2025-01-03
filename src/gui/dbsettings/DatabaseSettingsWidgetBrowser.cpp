@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2018 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2018 Sami Vänttinen <sami.vanttinen@protonmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -126,7 +126,7 @@ void DatabaseSettingsWidgetBrowser::updateModel()
         if (key.startsWith(CustomData::BrowserKeyPrefix)) {
             QString strippedKey = key;
             strippedKey.remove(CustomData::BrowserKeyPrefix);
-            auto created = customData()->value(QString("%1_%2").arg(CustomData::Created, strippedKey));
+            auto created = customData()->value(getKeyWithPrefix(CustomData::Created, strippedKey));
             auto createdItem = new QStandardItem(created);
             createdItem->setEditable(false);
             m_customDataModel->appendRow(QList<QStandardItem*>()
@@ -287,18 +287,16 @@ void DatabaseSettingsWidgetBrowser::editFinished(QStandardItem* item)
 
     if (itemSelectionModel) {
         auto indexList = itemSelectionModel->selectedRows(item->column());
-        if (indexList.length() > 0) {
-            QString newValue = item->index().data().toString();
+        if (!indexList.isEmpty()) {
+            auto newValue = item->index().data().toString();
 
             // The key is edited
             if (item->column() == 0) {
-                // Get the old key/value pair, remove it and replace it
-                m_valueInEdit.insert(0, CustomData::BrowserKeyPrefix);
-                auto tempValue = customData()->value(m_valueInEdit);
-                newValue.insert(0, CustomData::BrowserKeyPrefix);
+                // Update created timestamp with the new key
+                replaceKey(CustomData::Created, m_valueInEdit, newValue);
 
-                m_db->metadata()->customData()->remove(m_valueInEdit);
-                m_db->metadata()->customData()->set(newValue, tempValue);
+                // Get the old key/value pair, remove it and replace it
+                replaceKey(CustomData::BrowserKeyPrefix, m_valueInEdit, newValue);
             } else {
                 // Replace just the value
                 for (const QString& key : m_db->metadata()->customData()->keys()) {
@@ -320,4 +318,21 @@ void DatabaseSettingsWidgetBrowser::editFinished(QStandardItem* item)
 void DatabaseSettingsWidgetBrowser::updateSharedKeyList()
 {
     updateModel();
+}
+
+// Replaces a key and the created timestamp for it
+void DatabaseSettingsWidgetBrowser::replaceKey(const QString& prefix,
+                                               const QString& oldName,
+                                               const QString& newName) const
+{
+    const auto oldKey = getKeyWithPrefix(prefix, oldName);
+    const auto newKey = getKeyWithPrefix(prefix, newName);
+    const auto tempValue = customData()->value(oldKey);
+    m_db->metadata()->customData()->remove(oldKey);
+    m_db->metadata()->customData()->set(newKey, tempValue);
+}
+
+QString DatabaseSettingsWidgetBrowser::getKeyWithPrefix(const QString& prefix, const QString& key) const
+{
+    return QString("%1%2").arg(prefix, key);
 }
