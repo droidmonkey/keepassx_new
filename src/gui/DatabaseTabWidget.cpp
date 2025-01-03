@@ -276,6 +276,9 @@ DatabaseWidget* DatabaseTabWidget::importFile()
             Merger merger(db.data(), newDb.data());
             merger.setSkipDatabaseCustomData(true);
             merger.merge();
+            // Transfer the root group data
+            newDb->rootGroup()->setName(db->rootGroup()->name());
+            newDb->rootGroup()->setNotes(db->rootGroup()->notes());
             // Show the new database
             auto dbWidget = new DatabaseWidget(newDb, this);
             addDatabaseTab(dbWidget);

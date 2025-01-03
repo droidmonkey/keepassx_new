@@ -79,6 +79,7 @@ set(keepassx_SOURCES
         format/OpVaultReaderAttachments.cpp
         format/OpVaultReaderBandEntry.cpp
         format/OpVaultReaderSections.cpp
+        format/ProtonPassReader.cpp
         gui/styles/styles.qrc
         gui/styles/StateColorPalette.cpp
         gui/styles/base/phantomcolor.cpp

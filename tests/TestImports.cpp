@@ -25,6 +25,7 @@
 #include "format/BitwardenReader.h"
 #include "format/OPUXReader.h"
 #include "format/OpVaultReader.h"
+#include "format/ProtonPassReader.h"
 
 #include <QJsonObject>
 #include <QList>
@@ -314,4 +315,59 @@ void TestImports::testBitwardenPasskey()
     QCOMPARE(attr->value(EntryAttributes::KPEX_PASSKEY_RELYING_PARTY), QStringLiteral("webauthn.io"));
     QCOMPARE(attr->value(EntryAttributes::KPEX_PASSKEY_USER_HANDLE),
              QStringLiteral("aTFtdmFnOHYtS2dxVEJ0by1rSFpLWGg0enlTVC1iUVJReDZ5czJXa3c2aw"));
+}
+
+void TestImports::testProtonPass()
+{
+    auto protonPassPath =
+        QStringLiteral("%1/%2").arg(KEEPASSX_TEST_DATA_DIR, QStringLiteral("/protonpass_export.json"));
+
+    ProtonPassReader reader;
+    auto db = reader.convert(protonPassPath);
+    QVERIFY2(!reader.hasError(), qPrintable(reader.errorString()));
+    QVERIFY(db);
+
+    // Confirm Login fields
+    auto entry = db->rootGroup()->findEntryByPath("/Personal/Test Login");
+    QVERIFY(entry);
+    QCOMPARE(entry->title(), QStringLiteral("Test Login"));
+    QCOMPARE(entry->username(), QStringLiteral("Username"));
+    QCOMPARE(entry->password(), QStringLiteral("Password"));
+    QCOMPARE(entry->url(), QStringLiteral("https://example.com/"));
+    QCOMPARE(entry->notes(), QStringLiteral("My login secure note."));
+    // Check extra URL's
+    QCOMPARE(entry->attribute("KP2A_URL_1"), QStringLiteral("https://example2.com/"));
+    // Check TOTP
+    QVERIFY(entry->hasTotp());
+    // Check attributes
+    auto attr = entry->attributes();
+    QVERIFY(attr->isProtected("hidden field"));
+    QCOMPARE(attr->value("second 2fa secret"), QStringLiteral("TOTPCODE"));
+    // NOTE: Proton Pass does not export attachments
+    // NOTE: Proton Pass does not export expiration dates
+
+    // Confirm Secure Note
+    entry = db->rootGroup()->findEntryByPath("/Personal/My Secure Note");
+    QVERIFY(entry);
+    QCOMPARE(entry->notes(), QStringLiteral("Secure note contents."));
+
+    // Confirm Credit Card
+    entry = db->rootGroup()->findEntryByPath("/Personal/Test Card");
+    QVERIFY(entry);
+    QCOMPARE(entry->username(), QStringLiteral("1234222233334444"));
+    QCOMPARE(entry->password(), QStringLiteral("333"));
+    attr = entry->attributes();
+    QCOMPARE(attr->value("card_cardholderName"), QStringLiteral("Test name"));
+    QCOMPARE(attr->value("card_expirationDate"), QStringLiteral("2025-01"));
+    QCOMPARE(attr->value("card_pin"), QStringLiteral("1234"));
+    QVERIFY(attr->isProtected("card_pin"));
+
+    // Confirm Expired (deleted) entry
+    entry = db->rootGroup()->findEntryByPath("/Personal/My Deleted Note");
+    QVERIFY(entry);
+    QTRY_VERIFY(entry->isExpired());
+
+    // Confirm second group (vault)
+    entry = db->rootGroup()->findEntryByPath("/Test/Other vault login");
+    QVERIFY(entry);
 }

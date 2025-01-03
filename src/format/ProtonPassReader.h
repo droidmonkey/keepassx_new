@@ -15,23 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TEST_IMPORTS_H
-#define TEST_IMPORTS_H
+#ifndef PROTONPASS_READER_H
+#define PROTONPASS_READER_H
 
-#include <QObject>
+#include <QSharedPointer>
 
-class TestImports : public QObject
+class Database;
+
+/*!
+ * Imports a Proton Pass vault in JSON format: https://proton.me/support/pass-export
+ */
+class ProtonPassReader
 {
-    Q_OBJECT
+public:
+    explicit ProtonPassReader() = default;
+    ~ProtonPassReader() = default;
 
-private slots:
-    void initTestCase();
-    void testOPUX();
-    void testOPVault();
-    void testBitwarden();
-    void testBitwardenEncrypted();
-    void testBitwardenPasskey();
-    void testProtonPass();
+    QSharedPointer<Database> convert(const QString& path);
+
+    bool hasError();
+    QString errorString();
+
+private:
+    QString m_error;
 };
 
-#endif /* TEST_IMPORTS_H */
+#endif // PROTONPASS_READER_H

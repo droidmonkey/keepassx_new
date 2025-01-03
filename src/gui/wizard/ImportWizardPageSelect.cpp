@@ -35,13 +35,16 @@ ImportWizardPageSelect::ImportWizardPageSelect(QWidget* parent)
     new QListWidgetItem(icons()->icon("onepassword"), tr("1Password Export (.1pux)"), m_ui->importTypeList);
     new QListWidgetItem(icons()->icon("onepassword"), tr("1Password Vault (.opvault)"), m_ui->importTypeList);
     new QListWidgetItem(icons()->icon("bitwarden"), tr("Bitwarden (.json)"), m_ui->importTypeList);
+    new QListWidgetItem(icons()->icon("proton"), tr("Proton Pass (.json)"), m_ui->importTypeList);
+    new QListWidgetItem(icons()->icon("web"), tr("Remote Database (.kdbx)"), m_ui->importTypeList);
     new QListWidgetItem(icons()->icon("object-locked"), tr("KeePass 1 Database (.kdb)"), m_ui->importTypeList);
 
     m_ui->importTypeList->item(0)->setData(Qt::UserRole, ImportWizard::IMPORT_CSV);
     m_ui->importTypeList->item(1)->setData(Qt::UserRole, ImportWizard::IMPORT_OPUX);
     m_ui->importTypeList->item(2)->setData(Qt::UserRole, ImportWizard::IMPORT_OPVAULT);
     m_ui->importTypeList->item(3)->setData(Qt::UserRole, ImportWizard::IMPORT_BITWARDEN);
-    m_ui->importTypeList->item(4)->setData(Qt::UserRole, ImportWizard::IMPORT_KEEPASS1);
+    m_ui->importTypeList->item(4)->setData(Qt::UserRole, ImportWizard::IMPORT_PROTONPASS);
+    m_ui->importTypeList->item(6)->setData(Qt::UserRole, ImportWizard::IMPORT_KEEPASS1);
 
     connect(m_ui->importTypeList, &QListWidget::currentItemChanged, this, &ImportWizardPageSelect::itemSelected);
     m_ui->importTypeList->setCurrentRow(0);
@@ -104,6 +107,7 @@ void ImportWizardPageSelect::itemSelected(QListWidgetItem* current, QListWidgetI
     // Unencrypted types
     case ImportWizard::IMPORT_CSV:
     case ImportWizard::IMPORT_OPUX:
+    case ImportWizard::IMPORT_PROTONPASS:
         setCredentialState(false);
         break;
     // Password may be required
@@ -237,6 +241,8 @@ QString ImportWizardPageSelect::importFileFilter()
         return QString("%1 (*.1pux)").arg(tr("1Password Export"));
     case ImportWizard::IMPORT_BITWARDEN:
         return QString("%1 (*.json)").arg(tr("Bitwarden JSON Export"));
+    case ImportWizard::IMPORT_PROTONPASS:
+        return QString("%1 (*.json)").arg(tr("Proton Pass JSON Export"));
     case ImportWizard::IMPORT_OPVAULT:
         return QString("%1 (*.opvault)").arg(tr("1Password Vault"));
     case ImportWizard::IMPORT_KEEPASS1:

@@ -137,6 +137,7 @@ Files: share/icons/badges/2_Expired.svg
        share/icons/database/C46_Help.svg
        share/icons/database/C53_Apply.svg
        share/icons/database/C61_Services.svg
+       share/icons/application/scalable/actions/proton.svg
 Copyright: 2022 KeePassXC Team <team@keepassxc.org>
 License: MIT
 

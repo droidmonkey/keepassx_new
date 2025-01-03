@@ -48,6 +48,7 @@ public:
         IMPORT_OPVAULT,
         IMPORT_OPUX,
         IMPORT_BITWARDEN,
+        IMPORT_PROTONPASS,
         IMPORT_KEEPASS1
     };
 

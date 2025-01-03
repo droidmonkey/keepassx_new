@@ -4546,6 +4546,18 @@ You can enable the DuckDuckGo website icon service in the security section of th
         <source>KeePass1 Database</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Proton Pass (.json)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Proton Pass JSON Export</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remote Database (.kdbx)</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>KMessageWidget</name>
@@ -8635,6 +8647,14 @@ This option is deprecated, use --set-key-file instead.</source>
     </message>
     <message>
         <source>Cannot generate valid passphrases because the wordlist is too short</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Encrypted files are not supported.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Proton Pass Import</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
