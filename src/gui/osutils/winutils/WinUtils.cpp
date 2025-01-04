@@ -136,6 +136,12 @@ bool WinUtils::isCapslockEnabled()
     return GetKeyState(VK_CAPITAL) == 1;
 }
 
+void WinUtils::setUserInputProtection(bool enable)
+{
+    // Windows does not support this feature
+    Q_UNUSED(enable)
+}
+
 bool WinUtils::isHighContrastMode() const
 {
     QSettings settings(R"(HKEY_CURRENT_USER\Control Panel\Accessibility\HighContrast)", QSettings::NativeFormat);
