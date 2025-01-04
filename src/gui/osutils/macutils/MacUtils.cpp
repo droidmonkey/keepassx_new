@@ -150,6 +150,15 @@ bool MacUtils::isCapslockEnabled()
 #endif
 }
 
+void MacUtils::setUserInputProtection(bool enable)
+{
+    if (enable) {
+        EnableSecureEventInput();
+    } else {
+        DisableSecureEventInput();
+    }
+}
+
 /**
  * Toggle application state between foreground app and UIElement app.
  * Foreground apps have dock icons, UIElement apps do not.

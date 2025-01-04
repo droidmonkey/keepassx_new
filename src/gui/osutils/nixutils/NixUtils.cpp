@@ -235,6 +235,12 @@ bool NixUtils::isCapslockEnabled()
     return false;
 }
 
+void NixUtils::setUserInputProtection(bool enable)
+{
+    // Linux does not support this feature
+    Q_UNUSED(enable)
+}
+
 void NixUtils::registerNativeEventFilter()
 {
     qApp->installNativeEventFilter(this);

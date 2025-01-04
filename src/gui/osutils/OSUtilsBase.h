@@ -56,6 +56,11 @@ public:
      */
     virtual bool isCapslockEnabled() = 0;
 
+    /**
+     * @param enable Toggle protection on user input (if available).
+     */
+    virtual void setUserInputProtection(bool enable) = 0;
+
     virtual void registerNativeEventFilter() = 0;
 
     virtual bool registerGlobalShortcut(const QString& name,

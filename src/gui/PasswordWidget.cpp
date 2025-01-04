@@ -38,6 +38,7 @@ PasswordWidget::PasswordWidget(QWidget* parent)
 {
     m_ui->setupUi(this);
     setFocusProxy(m_ui->passwordEdit);
+    m_ui->passwordEdit->installEventFilter(this);
 
     const QIcon errorIcon = icons()->icon("dialog-error");
     m_errorAction = m_ui->passwordEdit->addAction(errorIcon, QLineEdit::TrailingPosition);
@@ -223,14 +224,19 @@ void PasswordWidget::updateRepeatStatus()
     }
 }
 
-bool PasswordWidget::event(QEvent* event)
+bool PasswordWidget::eventFilter(QObject* watched, QEvent* event)
 {
-    if (isVisible()
-        && (event->type() == QEvent::KeyPress || event->type() == QEvent::KeyRelease
-            || event->type() == QEvent::FocusIn)) {
-        checkCapslockState();
+    if (watched == m_ui->passwordEdit) {
+        auto type = event->type();
+        if (isVisible() && (type == QEvent::KeyPress || type == QEvent::KeyRelease || type == QEvent::FocusIn)) {
+            checkCapslockState();
+        }
+        if (type == QEvent::FocusIn || type == QEvent::FocusOut) {
+            osUtils->setUserInputProtection(type == QEvent::FocusIn);
+        }
     }
-    return QWidget::event(event);
+    // Continue with normal operations
+    return false;
 }
 
 void PasswordWidget::checkCapslockState()

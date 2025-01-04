@@ -44,6 +44,7 @@ public:
     bool isLaunchAtStartupEnabled() const override;
     void setLaunchAtStartup(bool enable) override;
     bool isCapslockEnabled() override;
+    void setUserInputProtection(bool enable) override;
     bool isHighContrastMode() const;
 
     void registerNativeEventFilter() override;

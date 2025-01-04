@@ -40,6 +40,7 @@ public:
     bool isLaunchAtStartupEnabled() const override;
     void setLaunchAtStartup(bool enable) override;
     bool isCapslockEnabled() override;
+    void setUserInputProtection(bool enable) override;
 
     WId activeWindow();
     bool raiseWindow(WId pid);
