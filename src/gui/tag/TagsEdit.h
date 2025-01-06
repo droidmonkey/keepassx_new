@@ -25,12 +25,10 @@
 #pragma once
 
 #include <QAbstractScrollArea>
+#include <QScopedPointer>
 
-#include <memory>
-#include <vector>
+class QCompleter;
 
-/// Tag multi-line editor widget
-/// `Space` commits a tag and initiates a new tag edition
 class TagsEdit : public QAbstractScrollArea
 {
     Q_OBJECT
@@ -39,27 +37,19 @@ public:
     explicit TagsEdit(QWidget* parent = nullptr);
     ~TagsEdit() override;
 
-    // QWidget
-    QSize sizeHint() const override;
-    QSize minimumSizeHint() const override;
+    bool hasHeightForWidth() const override;
     int heightForWidth(int w) const override;
 
-    /// Set completions
-    void completion(QStringList const& completions);
-
-    /// Set tags
-    void tags(QStringList const& tags);
-
-    /// Get tags
-    QStringList tags() const;
-
     void setReadOnly(bool readOnly);
+    void setCompletion(const QStringList& completions);
+    void setTags(const QStringList& tags);
+
+    QStringList tags() const;
 
 signals:
     void tagsEdited();
 
 protected:
-    // QWidget
     void paintEvent(QPaintEvent* event) override;
     void timerEvent(QTimerEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
@@ -69,11 +59,20 @@ protected:
     void keyPressEvent(QKeyEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void hideEvent(QHideEvent* event) override;
+    QSize viewportSizeHint() const override;
 
 private:
     bool isAcceptableInput(QKeyEvent const* event) const;
+    void setupCompleter();
+    void setCursorVisible(bool visible);
+    bool cursorVisible() const;
+    void updateCursorBlinking();
 
     struct Impl;
-    std::unique_ptr<Impl> impl;
-    bool m_readOnly;
+    QScopedPointer<Impl> impl;
+    QScopedPointer<QCompleter> completer;
+
+    bool m_readOnly = false;
+    int blink_timer = 0;
+    bool blink_status = true;
 };

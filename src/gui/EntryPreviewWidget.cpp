@@ -404,7 +404,7 @@ void EntryPreviewWidget::updateEntryGeneralTab()
     const TimeInfo entryTime = m_currentEntry->timeInfo();
     const QString expires = entryTime.expires() ? Clock::toString(entryTime.expiryTime().toLocalTime()) : tr("Never");
     m_ui->entryExpirationLabel->setText(expires);
-    m_ui->entryTagsList->tags(m_currentEntry->tagList());
+    m_ui->entryTagsList->setTags(m_currentEntry->tagList());
     m_ui->entryTagsList->setReadOnly(true);
 }
 
