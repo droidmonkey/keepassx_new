@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,10 +43,10 @@ constexpr quint8 ASCII_a = static_cast<quint8>('a');
 constexpr quint8 ASCII_z = static_cast<quint8>('z');
 constexpr quint8 ASCII_EQ = static_cast<quint8>('=');
 
-QVariant Base32::decode(const QByteArray& encodedData)
+QByteArray Base32::decode(const QByteArray& encodedData)
 {
     if (encodedData.size() <= 0) {
-        return QVariant::fromValue(QByteArray(""));
+        return {};
     }
 
     if (encodedData.size() % 8 != 0) {
@@ -139,7 +139,7 @@ QVariant Base32::decode(const QByteArray& encodedData)
     Q_ASSERT(encodedData.size() == i);
     Q_ASSERT(nBytes == o);
 
-    return QVariant::fromValue(data);
+    return data;
 }
 
 QByteArray Base32::encode(const QByteArray& data)

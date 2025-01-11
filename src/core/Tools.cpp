@@ -1,11 +1,11 @@
 /*
- *  Copyright (C) 2012 Felix Geyer <debfx@fobos.de>
- *  Copyright (C) 2017 Lennart Glauer <mail@lennart-glauer.de>
- *  Copyright (C) 2020 Giuseppe D'Angelo <dangelog@gmail.com>.
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2021 The Qt Company Ltd.
  *  Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com,
  *  author Giuseppe D'Angelo <giuseppe.dangelo@kdab.com>
- *  Copyright (C) 2021 The Qt Company Ltd.
- *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2020 Giuseppe D'Angelo <dangelog@gmail.com>
+ *  Copyright (C) 2017 Lennart Glauer <mail@lennart-glauer.de>
+ *  Copyright (C) 2012 Felix Geyer <debfx@fobos.de>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -204,11 +204,11 @@ namespace Tools
     bool isBase64(const QByteArray& ba)
     {
         constexpr auto pattern = R"(^(?:[a-z0-9+/]{4})*(?:[a-z0-9+/]{3}=|[a-z0-9+/]{2}==)?$)";
-        QRegExp regexp(pattern, Qt::CaseInsensitive, QRegExp::RegExp2);
+        QRegularExpression regexp(pattern, QRegularExpression::CaseInsensitiveOption);
 
         QString base64 = QString::fromLatin1(ba.constData(), ba.size());
 
-        return regexp.exactMatch(base64);
+        return regexp.match(base64).hasMatch();
     }
 
     bool isAsciiString(const QString& str)

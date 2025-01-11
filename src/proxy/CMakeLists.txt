@@ -1,4 +1,4 @@
-#  Copyright (C) 2020 KeePassXC Team <team@keepassxc.org>
+#  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -21,10 +21,10 @@ if(KPXC_FEATURE_BROWSER)
 
     # Alloc must be defined in a static library to prevent clashing with clang ASAN definitions
     add_library(proxy_alloc STATIC ../core/Alloc.cpp)
-    target_link_libraries(proxy_alloc PRIVATE Qt5::Core ${BOTAN_LIBRARIES})
+    target_link_libraries(proxy_alloc PRIVATE Qt6::Core ${BOTAN_LIBRARIES})
 
     add_executable(keepassxc-proxy ${proxy_SOURCES})
-    target_link_libraries(keepassxc-proxy proxy_alloc Qt5::Core Qt5::Network)
+    target_link_libraries(keepassxc-proxy proxy_alloc Qt6::Core Qt6::Network)
     install(TARGETS keepassxc-proxy
             BUNDLE DESTINATION . COMPONENT Runtime
             RUNTIME DESTINATION ${PROXY_INSTALL_DIR} COMPONENT Runtime)

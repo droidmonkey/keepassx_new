@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,23 +19,23 @@
 #define KEEPASSXC_MACPASTEBOARD_H
 
 #include <QObject>
-#include <QTextCodec>
-#include <QtMacExtras/QMacPasteboardMime>
+#include <QStringConverter>
+#include <QUtiMimeConverter>
+#include <QVariant>
 
-class MacPasteboard : public QObject, public QMacPasteboardMime
+class MacPasteboard : public QObject, public QUtiMimeConverter
 {
 public:
     explicit MacPasteboard()
-        : QMacPasteboardMime(MIME_ALL)
+        : QUtiMimeConverter()
     {
     }
 
-    QString convertorName() override;
-    bool canConvert(const QString& mime, QString flav) override;
-    QString mimeFor(QString flav) override;
-    QString flavorFor(const QString& mime) override;
-    QVariant convertToMime(const QString& mime, QList<QByteArray> data, QString flav) override;
-    QList<QByteArray> convertFromMime(const QString& mime, QVariant data, QString flav) override;
+    bool canConvert(const QString& mime, const QString& uti) const;
+    QString mimeForUti(const QString& uti) const override;
+    QString utiForMime(const QString& mime) const override;
+    QVariant convertToMime(const QString& mime, const QList<QByteArray>& data, const QString& uti) const override;
+    QList<QByteArray> convertFromMime(const QString& mime, const QVariant& data, const QString& uti) const override;
 };
 
 #endif // KEEPASSXC_MACPASTEBOARD_H

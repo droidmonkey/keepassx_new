@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2015 David Wu <lightvector@gmail.com>
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ class CustomSortFilterProxyModel : public QSortFilterProxyModel
 {
 public:
     explicit CustomSortFilterProxyModel(QObject* parent = nullptr)
-        : QSortFilterProxyModel(parent){};
+        : QSortFilterProxyModel(parent) {};
     ~CustomSortFilterProxyModel() override = default;
 
     // Only search the first three columns (ie, ignore sequence column)
@@ -38,9 +38,9 @@ public:
         auto index1 = sourceModel()->index(sourceRow, 1, sourceParent);
         auto index2 = sourceModel()->index(sourceRow, 2, sourceParent);
 
-        return sourceModel()->data(index0).toString().contains(filterRegExp())
-               || sourceModel()->data(index1).toString().contains(filterRegExp())
-               || sourceModel()->data(index2).toString().contains(filterRegExp());
+        return sourceModel()->data(index0).toString().contains(filterRegularExpression())
+               || sourceModel()->data(index1).toString().contains(filterRegularExpression())
+               || sourceModel()->data(index2).toString().contains(filterRegularExpression());
     }
 };
 

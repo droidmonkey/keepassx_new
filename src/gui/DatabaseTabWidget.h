@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
+ * Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KEEPASSX_DATABASETABWIDGET_H
-#define KEEPASSX_DATABASETABWIDGET_H
+#ifndef KEEPASSXC_DATABASETABWIDGET_H
+#define KEEPASSXC_DATABASETABWIDGET_H
 
 #include "DatabaseOpenDialog.h"
 #include "config-keepassx.h"
@@ -86,10 +86,12 @@ public slots:
     void showDatabaseReports(bool state);
     void showDatabaseSettings(bool state);
     void showDatabaseSecurity();
+#ifdef KPXC_FEATURE_BROWSER
     void showPasskeys();
     void importPasskey();
     void importPasskeyToEntry();
     void removePasskeyFromEntry();
+#endif
     void performGlobalAutoType(const QString& search);
     void performBrowserUnlock();
 
@@ -127,4 +129,4 @@ private:
     bool m_databaseOpenInProgress;
 };
 
-#endif // KEEPASSX_DATABASETABWIDGET_H
+#endif // KEEPASSXC_DATABASETABWIDGET_H

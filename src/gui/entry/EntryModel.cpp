@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -18,6 +19,7 @@
 #include "EntryModel.h"
 
 #include <QFont>
+#include <QIODevice>
 #include <QMimeData>
 #include <QPalette>
 
@@ -26,7 +28,6 @@
 #include "core/Group.h"
 #include "core/Metadata.h"
 #include "core/PasswordHealth.h"
-#include "gui/DatabaseIcons.h"
 #include "gui/Icons.h"
 #include "gui/styles/StateColorPalette.h"
 #ifdef Q_OS_MACOS

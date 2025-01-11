@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,9 @@
 #ifndef KEEPASSXC_UTILS_H
 #define KEEPASSXC_UTILS_H
 
+#include <QSharedPointer>
+#include <QString>
+#include <QStringList>
 #include <QTextStream>
 
 class CompositeKey;

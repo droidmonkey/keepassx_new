@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2018 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -27,6 +27,7 @@
 
 #include <QDataStream>
 #include <QDebug>
+#include <QIODevice>
 
 QUuid CompositeKey::UUID("76a7ae25-a542-4add-9849-7c06be945b94");
 

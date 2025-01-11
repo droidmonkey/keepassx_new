@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2018 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -66,16 +66,16 @@ DatabaseOpenDialog::DatabaseOpenDialog(QWidget* parent)
 #ifdef Q_OS_MACOS
     dbTabModifier = Qt::ALT;
 #endif
-    auto* shortcut = new QShortcut(Qt::CTRL + Qt::Key_PageUp, this);
+    auto* shortcut = new QShortcut(Qt::CTRL | Qt::Key_PageUp, this);
     shortcut->setContext(Qt::WidgetWithChildrenShortcut);
     connect(shortcut, &QShortcut::activated, this, [this]() { selectTabOffset(-1); });
-    shortcut = new QShortcut(dbTabModifier + Qt::SHIFT + Qt::Key_Tab, this);
+    shortcut = new QShortcut(dbTabModifier | Qt::SHIFT | Qt::Key_Tab, this);
     shortcut->setContext(Qt::WidgetWithChildrenShortcut);
     connect(shortcut, &QShortcut::activated, this, [this]() { selectTabOffset(-1); });
-    shortcut = new QShortcut(Qt::CTRL + Qt::Key_PageDown, this);
+    shortcut = new QShortcut(Qt::CTRL | Qt::Key_PageDown, this);
     shortcut->setContext(Qt::WidgetWithChildrenShortcut);
     connect(shortcut, &QShortcut::activated, this, [this]() { selectTabOffset(1); });
-    shortcut = new QShortcut(dbTabModifier + Qt::Key_Tab, this);
+    shortcut = new QShortcut(dbTabModifier | Qt::Key_Tab, this);
     shortcut->setContext(Qt::WidgetWithChildrenShortcut);
     connect(shortcut, &QShortcut::activated, this, [this]() { selectTabOffset(1); });
 }
@@ -142,7 +142,7 @@ void DatabaseOpenDialog::tabChanged(int index)
         setTarget(dbWidget, dbWidget->database()->filePath());
     } else {
         // if these list sizes don't match, there's a bug somewhere nearby
-        qWarning("DatabaseOpenDialog: mismatch between tab count %d and DB count %d",
+        qWarning("DatabaseOpenDialog: mismatch between tab count %d and DB count %" PRIdQSIZETYPE "",
                  m_tabBar->count(),
                  m_tabDbWidgets.count());
     }

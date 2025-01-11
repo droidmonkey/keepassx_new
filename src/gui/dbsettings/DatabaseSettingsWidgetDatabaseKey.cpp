@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ DatabaseSettingsWidgetDatabaseKey::DatabaseSettingsWidgetDatabaseKey(QWidget* pa
     vbox->addWidget(m_additionalKeyOptions);
     vbox->setSizeConstraint(QLayout::SetMinimumSize);
     m_additionalKeyOptions->setLayout(new QVBoxLayout());
-    m_additionalKeyOptions->layout()->setMargin(0);
+    m_additionalKeyOptions->layout()->setContentsMargins(0, 0, 0, 0);
     m_additionalKeyOptions->layout()->setSpacing(20);
     m_additionalKeyOptions->layout()->addWidget(m_keyFileEditWidget);
     m_additionalKeyOptions->layout()->addWidget(m_yubiKeyEditWidget);

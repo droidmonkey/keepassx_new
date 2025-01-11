@@ -1,4 +1,4 @@
-#  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
+#  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
 #  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -231,7 +231,7 @@ if(UNIX AND NOT APPLE)
         list(APPEND gui_SOURCES
             gui/osutils/nixutils/X11Funcs.cpp)
     endif()
-    qt5_add_dbus_adaptor(gui_SOURCES
+    qt6_add_dbus_adaptor(gui_SOURCES
             gui/org.keepassxc.KeePassXC.MainWindow.xml
             gui/MainWindow.h
             MainWindow)
@@ -241,7 +241,7 @@ if(UNIX AND NOT APPLE)
         PROPERTIES
         INCLUDE "quickunlock/PolkitDbusTypes.h"
         )
-    qt5_add_dbus_interface(core_SOURCES
+    qt6_add_dbus_interface(core_SOURCES
         quickunlock/dbus/org.freedesktop.PolicyKit1.Authority.xml
         polkit_dbus
     )
@@ -311,13 +311,20 @@ endif()
 configure_file(config-keepassx.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-keepassx.h)
 configure_file(git-info.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/git-info.h)
 
+# Compatibility
+find_package(Qt6 REQUIRED COMPONENTS Core5Compat)
+
+# SVG Widgets
+find_package(Qt6 REQUIRED COMPONENTS SvgWidgets)
+
 # Core Library Definition
 add_library(keepassxc_core STATIC ${core_SOURCES})
 set_target_properties(keepassxc_core PROPERTIES COMPILE_DEFINITIONS KPXC_BUILDING_CORE)
 target_link_libraries(keepassxc_core 
         ${qrcode_LIB}
-        Qt5::Core
-        Qt5::Concurrent
+        Qt6::Core
+        Qt6::Core5Compat
+        Qt6::Concurrent
         ${BOTAN_LIBRARIES}
         ${PCSC_LIBRARIES}
         ${ZXCVBN_LIBRARIES}
@@ -332,8 +339,9 @@ add_library(keepassxc_gui STATIC ${gui_SOURCES})
 set_target_properties(keepassxc_gui PROPERTIES COMPILE_DEFINITIONS KPXC_BUILDING_CORE)
 target_link_libraries(keepassxc_gui
         keepassxc_core
-        Qt5::Network
-        Qt5::Widgets
+        Qt6::Network
+        Qt6::SvgWidgets
+        Qt6::Widgets
         ${autotype_LIB}
         ${browser_LIB}
         ${fdosecrets_LIB}
@@ -342,19 +350,19 @@ target_link_libraries(keepassxc_gui
 
 if(APPLE)
     target_link_libraries(keepassxc_gui "-framework Foundation -framework AppKit -framework Carbon -framework Security -framework LocalAuthentication -framework ScreenCaptureKit")
-    if(Qt5MacExtras_FOUND)
-        target_link_libraries(keepassxc_gui Qt5::MacExtras)
+    if(Qt6MacExtras_FOUND)
+        target_link_libraries(keepassxc_gui Qt6::MacExtras)
     endif()
 endif()
 if(HAIKU)
     target_link_libraries(keepassxc_gui network)
 endif()
 if(UNIX AND NOT APPLE)
-    target_link_libraries(keepassxc_core Qt5::DBus ${LIBUSB_LIBRARIES})
+    target_link_libraries(keepassxc_core Qt6::DBus ${LIBUSB_LIBRARIES})
     if(WITH_X11)
-        target_link_libraries(keepassxc_gui Qt5::X11Extras X11)
+        target_link_libraries(keepassxc_gui Qt6::X11Extras X11)
     endif()
-    include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
+    include_directories(${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 endif()
 if(WIN32)
     target_link_libraries(keepassxc_gui Wtsapi32.lib Ws2_32.lib)
@@ -478,13 +486,6 @@ if(WIN32)
                 COMPONENT Runtime)
 
         # Use windeployqt.exe to setup Qt dependencies
-        if(Qt5Core_VERSION VERSION_LESS "5.14.1")
-            set(WINDEPLOYQT_MODE "--release")
-            if(CMAKE_BUILD_TYPE_LOWER STREQUAL "debug")
-                set(WINDEPLOYQT_MODE "--debug")
-            endif()
-        endif()
-
         install(CODE "execute_process(COMMAND ${WINDEPLOYQT_EXE} ${PROGNAME}.exe ${WINDEPLOYQT_MODE} WORKING_DIRECTORY \${CMAKE_INSTALL_PREFIX} OUTPUT_QUIET)"
                 COMPONENT Runtime)
 
@@ -511,7 +512,7 @@ if(WIN32)
     endif()
 
     # install CA cert chains
-    find_file(SSL_CA_BUNDLE ca-bundle.crt PATHS "${Qt5_PREFIX}/ssl/certs")
+    find_file(SSL_CA_BUNDLE ca-bundle.crt PATHS "${Qt6_PREFIX}/ssl/certs")
     if(SSL_CA_BUNDLE)
         install(FILES ${SSL_CA_BUNDLE} DESTINATION "ssl/certs")
     else()

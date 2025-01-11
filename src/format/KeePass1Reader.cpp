@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2012 Felix Geyer <debfx@fobos.de>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -19,6 +20,7 @@
 
 #include <QFile>
 #include <QFileInfo>
+#include <QRegularExpression>
 #include <QTextCodec>
 
 #include "core/Endian.h"
@@ -701,8 +703,8 @@ Entry* KeePass1Reader::readEntry(QIODevice* cipherStream)
 
 void KeePass1Reader::parseNotes(const QString& rawNotes, Entry* entry)
 {
-    QRegExp sequenceRegexp("Auto-Type(?:-(\\d+))?: (.+)", Qt::CaseInsensitive, QRegExp::RegExp2);
-    QRegExp windowRegexp("Auto-Type-Window(?:-(\\d+))?: (.+)", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QRegularExpression sequenceRegexp("Auto-Type(?:-(\\d+))?: (.+)", QRegularExpression::CaseInsensitiveOption);
+    QRegularExpression windowRegexp("Auto-Type-Window(?:-(\\d+))?: (.+)", QRegularExpression::CaseInsensitiveOption);
     QHash<int, QString> sequences;
     QMap<int, QStringList> windows;
 
@@ -713,23 +715,25 @@ void KeePass1Reader::parseNotes(const QString& rawNotes, Entry* entry)
     for (QString line : rawNotesLines) {
         line.remove("\r");
 
-        if (sequenceRegexp.exactMatch(line)) {
-            if (sequenceRegexp.cap(1).isEmpty()) {
-                entry->setDefaultAutoTypeSequence(sequenceRegexp.cap(2));
+        auto sequenceMatch = sequenceRegexp.match(line);
+        auto windowMatch = windowRegexp.match(line);
+        if (sequenceMatch.hasMatch()) {
+            if (sequenceMatch.captured(1).isEmpty()) {
+                entry->setDefaultAutoTypeSequence(sequenceMatch.captured(2));
             } else {
-                sequences[sequenceRegexp.cap(1).toInt()] = sequenceRegexp.cap(2);
+                sequences[sequenceMatch.captured(1).toInt()] = sequenceMatch.captured(2);
             }
 
             lastLineAutoType = true;
-        } else if (windowRegexp.exactMatch(line)) {
+        } else if (windowMatch.hasMatch()) {
             int nr;
-            if (windowRegexp.cap(1).isEmpty()) {
+            if (windowMatch.captured(1).isEmpty()) {
                 nr = -1; // special number that matches no other sequence
             } else {
-                nr = windowRegexp.cap(1).toInt();
+                nr = windowMatch.captured(1).toInt();
             }
 
-            windows[nr].append(windowRegexp.cap(2));
+            windows[nr].append(windowMatch.captured(2));
 
             lastLineAutoType = true;
         } else {

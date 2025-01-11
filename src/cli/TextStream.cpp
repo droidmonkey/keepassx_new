@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2018 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #include "TextStream.h"
 
 #include <QProcessEnvironment>
-#include <QTextCodec>
+#include <QStringConverter>
 #ifdef Q_OS_WIN
 #include <windows.h>
 #endif
@@ -87,13 +87,44 @@ void TextStream::detectCodec()
         // Only override codec if LANG is set, otherwise Qt will assume
         // US-ASCII, which is almost always wrong and results in
         // Unicode passwords being displayed as question marks.
-        codecName = QTextCodec::codecForLocale()->name();
+        codecName = "System";
     }
 #endif
 
     codecName = env.value("ENCODING_OVERRIDE", codecName);
-    auto* codec = QTextCodec::codecForName(codecName.toLatin1());
-    if (codec) {
-        setCodec(codec);
+
+    QStringConverter::Encoding codec = QStringConverter::Utf8;
+    if (codecName.toLatin1().compare(QByteArray("UTF-8"), Qt::CaseInsensitive) == 0
+        || codecName.toLatin1().compare(QByteArray("Utf8"), Qt::CaseInsensitive) == 0) {
+        codec = QStringConverter::Utf8;
+    } else if (codecName.toLatin1().compare(QByteArray("UTF-16"), Qt::CaseInsensitive) == 0
+               || codecName.toLatin1().compare(QByteArray("Utf16"), Qt::CaseInsensitive) == 0) {
+        codec = QStringConverter::Utf16;
+    } else if (codecName.toLatin1().compare(QByteArray("UTF-16BE"), Qt::CaseInsensitive) == 0
+               || codecName.toLatin1().compare(QByteArray("Utf16BE"), Qt::CaseInsensitive) == 0) {
+        codec = QStringConverter::Utf16BE;
+    } else if (codecName.toLatin1().compare(QByteArray("UTF-16LE"), Qt::CaseInsensitive) == 0
+               || codecName.toLatin1().compare(QByteArray("Utf16LE"), Qt::CaseInsensitive) == 0) {
+        codec = QStringConverter::Utf16LE;
+    } else if (codecName.toLatin1().compare(QByteArray("UTF-32"), Qt::CaseInsensitive) == 0
+               || codecName.toLatin1().compare(QByteArray("Utf32"), Qt::CaseInsensitive) == 0) {
+        codec = QStringConverter::Utf32;
+    } else if (codecName.toLatin1().compare(QByteArray("UTF-32BE"), Qt::CaseInsensitive) == 0
+               || codecName.toLatin1().compare(QByteArray("Utf32BE"), Qt::CaseInsensitive) == 0) {
+        codec = QStringConverter::Utf32BE;
+    } else if (codecName.toLatin1().compare(QByteArray("UTF-32LE"), Qt::CaseInsensitive) == 0
+               || codecName.toLatin1().compare(QByteArray("Utf32LE"), Qt::CaseInsensitive) == 0) {
+        codec = QStringConverter::Utf32LE;
+    } else if (codecName.toLatin1().compare(QByteArray("ISO 8859-1"), Qt::CaseInsensitive) == 0
+               || codecName.toLatin1().compare(QByteArray("Latin1"), Qt::CaseInsensitive) == 0) {
+        codec = QStringConverter::Latin1;
+    } else if (codecName.toLatin1().compare(QByteArray("Windows-850"), Qt::CaseInsensitive) == 0
+               || codecName.toLatin1().compare(QByteArray("Windows-1252"), Qt::CaseInsensitive) == 0
+               || codecName.toLatin1().compare(QByteArray("System"), Qt::CaseInsensitive) == 0) {
+        codec = QStringConverter::System;
+    } else {
+        return;
     }
+
+    setEncoding(codec);
 }

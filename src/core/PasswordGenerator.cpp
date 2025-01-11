@@ -132,7 +132,7 @@ QVector<PasswordGroup> PasswordGenerator::passwordGroups() const
                 continue;
             }
 
-            group.append(i);
+            group.append(QChar(i));
         }
 
         passwordGroups.append(group);
@@ -146,7 +146,7 @@ QVector<PasswordGroup> PasswordGenerator::passwordGroups() const
                 continue;
             }
 
-            group.append(i);
+            group.append(QChar(i));
         }
 
         passwordGroups.append(group);
@@ -159,7 +159,7 @@ QVector<PasswordGroup> PasswordGenerator::passwordGroups() const
                 continue;
             }
 
-            group.append(i);
+            group.append(QChar(i));
         }
 
         passwordGroups.append(group);
@@ -168,12 +168,12 @@ QVector<PasswordGroup> PasswordGenerator::passwordGroups() const
         PasswordGroup group;
 
         // ()[]{}
-        group.append(40);
-        group.append(41);
-        group.append(91);
-        group.append(93);
-        group.append(123);
-        group.append(125);
+        group.append(QChar(40));
+        group.append(QChar(41));
+        group.append(QChar(91));
+        group.append(QChar(93));
+        group.append(QChar(123));
+        group.append(QChar(125));
 
         passwordGroups.append(group);
     }
@@ -181,10 +181,10 @@ QVector<PasswordGroup> PasswordGenerator::passwordGroups() const
         PasswordGroup group;
 
         // .,:;
-        group.append(44);
-        group.append(46);
-        group.append(58);
-        group.append(59);
+        group.append(QChar(44));
+        group.append(QChar(46));
+        group.append(QChar(58));
+        group.append(QChar(59));
 
         passwordGroups.append(group);
     }
@@ -192,8 +192,8 @@ QVector<PasswordGroup> PasswordGenerator::passwordGroups() const
         PasswordGroup group;
 
         // "'
-        group.append(34);
-        group.append(39);
+        group.append(QChar(34));
+        group.append(QChar(39));
 
         passwordGroups.append(group);
     }
@@ -201,12 +201,12 @@ QVector<PasswordGroup> PasswordGenerator::passwordGroups() const
         PasswordGroup group;
 
         // -/\_|
-        group.append(45);
-        group.append(47);
-        group.append(92);
-        group.append(95);
+        group.append(QChar(45));
+        group.append(QChar(47));
+        group.append(QChar(92));
+        group.append(QChar(95));
         if (!(m_flags & ExcludeLookAlike)) {
-            group.append(124); // "|"
+            group.append(QChar(124)); // "|"
         }
 
         passwordGroups.append(group);
@@ -215,13 +215,13 @@ QVector<PasswordGroup> PasswordGenerator::passwordGroups() const
         PasswordGroup group;
 
         // !*+<=>?
-        group.append(33);
-        group.append(42);
-        group.append(43);
-        group.append(60);
-        group.append(61);
-        group.append(62);
-        group.append(63);
+        group.append(QChar(33));
+        group.append(QChar(42));
+        group.append(QChar(43));
+        group.append(QChar(60));
+        group.append(QChar(61));
+        group.append(QChar(62));
+        group.append(QChar(63));
 
         passwordGroups.append(group);
     }
@@ -230,13 +230,13 @@ QVector<PasswordGroup> PasswordGenerator::passwordGroups() const
 
         // #$%&
         for (int i = 35; i <= 38; i++) {
-            group.append(i);
+            group.append(QChar(i));
         }
         // @^`~
-        group.append(64);
-        group.append(94);
-        group.append(96);
-        group.append(126);
+        group.append(QChar(64));
+        group.append(QChar(94));
+        group.append(QChar(96));
+        group.append(QChar(126));
 
         passwordGroups.append(group);
     }
@@ -246,14 +246,14 @@ QVector<PasswordGroup> PasswordGenerator::passwordGroups() const
         // [U+0080, U+009F] are C1 control characters,
         // U+00A0 is non-breaking space
         for (int i = 161; i <= 172; i++) {
-            group.append(i);
+            group.append(QChar(i));
         }
         // U+00AD is soft hyphen (format character)
         for (int i = 174; i <= 255; i++) {
             if ((m_flags & ExcludeLookAlike) && (i == 249)) { // "﹒"
                 continue;
             }
-            group.append(i);
+            group.append(QChar(i));
         }
 
         passwordGroups.append(group);

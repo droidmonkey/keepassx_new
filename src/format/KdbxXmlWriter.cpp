@@ -55,7 +55,6 @@ void KdbxXmlWriter::writeDatabase(QIODevice* device,
 
     m_xml.setAutoFormatting(true);
     m_xml.setAutoFormattingIndent(-1); // 1 tab
-    m_xml.setCodec("UTF-8");
 
     if (m_kdbxVersion < KeePass2::FILE_VERSION_4) {
         fillBinaryIdxMap();

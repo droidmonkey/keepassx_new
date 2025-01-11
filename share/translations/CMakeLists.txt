@@ -1,4 +1,4 @@
-#  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+#  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
 #  Copyright (C) 2014 Felix Geyer <debfx@fobos.de>
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -20,15 +20,14 @@ list(REMOVE_ITEM TRANSLATION_FILES keepassxc_en.ts)
 list(REMOVE_ITEM TRANSLATION_FILES ${TRANSLATION_EN_ABS})
 message(STATUS "Including translations...\n")
 
-qt5_add_translation(QM_FILES ${TRANSLATION_FILES})
+qt6_add_translation(QM_FILES ${TRANSLATION_FILES})
 
 if(WIN32)
-    file(GLOB QTBASE_TRANSLATIONS ${Qt5_PREFIX}/share/qt5/translations/qtbase_*.qm)
+    file(GLOB QTBASE_TRANSLATIONS ${Qt6_PREFIX}/share/qt/translations/qtbase_*.qm)
 elseif(APPLE OR KEEPASSXC_DIST_APPIMAGE)
     file(GLOB QTBASE_TRANSLATIONS
             /usr/share/qt/translations/qtbase_*.qm
-            /usr/share/qt5/translations/qtbase_*.qm
-            ${Qt5_PREFIX}/translations/qtbase_*.qm)
+            ${Qt6_PREFIX}/translations/qtbase_*.qm)
 endif()
 set(QM_FILES ${QM_FILES} ${QTBASE_TRANSLATIONS})
 

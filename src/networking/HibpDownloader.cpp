@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2020 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 #include <QCryptographicHash>
 #include <QNetworkReply>
+#include <QStringview>
 
 namespace
 {
@@ -60,7 +61,7 @@ namespace
         }
 
         // Extract the count, remove remaining whitespace, and convert to int
-        return hibpResult.midRef(pos, end - pos).trimmed().toInt();
+        return QStringView{hibpResult}.mid(pos, end - pos).trimmed().toInt();
     }
 } // namespace
 

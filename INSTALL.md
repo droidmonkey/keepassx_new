@@ -67,7 +67,7 @@ Note: These steps place the compiled KeePassXC binary inside the `./build/src/` 
 
 If you installed Qt@5 via Homebrew and CMake fails to find your Qt installation, you can specify it manually by adding the following parameter:
 
-`-DCMAKE_PREFIX_PATH=$(brew --prefix qt@5)/lib/cmake`
+`-DCMAKE_PREFIX_PATH=$(brew --prefix qt)/lib/cmake`
 
 When building with ASAN support on macOS, you need to use `export ASAN_OPTIONS=detect_leaks=0` before running the tests (LSAN is no supported on macOS).
 
@@ -105,7 +105,7 @@ KeePassXC comes with a variety of build options that can turn on/off features. E
 ```
 
 Note: Even though you can build the application with all TCP/IP networking code disabled, we still require and link against
-Qt5's network library to use local named pipes on all operating systems.
+Qt6's network library to use local named pipes on all operating systems.
 
 ## Installation
 

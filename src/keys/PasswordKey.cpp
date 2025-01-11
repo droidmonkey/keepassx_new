@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2019 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #include "crypto/CryptoHash.h"
 
 #include <QDataStream>
+#include <QIODevice>
 #include <QSharedPointer>
 
 QUuid PasswordKey::UUID("77e90411-303a-43f2-b773-853b05635ead");

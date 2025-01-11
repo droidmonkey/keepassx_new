@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2016 Lennart Glauer <mail@lennart-glauer.de>
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KEEPASSX_AUTOTYPEMAC_H
-#define KEEPASSX_AUTOTYPEMAC_H
+#ifndef KEEPASSXC_AUTOTYPEMAC_H
+#define KEEPASSXC_AUTOTYPEMAC_H
 
 #include <Carbon/Carbon.h>
 #include <QtPlugin>
@@ -45,7 +45,7 @@ public:
     bool raiseOwnWindow() override;
 
     void sendChar(const QChar& ch, bool isKeyDown);
-    void sendKey(Qt::Key key, bool isKeyDown, Qt::KeyboardModifiers modifiers = 0);
+    void sendKey(Qt::Key key, bool isKeyDown, Qt::KeyboardModifiers modifiers = Qt::NoModifier);
 
 private:
     static int windowLayer(CFDictionaryRef window);
@@ -65,4 +65,4 @@ private:
     AutoTypePlatformMac* const m_platform;
 };
 
-#endif  // KEEPASSX_AUTOTYPEMAC_H
+#endif  // KEEPASSXC_AUTOTYPEMAC_H

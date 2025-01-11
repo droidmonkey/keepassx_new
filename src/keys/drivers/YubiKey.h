@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2014 Kyle Manna <kyle@kylemanna.com>
- *  Copyright (C) 2017-2021 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,13 +16,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KEEPASSX_YUBIKEY_H
-#define KEEPASSX_YUBIKEY_H
+#ifndef KEEPASSXC_YUBIKEY_H
+#define KEEPASSXC_YUBIKEY_H
 
 #include <QHash>
 #include <QMultiMap>
 #include <QMutex>
 #include <QObject>
+#include <QRecursiveMutex>
 #include <QTimer>
 
 #include <botan/secmem.h>
@@ -38,7 +39,7 @@ class YubiKey : public QObject
     Q_OBJECT
 
 public:
-    using KeyMap = QMap<YubiKeySlot, QString>;
+    using KeyMap = QMultiMap<YubiKeySlot, QString>;
 
     enum class ChallengeResult : int
     {
@@ -90,7 +91,7 @@ private:
     bool m_initialized = false;
     QString m_error;
 
-    static QMutex s_interfaceMutex;
+    QRecursiveMutex m_interfaces_detect_mutex;
 
     KeyMap m_usbKeys;
     KeyMap m_pcscKeys;
@@ -100,4 +101,4 @@ private:
     Q_DISABLE_COPY(YubiKey)
 };
 
-#endif // KEEPASSX_YUBIKEY_H
+#endif // KEEPASSXC_YUBIKEY_H

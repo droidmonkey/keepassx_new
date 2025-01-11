@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -90,8 +90,7 @@ namespace
                     // Change from UUID to base64 byte array
                     const auto credentialIdValue = passkey.value("credentialId").toString();
                     if (!credentialIdValue.isEmpty()) {
-                        const auto credentialUuid = Tools::uuidToHex(credentialIdValue);
-                        const auto credentialIdArray = QByteArray::fromHex(credentialUuid.toUtf8());
+                        const auto credentialIdArray = QByteArray::fromHex(credentialIdValue.toUtf8());
                         const auto credentialId =
                             credentialIdArray.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
                         entry->attributes()->set(EntryAttributes::KPEX_PASSKEY_CREDENTIAL_ID, credentialId, true);

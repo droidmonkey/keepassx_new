@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2014 Kyle Manna <kyle@kylemanna.com>
- *  Copyright (C) 2017-2021 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,8 +23,6 @@
 #include <QMutexLocker>
 #include <QSet>
 #include <QtConcurrent>
-
-QMutex YubiKey::s_interfaceMutex;
 
 YubiKey::YubiKey()
 {
@@ -73,7 +71,7 @@ bool YubiKey::isInitialized()
 
 bool YubiKey::findValidKeys()
 {
-    QMutexLocker lock(&s_interfaceMutex);
+    QMutexLocker lock(&m_interfaces_detect_mutex);
 
     m_connectedKeys = 0;
     m_usbKeys = YubiKeyInterfaceUSB::instance()->findValidKeys(m_connectedKeys);
@@ -84,12 +82,12 @@ bool YubiKey::findValidKeys()
 
 void YubiKey::findValidKeysAsync()
 {
-    QtConcurrent::run([this] { emit detectComplete(findValidKeys()); });
+    auto res = QtConcurrent::run([this] { emit detectComplete(findValidKeys()); });
 }
 
 YubiKey::KeyMap YubiKey::foundKeys()
 {
-    QMutexLocker lock(&s_interfaceMutex);
+    QMutexLocker lock(&m_interfaces_detect_mutex);
     KeyMap foundKeys = m_usbKeys;
     foundKeys.unite(m_pcscKeys);
 
@@ -103,7 +101,7 @@ int YubiKey::connectedKeys()
 
 QString YubiKey::errorMessage()
 {
-    QMutexLocker lock(&s_interfaceMutex);
+    QMutexLocker lock(&m_interfaces_detect_mutex);
 
     QString error;
     error.clear();
@@ -140,7 +138,7 @@ QString YubiKey::errorMessage()
  */
 bool YubiKey::testChallenge(YubiKeySlot slot, bool* wouldBlock)
 {
-    QMutexLocker lock(&s_interfaceMutex);
+    QMutexLocker lock(&m_interfaces_detect_mutex);
 
     if (m_usbKeys.contains(slot)) {
         return YubiKeyInterfaceUSB::instance()->testChallenge(slot, wouldBlock);
@@ -165,7 +163,7 @@ bool YubiKey::testChallenge(YubiKeySlot slot, bool* wouldBlock)
 YubiKey::ChallengeResult
 YubiKey::challenge(YubiKeySlot slot, const QByteArray& challenge, Botan::secure_vector<char>& response)
 {
-    QMutexLocker lock(&s_interfaceMutex);
+    QMutexLocker lock(&m_interfaces_detect_mutex);
 
     m_error.clear();
 

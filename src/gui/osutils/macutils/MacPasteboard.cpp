@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,23 +17,18 @@
 
 #include "MacPasteboard.h"
 
-QString MacPasteboard::convertorName()
+QString MacPasteboard::utiForMime(const QString& mime) const
 {
-    return QLatin1String("MacPasteboard");
-}
-
-QString MacPasteboard::flavorFor(const QString& mimetype)
-{
-    if (mimetype == QLatin1String("text/plain")) {
+    if (mime == QLatin1String("text/plain")) {
         return QLatin1String("public.utf8-plain-text");
-    } else if (mimetype == QLatin1String("application/x-nspasteboard-concealed-type")) {
+    } else if (mime == QLatin1String("application/x-nspasteboard-concealed-type")) {
         return QLatin1String("org.nspasteboard.ConcealedType");
     }
 
-    int i = mimetype.indexOf(QLatin1String("charset="));
+    int i = mime.indexOf(QLatin1String("charset="));
 
     if (i >= 0) {
-        QString cs(mimetype.mid(i + 8).toLower());
+        QString cs(mime.mid(i + 8).toLower());
         i = cs.indexOf(QLatin1Char(';'));
 
         if (i >= 0) {
@@ -46,54 +41,61 @@ QString MacPasteboard::flavorFor(const QString& mimetype)
             return QLatin1String("public.utf16-plain-text");
         }
     }
-    return QString();
+    return {};
 }
 
-QString MacPasteboard::mimeFor(QString flavor)
+QString MacPasteboard::mimeForUti(const QString& uti) const
 {
-    if (flavor == QLatin1String("public.utf8-plain-text"))
+    if (uti == QLatin1String("public.utf8-plain-text"))
         return QLatin1String("text/plain");
-    if (flavor == QLatin1String("org.nspasteboard.ConcealedType"))
+    if (uti == QLatin1String("org.nspasteboard.ConcealedType"))
         return QLatin1String("application/x-nspasteboard-concealed-type");
-    if (flavor == QLatin1String("public.utf16-plain-text"))
+    if (uti == QLatin1String("public.utf16-plain-text"))
         return QLatin1String("text/plain;charset=utf16");
-    return QString();
+    return {};
 }
 
-bool MacPasteboard::canConvert(const QString& mimetype, QString flavor)
+bool MacPasteboard::canConvert(const QString& mime, const QString& uti) const
 {
-    Q_UNUSED(mimetype);
-    Q_UNUSED(flavor);
+    Q_UNUSED(mime);
+    Q_UNUSED(uti);
     return true;
 }
 
-QVariant MacPasteboard::convertToMime(const QString& mimetype, QList<QByteArray> data, QString flavor)
+QVariant MacPasteboard::convertToMime(const QString& mime, const QList<QByteArray>& data, const QString& uti) const
 {
     if (data.count() > 1)
         qWarning("QMime::convertToMime: Cannot handle multiple member data");
     const QByteArray& firstData = data.first();
     QVariant ret;
-    if (flavor == QLatin1String("public.utf8-plain-text")) {
+    if (uti == QLatin1String("public.utf8-plain-text")) {
         ret = QString::fromUtf8(firstData);
-    } else if (flavor == QLatin1String("org.nspasteboard.ConcealedType")) {
+    } else if (uti == QLatin1String("org.nspasteboard.ConcealedType")) {
         ret = QString::fromUtf8(firstData);
-    } else if (flavor == QLatin1String("public.utf16-plain-text")) {
-        ret = QTextCodec::codecForName("UTF-16")->toUnicode(firstData);
+    } else if (uti == QLatin1String("public.utf16-plain-text")) {
+        auto toUtf16 = QStringDecoder(QStringDecoder::Utf16);
+        QVariant var{toUtf16(firstData)};
+        return var;
     } else {
-        qWarning("QMime::convertToMime: unhandled mimetype: %s", qPrintable(mimetype));
+        qWarning("QMime::convertToMime: unhandled mimetype: %s", qPrintable(mime));
     }
     return ret;
 }
 
-QList<QByteArray> MacPasteboard::convertFromMime(const QString&, QVariant data, QString flavor)
+QList<QByteArray> MacPasteboard::convertFromMime(const QString& mime, const QVariant& data, const QString& uti) const
 {
+    Q_UNUSED(mime);
+
     QList<QByteArray> ret;
-    QString string = data.toString();
-    if (flavor == QLatin1String("public.utf8-plain-text"))
-        ret.append(string.toUtf8());
-    else if (flavor == QLatin1String("org.nspasteboard.ConcealedType"))
-        ret.append(string.toUtf8());
-    else if (flavor == QLatin1String("public.utf16-plain-text"))
-        ret.append(QTextCodec::codecForName("UTF-16")->fromUnicode(string));
+    QString dataString = data.toString();
+    if (uti == QLatin1String("public.utf8-plain-text")) {
+        ret.append(dataString.toUtf8());
+    } else if (uti == QLatin1String("org.nspasteboard.ConcealedType")) {
+        ret.append(dataString.toUtf8());
+    } else if (uti == QLatin1String("public.utf16-plain-text")) {
+        auto toUtf16 = QStringEncoder(QStringDecoder::Utf16);
+        QByteArray baUtf16 = toUtf16(dataString);
+        ret.append(baUtf16);
+    }
     return ret;
 }

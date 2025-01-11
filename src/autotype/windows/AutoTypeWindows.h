@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2016 Lennart Glauer <mail@lennart-glauer.de>
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KEEPASSX_AUTOTYPEWINDOWS_H
-#define KEEPASSX_AUTOTYPEWINDOWS_H
+#ifndef KEEPASSXC_AUTOTYPEWINDOWS_H
+#define KEEPASSXC_AUTOTYPEWINDOWS_H
 
 #include <QtPlugin>
 
@@ -67,4 +67,4 @@ private:
     AutoTypePlatformWin* const m_platform;
 };
 
-#endif // KEEPASSX_AUTOTYPEWINDOWS_H
+#endif // KEEPASSXC_AUTOTYPEWINDOWS_H

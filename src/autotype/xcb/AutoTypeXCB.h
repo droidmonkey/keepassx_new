@@ -1,7 +1,7 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2012 Felix Geyer <debfx@fobos.de>
  *  Copyright (C) 2000-2008 Tom Sato <VEF00200@nifty.ne.jp>
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KEEPASSX_AUTOTYPEXCB_H
-#define KEEPASSX_AUTOTYPEXCB_H
+#ifndef KEEPASSXC_AUTOTYPEXCB_H
+#define KEEPASSXC_AUTOTYPEXCB_H
 
 #include <QApplication>
 #include <QSet>
@@ -48,7 +48,7 @@ public:
     AutoTypeExecutor* createExecutor() override;
     void updateKeymap();
 
-    AutoTypeAction::Result sendKey(KeySym keysym, unsigned int modifiers = 0);
+    AutoTypeAction::Result sendKey(KeySym keysym, unsigned int modifiers = Qt::NoModifier);
 
 private:
     QString windowTitle(Window window, bool useBlacklist);
@@ -105,4 +105,4 @@ private:
     AutoTypePlatformX11* const m_platform;
 };
 
-#endif // KEEPASSX_AUTOTYPEXCB_H
+#endif // KEEPASSXC_AUTOTYPEXCB_H

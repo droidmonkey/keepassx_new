@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
- *  Copyright (C) 2021 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,10 +19,8 @@
 #include "Metadata.h"
 
 #include "core/Clock.h"
-#include "core/Entry.h"
 #include "core/Group.h"
 
-#include <QApplication>
 #include <QCryptographicHash>
 #include <QJsonDocument>
 

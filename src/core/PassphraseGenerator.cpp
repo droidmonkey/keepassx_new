@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 #include "PassphraseGenerator.h"
 
 #include <QFile>
+#include <QRegularExpression>
 #include <QSet>
 #include <QTextStream>
 #include <cmath>
@@ -72,7 +73,6 @@ void PassphraseGenerator::setWordList(const QString& path)
     }
 
     QTextStream in(&file);
-    in.setCodec("UTF-8");
     QString line = in.readLine();
     bool isSigned = line.startsWith("-----BEGIN PGP SIGNED MESSAGE-----");
     if (isSigned) {
@@ -80,7 +80,7 @@ void PassphraseGenerator::setWordList(const QString& path)
             line = in.readLine();
         }
     }
-    QRegExp rx("^[0-9]+(-[0-9]+)*\\s+([^\\s]+)$");
+    QRegularExpression rx("^[0-9]+(-[0-9]+)*\\s+([^\\s]+)$");
     while (!line.isNull()) {
         if (isSigned && line.startsWith("-----BEGIN PGP SIGNATURE-----")) {
             break;
@@ -97,7 +97,7 @@ void PassphraseGenerator::setWordList(const QString& path)
         line = in.readLine();
     }
 
-    m_wordlist = wordset.toList();
+    m_wordlist = wordset.values();
 
     if (m_wordlist.size() < m_minimum_wordlist_length) {
         qWarning("Wordlist is less than minimum acceptable size: %s", qPrintable(path));

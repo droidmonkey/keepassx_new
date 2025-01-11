@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2012 Felix Geyer <debfx@fobos.de>
+ *  Copyright (C) 2015 Felix Geyer <debfx@fobos.de>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
 #ifndef KEEPASSX_SIGNALMULTIPLEXER_H
 #define KEEPASSX_SIGNALMULTIPLEXER_H
 
+#include <QList>
+#include <QObject>
 #include <QPointer>
 
 class SignalMultiplexer

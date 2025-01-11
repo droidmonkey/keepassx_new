@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2012 Felix Geyer <debfx@fobos.de>
+ *  Copyright (C) 2025 Felix Geyer <debfx@fobos.de>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,8 +25,7 @@
 #include <QMap>
 #include <QObject>
 #include <QSharedPointer>
-
-class QStringList;
+#include <QStringList>
 
 class EntryAttachments : public ModifiableObject
 {
@@ -35,7 +34,7 @@ class EntryAttachments : public ModifiableObject
 public:
     explicit EntryAttachments(QObject* parent = nullptr);
     ~EntryAttachments() override;
-    QList<QString> keys() const;
+    QStringList keys() const;
     bool hasKey(const QString& key) const;
     QSet<QByteArray> values() const;
     QByteArray value(const QString& key) const;

@@ -1,4 +1,4 @@
-#  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
+#  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
 #  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -78,7 +78,9 @@ macro(add_unit_test)
     set_tests_properties(${_test_NAME} PROPERTIES ENVIRONMENT "LANG=en_US.UTF-8")
 endmacro(add_unit_test)
 
-set(TEST_LIBRARIES keepassxc_gui Qt5::Test)
+find_package(Qt6 REQUIRED COMPONENTS Core5Compat)
+
+set(TEST_LIBRARIES keepassxc_gui Qt6::Test)
 
 set(testsupport_SOURCES
         modeltest.cpp
@@ -86,7 +88,7 @@ set(testsupport_SOURCES
         mock/MockClock.cpp
         util/TemporaryFile.cpp)
 add_library(testsupport STATIC ${testsupport_SOURCES})
-target_link_libraries(testsupport Qt5::Core Qt5::Concurrent Qt5::Widgets Qt5::Test)
+target_link_libraries(testsupport Qt6::Core Qt6::Concurrent Qt6::Core5Compat Qt6::Widgets Qt6::Test)
 
 add_unit_test(NAME testgroup SOURCES TestGroup.cpp
         LIBS testsupport ${TEST_LIBRARIES})

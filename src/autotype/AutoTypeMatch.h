@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2021 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
 
 #ifndef KPXC_AUTOTYPEMATCH_H
 #define KPXC_AUTOTYPEMATCH_H
+
+#include "core/Entry.h"
 
 #include <QPair>
 #include <QPointer>

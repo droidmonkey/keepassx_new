@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
- *  Copyright (C) 2021 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -869,7 +869,7 @@ QList<QString> Group::usernamesRecursive(int topN) const
 
     // Take first topN usernames if set
     QList<QString> usernames;
-    int actualUsernames = topN < 0 ? sortedUsernames.size() : std::min(topN, sortedUsernames.size());
+    int actualUsernames = topN < 0 ? sortedUsernames.size() : qMin(topN, sortedUsernames.size());
     for (int i = 0; i < actualUsernames; i++) {
         usernames.append(sortedUsernames[i].first);
     }

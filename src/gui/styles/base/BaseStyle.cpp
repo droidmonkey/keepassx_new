@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 KeePassXC Team <team@keepassxc.org>
+ * Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  * Copyright (C) 2019 Andrew Richards
  *
  * Derived from Phantomstyle and relicensed under the GPLv2 or v3.
@@ -33,11 +33,11 @@
 #include <QPainterPath>
 #include <QPoint>
 #include <QString>
+#include <QStringView>
 #include <QTableView>
 #include <QToolBar>
 #include <QToolButton>
 #include <QWizard>
-#include <QtCore>
 
 #ifdef Q_OS_MACOS
 #include <QMainWindow>
@@ -521,11 +521,11 @@ namespace Phantom
             // guard for it, so that it will default to a more safe definition on the
             // next guaranteed big breaking change for Qt. A warning will hopefully get
             // someone to double-check it at some point in the future.
-#warning "Verify contents and layout of QPalette::cacheKey() have not changed"
+            // #warning "Verify contents and layout of QPalette::cacheKey() have not changed"
             QtPrivate::QHashCombine c;
             uint h = qHash(p.currentColorGroup());
-            h = c(h, (uint)(x.u & 0xFFFFFFFFu));
-            h = c(h, (uint)((x.u >> 32) & 0xFFFFFFFFu));
+            h = c(h, static_cast<uint>(x.u & 0xFFFFFFFFu));
+            h = c(h, static_cast<uint>((x.u >> 32) & 0xFFFFFFFFu));
             return h;
 #endif
         }
@@ -871,7 +871,7 @@ namespace Phantom
         {
             QRect ra = bar->rect;
             QRect rb = ra;
-            bool isHorizontal = bar->orientation != Qt::Vertical;
+            bool isHorizontal = bar->state == QStyle::State_Horizontal;
             bool isInverted = bar->invertedAppearance;
             bool isIndeterminate = bar->minimum == 0 && bar->maximum == 0;
             bool isForward = !isHorizontal || bar->direction != Qt::RightToLeft;
@@ -2570,7 +2570,7 @@ void BaseStyle::drawControl(ControlElement element,
         QRect r = bar->rect.adjusted(2, 2, -2, -2);
         if (r.isEmpty() || !r.isValid())
             break;
-        QSize textSize = option->fontMetrics.size(Qt::TextBypassShaping, bar->text);
+        QSize textSize = option->fontMetrics.size(0, bar->text);
         QRect textRect = QStyle::alignedRect(option->direction, Qt::AlignCenter, textSize, option->rect);
         textRect &= r;
         if (textRect.isEmpty())
@@ -2730,10 +2730,10 @@ void BaseStyle::drawControl(ControlElement element,
         }
 
         // Draw main text and mnemonic text
-        QStringRef s(&menuItem->text);
+        QStringView s(menuItem->text);
         if (!s.isEmpty()) {
-            QRect textRect =
-                Ph::menuItemTextRect(metrics, option->direction, itemRect, hasSubMenu, hasIcon, menuItem->tabWidth);
+            QRect textRect = Ph::menuItemTextRect(
+                metrics, option->direction, itemRect, hasSubMenu, hasIcon, menuItem->reservedShortcutWidth);
             int t = s.indexOf(QLatin1Char('\t'));
             int text_flags =
                 Qt::AlignLeft | Qt::AlignTop | Qt::TextShowMnemonic | Qt::TextDontClip | Qt::TextSingleLine;
@@ -2804,14 +2804,14 @@ void BaseStyle::drawControl(ControlElement element,
 
             // Draw mnemonic text
             if (t >= 0) {
-                QRect mnemonicR =
-                    Ph::menuItemMnemonicRect(metrics, option->direction, itemRect, hasSubMenu, menuItem->tabWidth);
-                const QStringRef textToDrawRef = s.mid(t + 1);
+                QRect mnemonicR = Ph::menuItemMnemonicRect(
+                    metrics, option->direction, itemRect, hasSubMenu, menuItem->reservedShortcutWidth);
+                const auto textToDrawRef = QStringView{s}.mid(t + 1);
                 const QString unsafeTextToDraw = QString::fromRawData(textToDrawRef.constData(), textToDrawRef.size());
                 painter->drawText(mnemonicR, text_flags, unsafeTextToDraw);
                 s = s.left(t);
             }
-            const QStringRef textToDrawRef = s.left(t);
+            const auto textToDrawRef = QStringView{s}.left(t);
             const QString unsafeTextToDraw = QString::fromRawData(textToDrawRef.constData(), textToDrawRef.size());
             painter->drawText(textRect, text_flags, unsafeTextToDraw);
 
@@ -4129,7 +4129,7 @@ QSize BaseStyle::sizeFromContents(ContentsType type,
         bool nullIcon = hdr->icon.isNull();
         int margin = proxy()->pixelMetric(QStyle::PM_HeaderMargin, hdr, widget);
         int iconSize = nullIcon ? 0 : option->fontMetrics.height();
-        QSize txt = hdr->fontMetrics.size(Qt::TextSingleLine | Qt::TextBypassShaping, hdr->text);
+        QSize txt = hdr->fontMetrics.size(Qt::TextSingleLine, hdr->text);
         QSize sz;
         sz.setHeight(margin + qMax(iconSize, txt.height()) + margin);
         sz.setWidth((nullIcon ? 0 : margin) + iconSize + (hdr->text.isNull() ? 0 : margin) + txt.width() + margin);
