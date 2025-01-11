@@ -205,7 +205,7 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14.0")
     check_pie_supported()
 endif()
 
-# Find Qt5 compatibility library
+# Find Qt6 compatibility library
 find_package(Qt6 REQUIRED COMPONENTS Core5Compat)
 
 # Find Botan early since the version affects subsequent compiler options

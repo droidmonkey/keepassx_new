@@ -25,6 +25,8 @@
 #include "RemoteSettings.h"
 #include "gui/MessageBox.h"
 
+#include <QFile>
+
 DatabaseSettingsWidgetRemote::DatabaseSettingsWidgetRemote(QWidget* parent)
     : DatabaseSettingsWidget(parent)
     , m_remoteSettings(new RemoteSettings(nullptr, this))

@@ -44,16 +44,16 @@ GroupView::GroupView(Database* db, QWidget* parent)
     connect(selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), SIGNAL(groupSelectionChanged()));
     // clang-format on
 
-    new QShortcut(Qt::CTRL + Qt::Key_F10, this, SLOT(contextMenuShortcutPressed()), nullptr, Qt::WidgetShortcut);
+    new QShortcut(Qt::CTRL | Qt::Key_F10, this, SLOT(contextMenuShortcutPressed()), nullptr, Qt::WidgetShortcut);
     new QShortcut(
-        Qt::CTRL + Qt::SHIFT + Qt::Key_PageUp, this, SLOT(selectPreviousGroup()), nullptr, Qt::WindowShortcut);
-    new QShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_PageDown, this, SLOT(selectNextGroup()), nullptr, Qt::WindowShortcut);
+        Qt::CTRL | Qt::SHIFT | Qt::Key_PageUp, this, SLOT(selectPreviousGroup()), nullptr, Qt::WindowShortcut);
+    new QShortcut(Qt::CTRL | Qt::SHIFT | Qt::Key_PageDown, this, SLOT(selectNextGroup()), nullptr, Qt::WindowShortcut);
 
     // keyboard shortcuts to sort children of a group
-    auto shortcut = new QShortcut(Qt::CTRL + Qt::Key_Down, this, nullptr, nullptr, Qt::WidgetShortcut);
+    auto shortcut = new QShortcut(Qt::CTRL | Qt::Key_Down, this, nullptr, nullptr, Qt::WidgetShortcut);
     connect(shortcut, &QShortcut::activated, this, [this]() { sortGroups(false); });
 
-    shortcut = new QShortcut(Qt::CTRL + Qt::Key_Up, this, nullptr, nullptr, Qt::WidgetShortcut);
+    shortcut = new QShortcut(Qt::CTRL | Qt::Key_Up, this, nullptr, nullptr, Qt::WidgetShortcut);
     connect(shortcut, &QShortcut::activated, this, [this]() { sortGroups(true); });
 
     modelReset();

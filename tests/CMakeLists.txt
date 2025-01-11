@@ -1,4 +1,4 @@
-#  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
+#  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
 #  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -90,7 +90,7 @@ macro(add_unit_test)
     endif()
 endmacro(add_unit_test)
 
-set(TEST_LIBRARIES keepassx_core Qt6::Test)
+set(TEST_LIBRARIES keepassxc_core Qt6::Test)
 
 set(testsupport_SOURCES
         modeltest.cpp

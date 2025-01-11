@@ -20,7 +20,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QRegularExpression>
-#include <QTextCodec>
+#include <QtCore5Compat/QTextCodec>
 
 #include "core/Endian.h"
 #include "core/Group.h"

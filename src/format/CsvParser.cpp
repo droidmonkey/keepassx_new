@@ -19,7 +19,7 @@
 #include "CsvParser.h"
 
 #include <QFile>
-#include <QTextCodec>
+//#include <QTextCodec>
 
 #include "core/Tools.h"
 

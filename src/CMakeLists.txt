@@ -1,4 +1,4 @@
-#  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
+#  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
 #  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -233,26 +233,26 @@ if(UNIX AND NOT APPLE)
     endif()
     if(WITH_XC_X11)
         list(APPEND gui_SOURCES
-            gui/osutils/nixutils/X11Funcs.cpp)
+                gui/osutils/nixutils/X11Funcs.cpp)
     endif()
-    qt6_add_dbus_adaptor(keepassx_SOURCES
+    qt6_add_dbus_adaptor(gui_SOURCES
             gui/org.keepassxc.KeePassXC.MainWindow.xml
             gui/MainWindow.h
             MainWindow)
 
     set_source_files_properties(
-        quickunlock/dbus/org.freedesktop.PolicyKit1.Authority.xml
-        PROPERTIES
-        INCLUDE "quickunlock/PolkitDbusTypes.h"
-        )
-    qt6_add_dbus_interface(keepassx_SOURCES
-        quickunlock/dbus/org.freedesktop.PolicyKit1.Authority.xml
-        polkit_dbus
+            quickunlock/dbus/org.freedesktop.PolicyKit1.Authority.xml
+            PROPERTIES
+            INCLUDE "quickunlock/PolkitDbusTypes.h"
+    )
+    qt6_add_dbus_interface(core_SOURCES
+            quickunlock/dbus/org.freedesktop.PolicyKit1.Authority.xml
+            polkit_dbus
     )
 
     find_library(KEYUTILS_LIBRARIES NAMES keyutils)
     if(NOT KEYUTILS_LIBRARIES)
-		message(FATAL_ERROR "Could not find libkeyutils")
+        message(FATAL_ERROR "Could not find libkeyutils")
     endif()
 endif()
 
@@ -329,19 +329,19 @@ set(autotype_SOURCES
         autotype/WindowSelectComboBox.cpp)
 
 add_library(autotype STATIC ${autotype_SOURCES})
-target_link_libraries(autotype Qt5::Core Qt5::Widgets)
+target_link_libraries(autotype Qt6::Core Qt6::Widgets)
 
 if(WITH_XC_YUBIKEY)
     list(APPEND core_SOURCES
-        keys/drivers/YubiKey.h
-        keys/drivers/YubiKey.cpp
-        keys/drivers/YubiKeyInterface.cpp
-        keys/drivers/YubiKeyInterfaceUSB.cpp
-        keys/drivers/YubiKeyInterfacePCSC.cpp)
+            keys/drivers/YubiKey.h
+            keys/drivers/YubiKey.cpp
+            keys/drivers/YubiKeyInterface.cpp
+            keys/drivers/YubiKeyInterfaceUSB.cpp
+            keys/drivers/YubiKeyInterfacePCSC.cpp)
 else()
     list(APPEND core_SOURCES
-        keys/drivers/YubiKey.h
-        keys/drivers/YubiKeyStub.cpp)
+            keys/drivers/YubiKey.h
+            keys/drivers/YubiKeyStub.cpp)
 endif()
 
 if(WITH_XC_NETWORKING)
@@ -357,25 +357,13 @@ endif()
 configure_file(config-keepassx.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-keepassx.h)
 configure_file(git-info.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/git-info.h)
 
-add_library(autotype STATIC ${autotype_SOURCES})
-target_link_libraries(autotype Qt6::Core Qt6::Network Qt6::Widgets)
-
-add_library(keepassx_core STATIC ${keepassx_SOURCES})
-
-find_package(Qt6 REQUIRED COMPONENTS SvgWidgets)
-
-set_target_properties(keepassx_core PROPERTIES COMPILE_DEFINITIONS KEEPASSX_BUILDING_CORE)
-target_link_libraries(keepassx_core
-        autotype
-        ${keepassxcbrowser_LIB}
+# Core Library Definition
+add_library(keepassxc_core STATIC ${core_SOURCES})
+set_target_properties(keepassxc_core PROPERTIES COMPILE_DEFINITIONS KEEPASSX_BUILDING_CORE)
+target_link_libraries(keepassxc_core
         ${qrcode_LIB}
-        ${fdosecrets_LIB}
         Qt6::Core
-        Qt6::Core5Compat
         Qt6::Concurrent
-        Qt6::Network
-        Qt6::SvgWidgets
-        Qt6::Widgets
         ${BOTAN_LIBRARIES}
         ${PCSC_LIBRARIES}
         ${ZXCVBN_LIBRARIES}
@@ -387,11 +375,13 @@ target_link_libraries(keepassx_core
 
 # GUI Library Definition
 add_library(keepassxc_gui STATIC ${gui_SOURCES})
+find_package(Qt6 REQUIRED COMPONENTS SvgWidgets)
 set_target_properties(keepassxc_gui PROPERTIES COMPILE_DEFINITIONS KEEPASSX_BUILDING_CORE)
 target_link_libraries(keepassxc_gui
         keepassxc_core
-        Qt5::Network
-        Qt5::Widgets
+        Qt6::Network
+        Qt6::SvgWidgets
+        Qt6::Widgets
         autotype
         ${browser_LIB}
         ${fdosecrets_LIB}
@@ -399,15 +389,18 @@ target_link_libraries(keepassxc_gui
         ${sshagent_LIB})
 
 if(APPLE)
-    target_link_libraries(keepassx_core "-framework Foundation -framework AppKit -framework Carbon -framework Security -framework LocalAuthentication -framework ScreenCaptureKit")
+    target_link_libraries(keepassxc_gui "-framework Foundation -framework AppKit -framework Carbon -framework Security -framework LocalAuthentication -framework ScreenCaptureKit")
+    if(Qt6MacExtras_FOUND)
+        target_link_libraries(keepassxc_gui Qt6::MacExtras)
+    endif()
 endif()
 if(HAIKU)
     target_link_libraries(keepassxc_gui network)
 endif()
 if(UNIX AND NOT APPLE)
-    target_link_libraries(keepassx_core Qt6::DBus ${LIBUSB_LIBRARIES})
+    target_link_libraries(keepassxc_core Qt6::DBus ${LIBUSB_LIBRARIES})
     if(WITH_XC_X11)
-        target_link_libraries(keepassx_core Qt6::X11Extras X11)
+        target_link_libraries(keepassxc_gui Qt6::X11Extras X11)
     endif()
     include_directories(${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 endif()
@@ -533,7 +526,7 @@ if(WIN32)
                 COMPONENT Runtime)
 
         # Use windeployqt.exe to setup Qt dependencies
-        if(Qt6Core_VERSION VERSION_LESS "6.6.0") # TODO: Check this.
+        if(Qt6Core_VERSION VERSION_LESS "6.6.0")
             set(WINDEPLOYQT_MODE "--release")
             if(CMAKE_BUILD_TYPE_LOWER STREQUAL "debug")
                 set(WINDEPLOYQT_MODE "--debug")
@@ -548,7 +541,7 @@ if(WIN32)
             find_file(OPENSSL_DLL
                     NAMES libssl-3.dll libssl-3-x64.dll
                     HINTS "${OPENSSL_ROOT_DIR}/bin"
-                    )
+            )
             if (NOT OPENSSL_DLL)
                 message(FATAL_ERROR "Cannot find libssl dll, ensure openssl is properly installed.")
             endif()
@@ -556,7 +549,7 @@ if(WIN32)
             find_file(CRYPTO_DLL
                     NAMES libcrypto-3.dll libcrypto-3-x64.dll
                     HINTS "${OPENSSL_ROOT_DIR}/bin"
-                    )
+            )
             if (NOT CRYPTO_DLL)
                 message(FATAL_ERROR "Cannot find libcrypto dll, ensure openssl is properly installed.")
             endif()

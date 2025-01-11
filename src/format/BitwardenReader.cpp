@@ -90,8 +90,11 @@ namespace
                     // Change from UUID to base64 byte array
                     const auto credentialIdValue = passkey.value("credentialId").toString();
                     if (!credentialIdValue.isEmpty()) {
-                        const auto credentialUuid = Tools::uuidToHex(credentialIdValue);
-                        const auto credentialIdArray = QByteArray::fromHex(credentialUuid.toUtf8());
+                        const auto uuid = Tools::hexToUuid(credentialIdValue);
+                        // What?
+                        //const auto credentialUuid = Tools::uuidToHex(credentialIdValue);
+                        //const auto credentialIdArray = QByteArray::fromHex(credentialUuid.toUtf8());
+                        const auto credentialIdArray = QByteArray::fromHex(uuid.toByteArray());
                         const auto credentialId =
                             credentialIdArray.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
                         entry->attributes()->set(EntryAttributes::KPEX_PASSKEY_CREDENTIAL_ID, credentialId, true);

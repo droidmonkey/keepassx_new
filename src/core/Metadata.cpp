@@ -19,10 +19,8 @@
 #include "Metadata.h"
 
 #include "core/Clock.h"
-#include "core/Entry.h"
 #include "core/Group.h"
 
-#include <QApplication>
 #include <QCryptographicHash>
 #include <QJsonDocument>
 

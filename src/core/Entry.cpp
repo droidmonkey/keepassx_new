@@ -1047,11 +1047,11 @@ QString Entry::resolveMultiplePlaceholdersRecursive(const QString& str, int maxD
     int capEnd = 0;
     while (matches.hasNext()) {
         const auto match = matches.next();
-        result += str.midRef(capEnd, match.capturedStart() - capEnd);
+        result += QStringView{str}.mid(capEnd, match.capturedStart() - capEnd);
         result += resolvePlaceholderRecursive(match.captured(), maxDepth);
         capEnd = match.capturedEnd();
     }
-    result += str.rightRef(str.length() - capEnd);
+    result += QStringView{str}.right(str.length() - capEnd);
     return result;
 }
 
@@ -1530,7 +1530,6 @@ QString Entry::resolveUrl(const QString& url) const
     } else if (url.startsWith("cmd://")) {
         QStringList cmdList = newUrl.split(" ");
         for (int i = 1; i < cmdList.size(); ++i) {
-            QString& cmd = cmdList[i];
             // Don't pass arguments to the resolveUrl function (they look like URL's)
             if (!cmdList[i].startsWith("-") && !cmdList[i].startsWith("/")) {
                 return resolveUrl(cmdList[i].remove(QRegularExpression("'|\"")));

@@ -513,7 +513,7 @@ namespace Phantom
             // generated changes. If that happens, change to use the definition of
             // `fastfragile_hash_qpalette` below, which is less likely to collide with an
             // arbitrarily numbered key but also does more work.
-#if QT_VERSION < QT_VERSION_CHECK(6, 7, 0) // TODO: What to do here?
+#if QT_VERSION < QT_VERSION_CHECK(6, 6, 0) // TODO: What to do here?
             x.u = x.u ^ (static_cast<quint64>(p.currentColorGroup()) << (64 - 3));
             return x.u;
 #else
@@ -522,11 +522,11 @@ namespace Phantom
             // guard for it, so that it will default to a more safe definition on the
             // next guaranteed big breaking change for Qt. A warning will hopefully get
             // someone to double-check it at some point in the future.
-#warning "Verify contents and layout of QPalette::cacheKey() have not changed"
+//#warning "Verify contents and layout of QPalette::cacheKey() have not changed"
             QtPrivate::QHashCombine c;
             uint h = qHash(p.currentColorGroup());
-            h = c(h, (uint)(x.u & 0xFFFFFFFFu));
-            h = c(h, (uint)((x.u >> 32) & 0xFFFFFFFFu));
+            h = c(h, static_cast<uint>(x.u & 0xFFFFFFFFu));
+            h = c(h, static_cast<uint>((x.u >> 32) & 0xFFFFFFFFu));
             return h;
 #endif
         }

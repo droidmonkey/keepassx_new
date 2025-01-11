@@ -272,7 +272,6 @@ MainWindow::MainWindow()
     connect(m_inactivityTimer, SIGNAL(inactivityDetected()), this, SLOT(lockDatabasesAfterInactivity()));
     applySettingsChanges();
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
     // Qt 5.10 introduced a new "feature" to hide shortcuts in context menus
     // Unfortunately, Qt::AA_DontShowShortcutsInContextMenus is broken, have to manually enable them
     m_ui->actionEntryNew->setShortcutVisibleInContextMenu(true);
@@ -2112,46 +2111,20 @@ void MainWindow::initActionCollection()
     }
 
     // Actions with standard shortcuts
-    ac->setDefaultShortcut(m_ui->actionDatabaseOpen, QKeySequence::Open, Qt::CTRL | Qt::Key_O);
-    ac->setDefaultShortcut(m_ui->actionDatabaseSave, QKeySequence::Save, Qt::CTRL | Qt::Key_S);
-    ac->setDefaultShortcut(m_ui->actionDatabaseSaveAs, QKeySequence::SaveAs, Qt::CTRL | Qt::SHIFT | Qt::Key_S);
-    ac->setDefaultShortcut(m_ui->actionDatabaseClose, QKeySequence::Close, Qt::CTRL | Qt::Key_W);
-    ac->setDefaultShortcut(m_ui->actionSettings, QKeySequence::Preferences, Qt::CTRL | Qt::Key_Comma);
-    ac->setDefaultShortcut(m_ui->actionQuit, QKeySequence::Quit, Qt::CTRL | Qt::Key_Q);
-    ac->setDefaultShortcut(m_ui->actionEntryNew, QKeySequence::New, Qt::CTRL | Qt::Key_N);
+    ac->setDefaultShortcut(m_ui->actionDatabaseOpen, QKeySequence::Open);
+    ac->setDefaultShortcut(m_ui->actionDatabaseSave, QKeySequence::Save);
+    ac->setDefaultShortcut(m_ui->actionDatabaseSaveAs, QKeySequence::SaveAs);
+    ac->setDefaultShortcut(m_ui->actionDatabaseClose, QKeySequence::Close);
+    ac->setDefaultShortcut(m_ui->actionSettings, QKeySequence::Preferences);
+    ac->setDefaultShortcut(m_ui->actionQuit, QKeySequence::Quit);
+    ac->setDefaultShortcut(m_ui->actionEntryNew, QKeySequence::New);
 
     // Prevent conflicts with global Mac shortcuts (force Control on all platforms)
     // Note: Qt::META means Ctrl on Mac.
 #ifdef Q_OS_MAC
-    ac->setDefaultShortcut(m_ui->actionEntryAddToAgent, Qt::META + Qt::Key_H);
-    ac->setDefaultShortcut(m_ui->actionEntryRemoveFromAgent, Qt::META + Qt::SHIFT + Qt::Key_H);
+    ac->setDefaultShortcut(m_ui->actionEntryAddToAgent, Qt::META | Qt::Key_H);
+    ac->setDefaultShortcut(m_ui->actionEntryRemoveFromAgent, Qt::META | Qt::SHIFT | Qt::Key_H);
 #endif
-
-    // All other actions with default shortcuts
-    ac->setDefaultShortcut(m_ui->actionDatabaseNew, Qt::CTRL | Qt::SHIFT | Qt::Key_N);
-    ac->setDefaultShortcut(m_ui->actionDatabaseSettings, Qt::CTRL | Qt::SHIFT | Qt::Key_Comma);
-    ac->setDefaultShortcut(m_ui->actionReports, Qt::CTRL | Qt::SHIFT | Qt::Key_R);
-    ac->setDefaultShortcut(m_ui->actionLockDatabase, Qt::CTRL | Qt::Key_L);
-    ac->setDefaultShortcut(m_ui->actionLockAllDatabases, Qt::CTRL | Qt::SHIFT | Qt::Key_L);
-    ac->setDefaultShortcut(m_ui->actionEntryEdit, Qt::CTRL | Qt::Key_E);
-    ac->setDefaultShortcut(m_ui->actionEntryDelete, Qt::CTRL | Qt::Key_D);
-    ac->setDefaultShortcut(m_ui->actionEntryDelete, Qt::Key_Delete);
-    ac->setDefaultShortcut(m_ui->actionEntryClone, Qt::CTRL | Qt::Key_K);
-    ac->setDefaultShortcut(m_ui->actionEntryTotp, Qt::CTRL | Qt::SHIFT | Qt::Key_T);
-    ac->setDefaultShortcut(m_ui->actionEntryDownloadIcon, Qt::CTRL | Qt::SHIFT | Qt::Key_D);
-    ac->setDefaultShortcut(m_ui->actionEntryCopyTotp, Qt::CTRL + Qt::Key_T);
-    ac->setDefaultShortcut(m_ui->actionEntryCopyPasswordTotp, Qt::CTRL | Qt::Key_Y);
-    ac->setDefaultShortcut(m_ui->actionEntryMoveUp, Qt::CTRL | Qt::ALT | Qt::Key_Up);
-    ac->setDefaultShortcut(m_ui->actionEntryMoveDown, Qt::CTRL | Qt::ALT | Qt::Key_Down);
-    ac->setDefaultShortcut(m_ui->actionEntryCopyUsername, Qt::CTRL | Qt::Key_B);
-    ac->setDefaultShortcut(m_ui->actionEntryCopyPassword, Qt::CTRL | Qt::Key_C);
-    ac->setDefaultShortcut(m_ui->actionEntryCopyTitle, Qt::CTRL | Qt::Key_I);
-    ac->setDefaultShortcut(m_ui->actionEntryAutoTypeSequence, Qt::CTRL | Qt::SHIFT | Qt::Key_V);
-    ac->setDefaultShortcut(m_ui->actionEntryOpenUrl, Qt::CTRL | Qt::SHIFT | Qt::Key_U);
-    ac->setDefaultShortcut(m_ui->actionEntryCopyURL, Qt::CTRL | Qt::Key_U);
-    ac->setDefaultShortcut(m_ui->actionEntryRestore, Qt::CTRL | Qt::Key_R);
-    ac->setDefaultShortcut(m_ui->actionEntryAddToAgent, modifier | Qt::Key_H);
-    ac->setDefaultShortcut(m_ui->actionEntryRemoveFromAgent, modifier | Qt::SHIFT | Qt::Key_H);
 
     QTimer::singleShot(1, ac, &ActionCollection::restoreShortcuts);
 }

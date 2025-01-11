@@ -20,11 +20,6 @@
 #include "config-keepassx.h"
 
 #include "core/Config.h"
-
-#ifdef WITH_XC_KEESHARE
-#include "keeshare/KeeShare.h"
-#endif
-
 #include "core/Global.h"
 #include "core/Metadata.h"
 #include "core/Tools.h"

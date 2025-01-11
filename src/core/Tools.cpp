@@ -36,8 +36,6 @@
 #include <QIODevice>
 #include <QLocale>
 #include <QMetaProperty>
-#include <QNetworkCookie>
-#include <QNetworkCookieJar>
 #include <QRegularExpression>
 #include <QStringList>
 #include <QUrl>

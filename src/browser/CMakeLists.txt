@@ -1,4 +1,4 @@
-#  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
+#  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -40,6 +40,6 @@ if(WITH_XC_BROWSER)
                 PasskeyUtils.cpp)
     endif()
 
-    add_library(keepassxcbrowser STATIC ${keepassxcbrowser_SOURCES})
-    target_link_libraries(keepassxcbrowser Qt6::Core Qt6::Concurrent Qt6::Widgets Qt6::Network ${BOTAN_LIBRARIES})
+    add_library(browser STATIC ${browser_SOURCES})
+    target_link_libraries(browser Qt6::Core Qt6::Concurrent Qt6::Widgets Qt6::Network ${BOTAN_LIBRARIES})
 endif()
