@@ -77,7 +77,7 @@ bool Translator::installTranslator(const QStringList& languages, const QString& 
 }
 
 /**
- * Install Qt5 base translator from the specified local search path or the default system path
+ * Install Qt6 base translator from the specified local search path or the default system path
  * if no qtbase_* translations were found at the local path.
  *
  * @param languages priority-ordered list of languages

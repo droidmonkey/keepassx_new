@@ -404,9 +404,6 @@ endif()
 # Find Qt
 set(QT_COMPONENTS Core Network Concurrent Gui Svg Widgets Test LinguistTools)
 if(UNIX AND NOT APPLE)
-    if(WITH_X11)
-        list(APPEND QT_COMPONENTS X11Extras)
-    endif()
     find_package(Qt6 COMPONENTS ${QT_COMPONENTS} DBus REQUIRED)
 elseif(APPLE)
     find_package(Qt6 COMPONENTS ${QT_COMPONENTS} REQUIRED HINTS

@@ -28,9 +28,10 @@
 #include "AutoTypeAction.h"
 #include "AutoTypeMatch.h"
 
+#include "core/Database.h"
+#include "core/Entry.h"
+
 class AutoTypePlatformInterface;
-class Database;
-class Entry;
 class QPluginLoader;
 
 class AutoType : public QObject

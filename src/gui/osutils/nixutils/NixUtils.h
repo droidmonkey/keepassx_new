@@ -60,7 +60,7 @@ private:
     explicit NixUtils(QObject* parent = nullptr);
     ~NixUtils() override;
 
-    bool nativeEventFilter(const QByteArray& eventType, void* message, long*) override;
+    bool nativeEventFilter(const QByteArray& eventType, void* message, qintptr* result) override;
     QString getAutostartDesktopFilename(bool createDirs = false) const;
 
     bool triggerGlobalShortcut(uint keycode, uint modifiers);

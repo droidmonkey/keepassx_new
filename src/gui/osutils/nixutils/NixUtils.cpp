@@ -240,8 +240,9 @@ void NixUtils::registerNativeEventFilter()
     qApp->installNativeEventFilter(this);
 }
 
-bool NixUtils::nativeEventFilter(const QByteArray& eventType, void* message, long*)
+bool NixUtils::nativeEventFilter(const QByteArray& eventType, void* message, qintptr* result)
 {
+    Q_UNUSED(result)
 #ifdef WITH_X11
     if (eventType != QByteArrayLiteral("xcb_generic_event_t")) {
         return false;

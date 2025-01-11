@@ -35,38 +35,33 @@
       "platform": "linux | freebsd"
     },
     {
-      "name": "qt5",
+      "name": "qt6",
       "version>=": "5.15.11"
     },
     {
-      "name": "qt5-imageformats",
-      "version>=": "5.15.11"
+      "name": "qt6-imageformats",
+      "version>=": "6.6.0"
     },
     {
-      "name": "qt5-macextras",
-      "version>=": "5.15.11",
+      "name": "qt6-macextras",
+      "version>=": "6.6.0",
       "platform": "osx"
     },
     {
-      "name": "qt5-svg",
-      "version>=": "5.15.11"
+      "name": "qt6-svg",
+      "version>=": "6.6.0"
     },
     {
-      "name": "qt5-tools",
-      "version>=": "5.15.11"
+      "name": "qt6-tools",
+      "version>=": "6.6.0"
     },
     {
-      "name": "qt5-translations",
-      "version>=": "5.15.11"
+      "name": "qt6-translations",
+      "version>=": "6.6.0"
     },
     {
-      "name": "qt5-wayland",
-      "version>=": "5.15.11",
-      "platform": "linux | freebsd"
-    },
-    {
-      "name": "qt5-x11extras",
-      "version>=": "5.15.11",
+      "name": "qt6-wayland",
+      "version>=": "6.6.0",
       "platform": "linux | freebsd"
     },
     {
