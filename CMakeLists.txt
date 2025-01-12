@@ -416,8 +416,8 @@ else()
 endif()
 
 # Minimum Qt version check
-if(Qt6Core_VERSION VERSION_LESS "6.7.0")
-    message(FATAL_ERROR "Qt version 6.7.0 or higher is required")
+if(Qt6Core_VERSION VERSION_LESS "6.4.2")
+    message(FATAL_ERROR "Qt version 6.4.2 or higher is required")
 endif()
 
 # Process moc automatically
