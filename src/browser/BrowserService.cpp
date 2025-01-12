@@ -1438,7 +1438,7 @@ bool BrowserService::isPasskeyCredentialExcluded(const QJsonArray& excludeCreden
 {
     QStringList allIds;
     for (const auto& cred : excludeCredentials) {
-        allIds << cred["id"].toString();
+        allIds << cred.toObject().value("id").toString();
     }
 
     const auto passkeyEntries = getPasskeyEntries(rpId, keyList);
@@ -1695,7 +1695,7 @@ void BrowserService::processClientMessage(QLocalSocket* socket, const QJsonObjec
         m_browserClients.insert(clientID, QSharedPointer<BrowserAction>::create());
     }
 
-    auto& action = m_browserClients.value(clientID);
+    const auto& action = m_browserClients.value(clientID);
     auto response = action->processClientMessage(socket, message);
     m_browserHost->sendClientMessage(socket, response);
 }

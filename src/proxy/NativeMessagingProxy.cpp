@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2020 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ void NativeMessagingProxy::setupStandardInput()
 #endif
 #endif
 
-    QtConcurrent::run([this] {
+    auto res = QtConcurrent::run([this] {
         while (std::cin.good()) {
             if (std::cin.peek() != EOF) {
                 uint length = 0;
@@ -68,7 +68,7 @@ void NativeMessagingProxy::setupStandardInput()
                 QString msg;
                 msg.reserve(length);
                 for (uint i = 0; i < length; ++i) {
-                    msg.append(getchar());
+                    msg.append(QChar(getchar()));
                 }
 
                 if (msg.length() > 0) {

@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KEEPASSX_POLKIT_H
-#define KEEPASSX_POLKIT_H
+#ifndef KEEPASSXC_POLKIT_H
+#define KEEPASSXC_POLKIT_H
 
 #include "QuickUnlockInterface.h"
 #include "polkit_dbus.h"
@@ -47,4 +47,4 @@ private:
     QScopedPointer<org::freedesktop::PolicyKit1::Authority> m_polkit;
 };
 
-#endif // KEEPASSX_POLKIT_H
+#endif // KEEPASSXC_POLKIT_H

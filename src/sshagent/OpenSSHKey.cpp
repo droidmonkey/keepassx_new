@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2017 Toni Spets <toni.spets@iki.fi>
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 
 #include <QRegularExpression>
 #include <QStringList>
+#include <QStringView>
 
 #include <botan/pwdhash.h>
 
@@ -180,7 +181,7 @@ const QString OpenSSHKey::privateKey()
 
     auto base64Key = QString::fromUtf8(sshKey.toBase64());
     for (int i = 0; i < base64Key.size(); i += 70) {
-        out += base64Key.midRef(i, 70);
+        out += QStringView{base64Key}.mid(i, 70);
         out += "\n";
     }
 
@@ -307,7 +308,7 @@ bool OpenSSHKey::parsePKCS1PEM(const QByteArray& in)
             return false;
         }
 
-        if (QString::fromLatin1(magic) != "openssh-key-v1") {
+        if (QString::fromLatin1(magic.toStdString().c_str()) != "openssh-key-v1") {
             m_error = tr("Key file magic header id invalid");
             return false;
         }

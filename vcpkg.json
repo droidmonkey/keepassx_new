@@ -40,28 +40,28 @@
     },
     {
       "name": "qt6-imageformats",
-      "version>=": "6.6.0"
+      "version>=": "6.7.0"
     },
     {
       "name": "qt6-macextras",
-      "version>=": "6.6.0",
+      "version>=": "6.7.0",
       "platform": "osx"
     },
     {
       "name": "qt6-svg",
-      "version>=": "6.6.0"
+      "version>=": "6.7.0"
     },
     {
       "name": "qt6-tools",
-      "version>=": "6.6.0"
+      "version>=": "6.7.0"
     },
     {
       "name": "qt6-translations",
-      "version>=": "6.6.0"
+      "version>=": "6.7.0"
     },
     {
       "name": "qt6-wayland",
-      "version>=": "6.6.0",
+      "version>=": "6.7.0",
       "platform": "linux | freebsd"
     },
     {
