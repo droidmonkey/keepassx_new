@@ -29,5 +29,5 @@ if(KPXC_FEATURE_SSHAGENT)
     )
 
     add_library(sshagent STATIC ${sshagent_SOURCES})
-    target_link_libraries(sshagent Qt6::Core Qt6::Widgets Qt6::Network)
+    target_link_libraries(sshagent Qt6::Core Qt6::Widgets Qt6::Network ${BOTAN_LIBRARIES})
 endif()

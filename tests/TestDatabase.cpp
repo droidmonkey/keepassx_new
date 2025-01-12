@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2017 Vladimir Svyatski <v.unreal@gmail.com>
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -125,7 +125,7 @@ void TestDatabase::testSaveAs()
     QVERIFY(QFile::exists(newDbFileName));
 #ifdef Q_OS_WIN
     QVERIFY(!QFileInfo(newDbFileName).isHidden());
-    SetFileAttributes(newDbFileName.toStdString().c_str(), FILE_ATTRIBUTE_HIDDEN);
+    SetFileAttributesA(newDbFileName.toStdString().c_str(), FILE_ATTRIBUTE_HIDDEN);
     QVERIFY2(db->saveAs(newDbFileName, Database::Atomic, QString(), &error), error.toLatin1());
     QVERIFY(QFileInfo(newDbFileName).isHidden());
 #endif

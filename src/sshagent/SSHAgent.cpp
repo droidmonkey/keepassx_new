@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2017 Toni Spets <toni.spets@iki.fi>
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -146,9 +146,9 @@ bool SSHAgent::isAgentRunning() const
     return !socketFileInfo.path().isEmpty() && socketFileInfo.exists();
 #else
     if (usePageant() && useOpenSSH()) {
-        return (FindWindowA("Pageant", "Pageant") != nullptr) && WaitNamedPipe(socketPath().toLatin1().data(), 100);
+        return (FindWindowA("Pageant", "Pageant") != nullptr) && WaitNamedPipeA(socketPath().toLatin1().data(), 100);
     } else if (useOpenSSH()) {
-        return WaitNamedPipe(socketPath().toLatin1().data(), 100);
+        return WaitNamedPipeA(socketPath().toLatin1().data(), 100);
     } else if (usePageant()) {
         return (FindWindowA("Pageant", "Pageant") != nullptr);
     } else {

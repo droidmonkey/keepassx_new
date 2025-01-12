@@ -1,6 +1,6 @@
 /*
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2017 Sami Vänttinen <sami.vanttinen@protonmail.com>
- *  Copyright (C) 2021 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -213,7 +213,7 @@ QString NativeMessageInstaller::getNativeMessagePath(SupportedBrowsers browser) 
     if (Config::isPortable()) {
         basePath = Config::portableConfigDir();
     } else {
-        basePath = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+        basePath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     }
     return QStringLiteral("%1/%2_%3.json").arg(basePath, HOST_NAME, getBrowserName(browser));
 #elif defined(KEEPASSXC_DIST_FLATPAK)

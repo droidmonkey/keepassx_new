@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,8 +54,9 @@ ScreenLockListenerWin::~ScreenLockListenerWin()
     }
 }
 
-bool ScreenLockListenerWin::nativeEventFilter(const QByteArray& eventType, void* message, long*)
+bool ScreenLockListenerWin::nativeEventFilter(const QByteArray& eventType, void* message, qintptr* result)
 {
+    Q_UNUSED(result);
     if (eventType == "windows_generic_MSG" || eventType == "windows_dispatcher_MSG") {
         MSG* m = static_cast<MSG*>(message);
         if (m->message == WM_POWERBROADCAST) {

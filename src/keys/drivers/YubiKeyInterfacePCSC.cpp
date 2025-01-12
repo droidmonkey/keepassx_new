@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2021 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ namespace
 
         // Read size of required string buffer
         // OSX does not support auto-allocate
-        auto rv = SCardListReaders(context, nullptr, nullptr, &dwReaders);
+        auto rv = SCardListReadersA(context, nullptr, nullptr, &dwReaders);
         if (rv != SCARD_S_SUCCESS) {
             return readers_list;
         }
@@ -107,7 +107,7 @@ namespace
         }
         char* mszReaders = new char[dwReaders + 2];
 
-        rv = SCardListReaders(context, nullptr, mszReaders, &dwReaders);
+        rv = SCardListReadersA(context, nullptr, mszReaders, &dwReaders);
         if (rv == SCARD_S_SUCCESS) {
             char* readhead = mszReaders;
             // Names are separated by a null byte
@@ -143,7 +143,7 @@ namespace
         uint8_t pbAtr[MAX_ATR_SIZE] = {0}; // ATR record
         SCUINT dwAtrLen = sizeof(pbAtr); // ATR record size
 
-        auto rv = SCardStatus(handle, pbReader, &dwReaderLen, &dwState, &dwProt, pbAtr, &dwAtrLen);
+        auto rv = SCardStatusA(handle, pbReader, &dwReaderLen, &dwState, &dwProt, pbAtr, &dwAtrLen);
         if (rv == SCARD_S_SUCCESS) {
             switch (dwProt) {
             case SCARD_PROTOCOL_T0:
@@ -430,7 +430,7 @@ namespace
         foreach (const QString& reader_name, readers_list) {
             SCARDHANDLE hCard;
             SCUINT dwActiveProtocol = SCARD_PROTOCOL_UNDEFINED;
-            rv = SCardConnect(context,
+            rv = SCardConnectA(context,
                               reader_name.toStdString().c_str(),
                               SCARD_SHARE_SHARED,
                               SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1,
@@ -446,7 +446,7 @@ namespace
                 uint8_t pbAtr[MAX_ATR_SIZE] = {0};
                 SCUINT dwAtrLen = sizeof(pbAtr);
 
-                rv = SCardStatus(hCard, pbReader, &dwReaderLen, &dwState, &dwProt, pbAtr, &dwAtrLen);
+                rv = SCardStatusA(hCard, pbReader, &dwReaderLen, &dwState, &dwProt, pbAtr, &dwAtrLen);
                 if (rv == SCARD_S_SUCCESS && (dwProt == SCARD_PROTOCOL_T0 || dwProt == SCARD_PROTOCOL_T1)) {
                     // Find which AID to use
                     SCardAID satr;
@@ -567,7 +567,7 @@ YubiKey::KeyMap YubiKeyInterfacePCSC::findValidKeys(int& connectedKeys)
 
         SCARDHANDLE hCard;
         SCUINT dwActiveProtocol = SCARD_PROTOCOL_UNDEFINED;
-        auto rv = SCardConnect(m_sc_context,
+        auto rv = SCardConnectA(m_sc_context,
                                reader_name.toStdString().c_str(),
                                SCARD_SHARE_SHARED,
                                SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1,
@@ -589,7 +589,7 @@ YubiKey::KeyMap YubiKeyInterfacePCSC::findValidKeys(int& connectedKeys)
         uint8_t pbAtr[MAX_ATR_SIZE] = {0};
         SCUINT dwAtrLen = sizeof(pbAtr);
 
-        rv = SCardStatus(hCard, pbReader, &dwReaderLen, &dwState, &dwProt, pbAtr, &dwAtrLen);
+        rv = SCardStatusA(hCard, pbReader, &dwReaderLen, &dwState, &dwProt, pbAtr, &dwAtrLen);
         if (rv != SCARD_S_SUCCESS || (dwProt != SCARD_PROTOCOL_T0 && dwProt != SCARD_PROTOCOL_T1)) {
             // Could not read the ATR record or the protocol is not supported
             continue;
