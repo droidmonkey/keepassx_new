@@ -67,7 +67,7 @@ void NewEntryAttachmentsDialog::saveAttachment()
     auto text = m_ui->attachmentTextEdit->toPlainText().toUtf8();
 
     QString error;
-    if (validateFileName(fileName, error)) {
+    if (!validateFileName(fileName, error)) {
         QMessageBox::warning(this, tr("Save attachment"), error);
         return;
     }
