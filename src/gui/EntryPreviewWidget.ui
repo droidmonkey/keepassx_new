@@ -288,6 +288,9 @@
                       <property name="textInteractionFlags">
                        <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
                       </property>
+                      <property name="blendIn" stdset="0">
+                       <bool>true</bool>
+                      </property>
                      </widget>
                     </item>
                    </layout>
@@ -324,6 +327,9 @@
                 </property>
                 <property name="textInteractionFlags">
                  <set>Qt::TextBrowserInteraction</set>
+                </property>
+                <property name="blendIn" stdset="0">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -409,6 +415,9 @@
                   <property name="readOnly">
                    <bool>true</bool>
                   </property>
+                  <property name="blendIn" stdset="0">
+                   <bool>true</bool>
+                  </property>
                  </widget>
                 </item>
                </layout>
@@ -482,6 +491,9 @@
                   <property name="readOnly">
                    <bool>true</bool>
                   </property>
+                  <property name="blendIn" stdset="0">
+                   <bool>true</bool>
+                  </property>
                  </widget>
                 </item>
                </layout>
@@ -493,6 +505,9 @@
                 </property>
                 <property name="accessibleName">
                  <string>Tags list</string>
+                </property>
+                <property name="blendIn" stdset="0">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -515,6 +530,9 @@
                 </property>
                 <property name="textInteractionFlags">
                  <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+                </property>
+                <property name="blendIn" stdset="0">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -1107,6 +1125,9 @@
                    <bool>true</bool>
                   </property>
                   <property name="readOnly">
+                   <bool>true</bool>
+                  </property>
+                  <property name="blendIn" stdset="0">
                    <bool>true</bool>
                   </property>
                  </widget>

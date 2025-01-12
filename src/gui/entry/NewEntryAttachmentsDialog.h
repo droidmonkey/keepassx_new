@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,29 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef KEEPASSX_TESTTOOLS_H
-#define KEEPASSX_TESTTOOLS_H
+#pragma once
 
-#include "core/Tools.h"
+#include <QDialog>
+#include <QPointer>
 
-class TestTools : public QObject
+namespace Ui
+{
+    class EntryAttachmentsDialog;
+}
+
+class QByteArray;
+class EntryAttachments;
+
+class NewEntryAttachmentsDialog : public QDialog
 {
     Q_OBJECT
-private slots:
-    void testHumanReadableFileSize();
-    void testIsHex();
-    void testIsBase64();
-    void testIsAsciiString();
-    void testEnvSubstitute();
-    void testValidUuid();
-    void testBackupFilePatternSubstitution_data();
-    void testBackupFilePatternSubstitution();
-    void testEscapeRegex();
-    void testEscapeRegex_data();
-    void testConvertToRegex();
-    void testConvertToRegex_data();
-    void testArrayContainsValues();
-    void testMimeTypes();
-};
 
-#endif // KEEPASSX_TESTTOOLS_H
+public:
+    explicit NewEntryAttachmentsDialog(QPointer<EntryAttachments> attachments, QWidget* parent = nullptr);
+    ~NewEntryAttachmentsDialog() override;
+
+private slots:
+    void saveAttachment();
+    void fileNameTextChanged(const QString& fileName);
+
+private:
+    bool validateFileName(const QString& fileName, QString& error) const;
+
+    QPointer<EntryAttachments> m_attachments;
+    QScopedPointer<Ui::EntryAttachmentsDialog> m_ui;
+};

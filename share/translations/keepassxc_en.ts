@@ -3698,6 +3698,21 @@ This may cause the affected plugins to malfunction.</source>
     </message>
 </context>
 <context>
+    <name>EntryAttachmentsDialog</name>
+    <message>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File contents...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>EntryAttachmentsModel</name>
     <message>
         <source>Name</source>
@@ -3732,14 +3747,6 @@ This may cause the affected plugins to malfunction.</source>
     </message>
     <message>
         <source>Remove</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Rename selected attachment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Rename</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3849,6 +3856,18 @@ Error: %1</source>
     <message>
         <source>Attachment &quot;%1&quot; already exists. 
 Would you like to overwrite the existing attachment?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Preview</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to preview an attachment: Attachment not found</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -6040,6 +6059,25 @@ We recommend you use the AppImage available on our downloads page.</source>
     </message>
 </context>
 <context>
+    <name>NewEntryAttachmentsDialog</name>
+    <message>
+        <source>Attachment name cannot be empty</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Attachment with the same name already exists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save attachment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New entry attachment</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>NixUtils</name>
     <message>
         <source>Password Manager</source>
@@ -6782,6 +6820,21 @@ Do you want to overwrite it?</source>
     </message>
     <message>
         <source>Press &amp;Tab between characters</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PreviewEntryAttachmentsDialog</name>
+    <message>
+        <source>Preview entry attachment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No preview available</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Image format not supported</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
