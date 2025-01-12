@@ -25,6 +25,7 @@
 #include <QDesktopServices>
 #include <QDir>
 #include <QProcessEnvironment>
+#include <QScopeGuard>
 #include <QSet>
 #include <QTemporaryFile>
 #include <QUrl>
@@ -250,6 +251,25 @@ bool EntryAttachments::openAttachment(const QString& key, QString* errorMessage)
         watcher->start(tmpFile.fileName(), 5);
         connect(watcher.data(), &FileWatcher::fileChanged, this, &EntryAttachments::attachmentFileModified);
         m_attachmentFileWatchers.insert(tmpFile.fileName(), watcher);
+    } else if (auto path = m_openedAttachments.value(key); m_attachmentFileWatchers.contains(path)) {
+        auto watcher = m_attachmentFileWatchers.value(path);
+        watcher->stop();
+
+        QFile file(path);
+        auto finally = qScopeGuard([&file, &watcher, &path] {
+            file.close();
+            watcher->start(path, 5);
+        });
+
+        const auto attachmentData = value(key);
+
+        const bool saveOk = file.open(QIODevice::WriteOnly) && file.setPermissions(QFile::ReadOwner | QFile::WriteOwner)
+                            && file.write(attachmentData) == attachmentData.size() && file.flush();
+
+        if (!saveOk) {
+            *errorMessage = QString("%1 - %2").arg(key, file.errorString());
+            return false;
+        }
     }
 
     const bool openOk = QDesktopServices::openUrl(QUrl::fromLocalFile(m_openedAttachments.value(key)));
