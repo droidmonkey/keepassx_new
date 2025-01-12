@@ -383,7 +383,7 @@ QVariant EntryModel::headerData(int section, Qt::Orientation orientation, int ro
         case ParentGroup:
             return tr("Group");
         case ParentGroupPath:
-            return tr("Group full path");
+            return tr("Group Path");
         case Title:
             return tr("Title");
         case Username:
@@ -422,7 +422,7 @@ QVariant EntryModel::headerData(int section, Qt::Orientation orientation, int ro
         case ParentGroup:
             return tr("Group name");
         case ParentGroupPath:
-            return tr("Group full path");
+            return tr("Group Path");
         case Title:
             return tr("Entry title");
         case Username:
