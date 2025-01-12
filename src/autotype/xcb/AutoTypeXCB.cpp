@@ -1,7 +1,7 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2012 Felix Geyer <debfx@fobos.de>
  *  Copyright (C) 2000-2008 Tom Sato <VEF00200@nifty.ne.jp>
- *  Copyright (C) 2017 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,8 @@
 #include "core/Tools.h"
 #include "gui/osutils/nixutils/X11Funcs.h"
 
-#include <QX11Info>
+#include <QGuiApplication>
+#include <private/qtx11extras_p.h>
 #include <X11/XKBlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/XTest.h>
@@ -38,8 +39,10 @@ static const QPair<KeySym, KeySym> deadMap[] = {
 AutoTypePlatformX11::AutoTypePlatformX11()
 {
     // Qt handles XCB slightly differently so we open our own connection
-    m_dpy = XOpenDisplay(XDisplayString(QX11Info::display()));
-    m_rootWindow = QX11Info::appRootWindow();
+    if (auto* native = qGuiApp->nativeInterface<QNativeInterface::QX11Application>()) {
+        m_dpy = XOpenDisplay(XDisplayString(native->display()));
+        m_rootWindow = DefaultRootWindow(native->display());
+    }
 
     m_atomWmState = XInternAtom(m_dpy, "WM_STATE", True);
     m_atomWmName = XInternAtom(m_dpy, "WM_NAME", True);

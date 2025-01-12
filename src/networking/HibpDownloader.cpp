@@ -20,7 +20,7 @@
 
 #include <QCryptographicHash>
 #include <QNetworkReply>
-#include <QStringview>
+#include <QStringView>
 
 namespace
 {

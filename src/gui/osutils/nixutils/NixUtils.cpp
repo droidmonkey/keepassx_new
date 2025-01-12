@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 KeePassXC Team <team@keepassxc.org>
+ * Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,9 +31,7 @@
 #include <QStyle>
 #include <QTextStream>
 #ifdef WITH_X11
-#include <QX11Info>
-
-#include <qpa/qplatformnativeinterface.h>
+#include <QGuiApplication>
 
 #include "X11Funcs.h"
 #include <X11/XKBlib.h>
@@ -68,8 +66,10 @@ NixUtils::NixUtils(QObject* parent)
     : OSUtilsBase(parent)
 {
 #ifdef WITH_X11
-    dpy = QX11Info::display();
-    rootWindow = QX11Info::appRootWindow();
+    if (auto* native = qGuiApp->nativeInterface<QNativeInterface::QX11Application>()) {
+        dpy = native->display();
+        rootWindow = DefaultRootWindow(dpy);
+    }
 #endif
 
     // notify about system color scheme changes
@@ -148,7 +148,6 @@ void NixUtils::setLaunchAtStartup(bool enable)
         const QString executeablePathOrName = isAppImage ? appImagePath : QApplication::applicationName().toLower();
 
         QTextStream stream(&desktopFile);
-        stream.setCodec("UTF-8");
         stream << QStringLiteral("[Desktop Entry]") << '\n'
                << QStringLiteral("Name=") << QApplication::applicationDisplayName() << '\n'
                << QStringLiteral("GenericName=") << tr("Password Manager") << '\n'
@@ -215,17 +214,18 @@ void NixUtils::launchAtStartupRequested(uint response, const QVariantMap& result
 bool NixUtils::isCapslockEnabled()
 {
 #ifdef WITH_X11
-    QPlatformNativeInterface* native = QGuiApplication::platformNativeInterface();
-    auto* display = native->nativeResourceForWindow("display", nullptr);
-    if (!display) {
-        return false;
-    }
+    if (auto* native = qGuiApp->nativeInterface<QNativeInterface::QX11Application>()) {
+        auto* display = native->display();
+        if (!display) {
+            return false;
+        }
 
-    QString platform = QGuiApplication::platformName();
-    if (platform == "xcb") {
-        unsigned state = 0;
-        if (XkbGetIndicatorState(reinterpret_cast<Display*>(display), XkbUseCoreKbd, &state) == Success) {
-            return ((state & 1u) != 0);
+        auto platform = QGuiApplication::platformName();
+        if (platform == "xcb") {
+            unsigned state = 0;
+            if (XkbGetIndicatorState(reinterpret_cast<Display*>(display), XkbUseCoreKbd, &state) == Success) {
+                return ((state & 1u) != 0);
+            }
         }
     }
 #endif
@@ -284,7 +284,7 @@ bool NixUtils::triggerGlobalShortcut(uint keycode, uint modifiers)
 bool NixUtils::registerGlobalShortcut(const QString& name, Qt::Key key, Qt::KeyboardModifiers modifiers, QString* error)
 {
 #ifdef WITH_X11
-    auto keycode = XKeysymToKeycode(dpy, qcharToNativeKeyCode(key));
+    auto keycode = XKeysymToKeycode(dpy, qcharToNativeKeyCode(QChar(key)));
     auto modifierscode = qtToNativeModifiers(modifiers);
 
     // Check if this key combo is registered to another shortcut
@@ -389,7 +389,7 @@ quint64 NixUtils::getProcessStartTime() const
 
     auto startIndex = processStatInfo.lastIndexOf(')');
     if (startIndex != -1) {
-        auto tokens = processStatInfo.midRef(startIndex + 2).split(' ');
+        auto tokens = QStringView{processStatInfo}.mid(startIndex + 2).split(' ');
         if (tokens.size() >= 20) {
             bool ok;
             auto time = tokens[19].toULongLong(&ok);
