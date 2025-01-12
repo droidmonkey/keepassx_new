@@ -183,7 +183,6 @@ public slots:
     void expireSelectedEntries();
     void deleteSelectedEntries();
     void restoreSelectedEntries();
-    void expireEntries(QList<Entry*> entries);
     void deleteEntries(QList<Entry*> entries, bool confirm = true);
     void focusOnEntries(bool editIfFocused = false);
     void focusOnGroups(bool editIfFocused = false);

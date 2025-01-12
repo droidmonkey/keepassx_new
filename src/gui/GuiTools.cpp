@@ -17,7 +17,6 @@
 
 #include "GuiTools.h"
 
-#include "core/Clock.h"
 #include "core/Config.h"
 #include "core/Group.h"
 #include "gui/MessageBox.h"
@@ -80,19 +79,6 @@ namespace GuiTools
                                            MessageBox::Cancel);
 
         return answer == MessageBox::Delete;
-    }
-
-    size_t expireEntries(QWidget* parent, const QList<Entry*>& entries)
-    {
-        if (!parent || entries.isEmpty()) {
-            return 0;
-        }
-
-        for (auto entry : asConst(entries)) {
-            entry->setExpiryTime(Clock::currentDateTimeUtc());
-            entry->setExpires(true);
-        }
-        return entries.size();
     }
 
     size_t deleteEntriesResolveReferences(QWidget* parent, const QList<Entry*>& entries, bool permanent)

@@ -347,11 +347,9 @@ QList<Entry*> ReportsWidgetBrowserStatistics::getSelectedEntries()
 
 void ReportsWidgetBrowserStatistics::expireSelectedEntries()
 {
-    QList<Entry*> selectedEntries = getSelectedEntries();
-    if (selectedEntries.isEmpty()) {
-        return;
+    for (auto entry : getSelectedEntries()) {
+        entry->expireNow();
     }
-    GuiTools::expireEntries(this, selectedEntries);
 
     calculateBrowserStatistics();
 }

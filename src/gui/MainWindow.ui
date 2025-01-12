@@ -430,7 +430,6 @@
    <addaction name="separator"/>
    <addaction name="actionEntryNew"/>
    <addaction name="actionEntryEdit"/>
-   <addaction name="actionEntryExpire"/>
    <addaction name="actionEntryDelete"/>
    <addaction name="separator"/>
    <addaction name="actionEntryCopyUsername"/>
@@ -551,7 +550,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>&amp;Expire Entry…</string>
+    <string>E&amp;xpire Entry…</string>
    </property>
   </action>
   <action name="actionEntryDelete">

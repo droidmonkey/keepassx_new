@@ -460,6 +460,12 @@ bool Entry::willExpireInDays(int days) const
     return m_data.timeInfo.expires() && m_data.timeInfo.expiryTime() < Clock::currentDateTime().addDays(days);
 }
 
+void Entry::expireNow()
+{
+    setExpiryTime(Clock::currentDateTimeUtc());
+    setExpires(true);
+}
+
 bool Entry::isRecycled() const
 {
     const Database* db = database();

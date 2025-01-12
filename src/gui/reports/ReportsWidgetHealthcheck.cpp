@@ -385,11 +385,9 @@ QList<Entry*> ReportsWidgetHealthcheck::getSelectedEntries()
 
 void ReportsWidgetHealthcheck::expireSelectedEntries()
 {
-    QList<Entry*> selectedEntries = getSelectedEntries();
-    if (selectedEntries.isEmpty()) {
-        return;
+    for (auto entry : getSelectedEntries()) {
+        entry->expireNow();
     }
-    GuiTools::expireEntries(this, selectedEntries);
 
     calculateHealth();
 }

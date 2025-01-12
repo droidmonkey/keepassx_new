@@ -5951,10 +5951,6 @@ Expect some bugs and minor issues, this version is meant for testing purposes.</
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Expire Entry…</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Remote S&amp;ync…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6224,6 +6220,10 @@ Expect some bugs and minor issues, this version is meant for testing purposes.</
     </message>
     <message>
         <source>Password Generator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>E&amp;xpire Entry…</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

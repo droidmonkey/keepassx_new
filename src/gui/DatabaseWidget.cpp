@@ -572,17 +572,12 @@ void DatabaseWidget::setupTotp()
 void DatabaseWidget::expireSelectedEntries()
 {
     const QModelIndexList selected = m_entryView->selectionModel()->selectedRows();
-    if (selected.isEmpty()) {
-        return;
+    for (const auto& index : selected) {
+        auto entry = m_entryView->entryFromIndex(index);
+        if (entry) {
+            entry->expireNow();
+        }
     }
-
-    // Resolve entries from the selection model
-    QList<Entry*> selectedEntries;
-    for (const QModelIndex& index : selected) {
-        selectedEntries.append(m_entryView->entryFromIndex(index));
-    }
-
-    expireEntries(std::move(selectedEntries));
 }
 
 void DatabaseWidget::deleteSelectedEntries()
@@ -619,15 +614,6 @@ void DatabaseWidget::restoreSelectedEntries()
             entry->setGroup(entry->previousParentGroup());
         }
     }
-}
-
-void DatabaseWidget::expireEntries(QList<Entry*> selectedEntries)
-{
-    if (selectedEntries.isEmpty()) {
-        return;
-    }
-
-    GuiTools::expireEntries(this, selectedEntries);
 }
 
 void DatabaseWidget::deleteEntries(QList<Entry*> selectedEntries, bool confirm)

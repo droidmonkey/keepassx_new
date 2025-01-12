@@ -431,8 +431,9 @@ QList<Entry*> ReportsWidgetHibp::getSelectedEntries()
 
 void ReportsWidgetHibp::expireSelectedEntries()
 {
-    QList<Entry*> selectedEntries = getSelectedEntries();
-    GuiTools::expireEntries(this, selectedEntries);
+    for (auto entry : getSelectedEntries()) {
+        entry->expireNow();
+    }
 
     makeHibpTable();
 }
