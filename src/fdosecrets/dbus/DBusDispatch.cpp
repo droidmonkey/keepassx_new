@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2020 Aetf <aetf@unlimitedcode.works>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -48,17 +49,17 @@ namespace FdoSecrets
             }
 
             // we need at least one conversion, allocate a slot in auxParams
-            auxParams.append(QVariant(id, nullptr));
+            auxParams.append(QVariant(id));
             auto& out = auxParams.last();
             // first handle QDBusArgument to wire types
             if (arg.userType() == qMetaTypeId<QDBusArgument>()) {
-                auto wireId = typeToWireType(id).dbusTypeId;
+                QMetaType wireId(typeToWireType(id).dbusTypeId);
                 out = QVariant(wireId, nullptr);
 
                 const auto& in = arg.value<QDBusArgument>();
                 if (!QDBusMetaType::demarshall(in, wireId, out.data())) {
                     qDebug() << "Internal error: failed QDBusArgument conversion from" << arg << "to type"
-                             << QMetaType::typeName(wireId) << wireId;
+                             << wireId.name();
                     return false;
                 }
             } else {
@@ -357,7 +358,7 @@ namespace FdoSecrets
         // prepare output args
         outputArgs.reserve(outputArgs.size() + method.outputTypes.size());
         for (const auto& outputType : asConst(method.outputTypes)) {
-            outputArgs.append(QVariant(outputType, nullptr));
+            outputArgs.append(QVariant(outputType));
             params.append(const_cast<void*>(outputArgs.last().constData()));
         }
 

@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>  
  *  Copyright (C) 2019 Aetf <aetf@unlimitedcodeworks.xyz>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -28,7 +29,7 @@
 
 #include <QMimeDatabase>
 #include <QSet>
-#include <QTextCodec>
+#include <QStringDecoder>
 
 namespace FdoSecrets
 {
@@ -400,7 +401,7 @@ namespace FdoSecrets
         Q_ASSERT(group);
 
         // root group is represented by a single slash, thus adding an empty component.
-        pathComponents.prepend(QLatin1Literal(""));
+        pathComponents.prepend("");
 
         return pathComponents.join('/');
     }
@@ -414,16 +415,18 @@ namespace FdoSecrets
         auto mimeType = db.mimeTypeForName(mimeName);
 
         // find a suitable codec
-        QTextCodec* codec = nullptr;
+        QStringDecoder decoder(QStringDecoder::Utf8);
         static const QRegularExpression charsetPattern(QStringLiteral(R"re(charset=(?<encode>.+)$)re"));
         auto match = charsetPattern.match(contentType);
         if (match.hasMatch()) {
-            codec = QTextCodec::codecForName(match.captured(QStringLiteral("encode")).toLatin1());
-        } else {
-            codec = QTextCodec::codecForName(QByteArrayLiteral("utf-8"));
+            auto codecName = match.captured(QStringLiteral("encode")).toUtf8();
+            auto encoding = QStringDecoder::encodingForName(codecName);
+            if (encoding != std::nullopt) {
+                decoder = QStringDecoder(encoding.value());
+            }
         }
 
-        if (!mimeType.isValid() || !mimeType.inherits(QStringLiteral("text/plain")) || !codec) {
+        if (!mimeType.isValid() || !mimeType.inherits(QStringLiteral("text/plain"))) {
             if (EntryAttributes::matchReference(contentType).hasMatch()) {
                 return QDBusError::InvalidArgs;
             }
@@ -432,7 +435,7 @@ namespace FdoSecrets
             entry->attachments()->set(FDO_SECRETS_DATA, data);
             entry->attributes()->set(FDO_SECRETS_CONTENT_TYPE, contentType);
         } else {
-            auto password = codec->toUnicode(data);
+            auto password = decoder.decode(data);
             if (EntryAttributes::matchReference(password).hasMatch()) {
                 return QDBusError::InvalidArgs;
             }

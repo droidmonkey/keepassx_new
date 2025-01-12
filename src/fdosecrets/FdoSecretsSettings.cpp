@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2018 Aetf <aetf@unlimitedcodeworks.xyz>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -96,7 +97,7 @@ namespace FdoSecrets
 
     QUuid FdoSecretsSettings::exposedGroup(Database* db) const
     {
-        return {db->metadata()->customData()->value(CustomData::FdoSecretsExposedGroup)};
+        return QUuid(db->metadata()->customData()->value(CustomData::FdoSecretsExposedGroup));
     }
 
     void FdoSecretsSettings::setExposedGroup(Database* db, const QUuid& group)
