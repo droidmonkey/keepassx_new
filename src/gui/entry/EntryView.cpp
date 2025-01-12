@@ -482,6 +482,7 @@ void EntryView::resetViewToDefaults()
     header()->hideSection(EntryModel::Size);
     header()->hideSection(EntryModel::PasswordStrength);
     header()->hideSection(EntryModel::Color);
+    header()->hideSection(EntryModel::ParentGroupPath);
     onHeaderChanged();
 
     // Reset column order to logical indices
