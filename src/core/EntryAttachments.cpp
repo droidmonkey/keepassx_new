@@ -262,7 +262,6 @@ bool EntryAttachments::openAttachment(const QString& key, QString* errorMessage)
         });
 
         const auto attachmentData = value(key);
-
         const bool saveOk = file.open(QIODevice::WriteOnly) && file.setPermissions(QFile::ReadOwner | QFile::WriteOwner)
                             && file.write(attachmentData) == attachmentData.size() && file.flush();
 

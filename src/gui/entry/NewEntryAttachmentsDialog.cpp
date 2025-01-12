@@ -33,9 +33,7 @@ NewEntryAttachmentsDialog::NewEntryAttachmentsDialog(QPointer<EntryAttachments> 
 
     setWindowTitle(tr("New entry attachment"));
 
-    m_ui->dialogButtons->clear();
-    m_ui->dialogButtons->addButton(QDialogButtonBox::Ok);
-    m_ui->dialogButtons->addButton(QDialogButtonBox::Cancel);
+    m_ui->dialogButtons->setStandardButtons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     connect(m_ui->dialogButtons, SIGNAL(accepted()), this, SLOT(saveAttachment()));
     connect(m_ui->dialogButtons, SIGNAL(rejected()), this, SLOT(reject()));
