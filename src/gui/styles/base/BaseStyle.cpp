@@ -2636,7 +2636,21 @@ void BaseStyle::drawControl(ControlElement element,
         }
         break;
     }
+    case CE_MenuTearoff: {
+        if (option->state & State_Selected) {
+            painter->fillRect(option->rect, option->palette.brush(QPalette::Highlight));
+            painter->setPen(QPen(option->palette.highlightedText().color(), 1, Qt::DashLine));
+        } else {
+            painter->fillRect(option->rect, option->palette.brush(QPalette::Button));
+            painter->setPen(QPen(option->palette.buttonText().color(), 1, Qt::DashLine));
+        }
 
+        painter->drawLine(option->rect.x() + 2,
+                          option->rect.y() + option->rect.height() / 2,
+                          option->rect.x() + option->rect.width() - 4,
+                          option->rect.y() + option->rect.height() / 2);
+        break;
+    }
     case CE_MenuItem: {
         auto menuItem = qstyleoption_cast<const QStyleOptionMenuItem*>(option);
         if (!menuItem)
