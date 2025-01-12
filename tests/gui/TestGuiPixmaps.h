@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2025 KeePassXC Team <team@keepassxc.org>
  *  Copyright (C) 2011 Felix Geyer <debfx@fobos.de>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -19,6 +20,7 @@
 #define KEEPASSX_TESTGUIPIXMAPS_H
 
 #include <QImage>
+#include <QObject>
 
 class TestGuiPixmaps : public QObject
 {
