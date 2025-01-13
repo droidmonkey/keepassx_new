@@ -50,7 +50,9 @@ private slots:
     void selectNextGroup();
 
 protected:
+    void dragEnterEvent(QDragEnterEvent *event) override;
     void dragMoveEvent(QDragMoveEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
     void focusInEvent(QFocusEvent* event) override;
 
 private:
@@ -58,6 +60,8 @@ private:
 
     GroupModel* const m_model;
     bool m_updatingExpanded;
+    bool m_isDragEventSrcFromOtherDb;
+    Qt::DropAction m_lastAcceptedDropAction;
 };
 
 #endif // KEEPASSX_GROUPVIEW_H

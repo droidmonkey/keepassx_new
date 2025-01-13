@@ -725,6 +725,10 @@ QList<DatabaseWidget*> MainWindow::getOpenDatabases()
     return dbWidgets;
 }
 
+DatabaseWidget* MainWindow::currentDatabaseWidget() {
+    return m_ui->tabWidget->currentDatabaseWidget();
+}
+
 void MainWindow::showErrorMessage(const QString& message)
 {
     m_ui->globalMessageWidget->showMessage(message, MessageWidget::Error);

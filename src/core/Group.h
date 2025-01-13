@@ -20,10 +20,23 @@
 #define KEEPASSX_GROUP_H
 
 #include <QPointer>
+#include <QList>
+#include <utility>
 
 #include "core/CustomData.h"
 #include "core/Database.h"
 #include "core/Entry.h"
+
+
+class Entry;
+class Group;
+
+
+template <typename TCallable> concept CGroupVisitor = std::is_invocable_v<TCallable, Group*>;
+template <typename TCallable> concept CGroupConstVisitor = std::is_invocable_v<TCallable, const Group*>;
+template <typename TCallable> concept CEntryVisitor = std::is_invocable_v<TCallable, Entry*>;
+template <typename TCallable> concept CEntryConstVisitor = std::is_invocable_v<TCallable, const Entry*>;
+
 
 class Group : public ModifiableObject
 {
@@ -47,10 +60,16 @@ public:
     {
         CloneNoFlags = 0,
         CloneNewUuid = 1, // generate a random uuid for the clone
-        CloneResetTimeInfo = 2, // set all TimeInfo attributes to the current time
-        CloneIncludeEntries = 4, // clone the group entries
-        CloneDefault = CloneNewUuid | CloneResetTimeInfo | CloneIncludeEntries,
-        CloneRenameTitle = 8, // add "- Clone" after the original title
+        CloneResetCreationTime = 2, // set timeInfo.CreationTime to the current time
+        CloneResetLastAccessTime = 4, // set timeInfo.LastAccessTime to the current time
+        CloneResetLocationChangedTime = 8, // set timeInfo.LocationChangedTime to the current time
+        CloneIncludeEntries = 16, // clone the group entries
+        CloneRenameTitle = 32, // add "- Clone" after the original title
+
+        CloneResetTimeInfo = CloneResetCreationTime | CloneResetLastAccessTime | CloneResetLocationChangedTime,
+        CloneExactCopy = CloneIncludeEntries,
+        CloneCopy = CloneExactCopy | CloneNewUuid | CloneResetTimeInfo,
+        CloneDefault = CloneCopy,
     };
     Q_DECLARE_FLAGS(CloneFlags, CloneFlag)
 
@@ -148,6 +167,7 @@ public:
     void setParent(Group* parent, int index = -1, bool trackPrevious = true);
     QStringList hierarchy(int height = -1) const;
     bool hasChildren() const;
+    bool isDescendantOf(const Group* group) const;
 
     Database* database();
     const Database* database() const;
@@ -159,6 +179,53 @@ public:
     QList<Entry*> entriesRecursive(bool includeHistoryItems = false) const;
     QList<const Group*> groupsRecursive(bool includeSelf) const;
     QList<Group*> groupsRecursive(bool includeSelf);
+
+    /**
+    * Walk methods for traversing the tree (depth-first search)
+    *
+    * @param[in] includeSelf is the current group to be included or excluded
+    *     if `false` the current group's entries will not be included either
+    * @param[in] groupVisitor functor that takes a single argument: ([const] Group*)
+    *     the functor may return a bool to indicate whether to stop=`true` or continue=`false` traversing
+    *     for a non-`bool` return-type the value is ignored and the traversing will continue as if `false` had been returned
+    * @param[in] entryVisitor functor that takes a single argument: ([const] Entry*)
+    *     the functor may return a bool to indicate whether to stop=`true` or continue=`false` traversing
+    *     for a non-`bool` return-type the value is ignored and the traversing will continue as if `false` had been returned
+    * @return `false` if the traversing completed without stop, or `true` otherwise
+    */
+    template <CGroupVisitor TGroupCallable, CEntryVisitor TEntryCallable>
+    bool walk(bool includeSelf, TGroupCallable&& groupVisitor, TEntryCallable&& entryVisitor)
+    {
+        return walk<TGroupCallable, TEntryCallable, false, true, true>(
+            includeSelf, std::forward<TGroupCallable>(groupVisitor), std::forward<TEntryCallable>(entryVisitor));
+    }
+    template <CGroupConstVisitor TGroupCallable, CEntryConstVisitor TEntryCallable>
+    bool walk(bool includeSelf, TGroupCallable&& groupVisitor, TEntryCallable&& entryVisitor) const
+    {
+        return walk<TGroupCallable, TEntryCallable, true, true, true>(
+            includeSelf, std::forward<TGroupCallable>(groupVisitor), std::forward<TEntryCallable>(entryVisitor));
+    }
+    template <CGroupConstVisitor TGroupCallable> bool walkGroups(bool includeSelf, TGroupCallable&& groupVisitor) const
+    {
+        return walk<TGroupCallable, void*, true, true, false>(
+            includeSelf, std::forward<TGroupCallable>(groupVisitor), nullptr);
+    }
+    template <CGroupVisitor TGroupCallable> bool walkGroups(bool includeSelf, TGroupCallable&& groupVisitor)
+    {
+        return walk<TGroupCallable, void*, false, true, false>(
+            includeSelf, std::forward<TGroupCallable>(groupVisitor), nullptr);
+    }
+    template <CEntryConstVisitor TEntryCallable> bool walkEntries(TEntryCallable&& entryVisitor) const
+    {
+        return walk<void*, TEntryCallable, true, false, true>(
+            true, nullptr, std::forward<TEntryCallable>(entryVisitor));
+    }
+    template <CEntryVisitor TEntryCallable> bool walkEntries(TEntryCallable&& entryVisitor)
+    {
+        return walk<void*, TEntryCallable, false, false, true>(
+            true, nullptr, std::forward<TEntryCallable>(entryVisitor));
+    }
+
     QSet<QUuid> customIconsRecursive() const;
     QList<QString> usernamesRecursive(int topN = -1) const;
 
@@ -204,8 +271,11 @@ private slots:
     void updateTimeinfo();
 
 private:
-    template <class P, class V> bool set(P& property, const V& value);
+    template <typename TGroupCallable, typename TEntryCallable, bool kIsConst, bool kVisitGroups, bool kVisitEntries>
+    bool walk(bool includeSelf, TGroupCallable&& groupVisitor, TEntryCallable&& entryVisitor) const;
+    template <class P, class V> bool set(P& property, const V& value, bool preserveTimeinfo = false);
 
+    void emitModifiedEx(bool preserveTimeinfo);
     void setParent(Database* db);
 
     void connectDatabaseSignalsRecursive(Database* db);
@@ -232,5 +302,56 @@ private:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Group::CloneFlags)
+
+// helpers to support non-bool returning callables
+template <bool kDefaultRetVal, typename TCallable, typename... Args>
+bool visitorPredicateImpl(std::true_type, TCallable&& callable, Args&&... args)
+{
+    return callable(std::forward<Args>(args)...);
+}
+
+template <bool kDefaultRetVal, typename TCallable, typename... Args>
+bool visitorPredicateImpl(std::false_type, TCallable&& callable, Args&&... args)
+{
+    callable(std::forward<Args>(args)...);
+    return kDefaultRetVal;
+}
+
+template <bool kDefaultRetVal, typename TCallable, typename... Args>
+bool visitorPredicate(TCallable&& callable, Args&&... args)
+{
+    using RetType = decltype(callable(args...));
+    return visitorPredicateImpl<kDefaultRetVal>(
+        std::is_same<RetType, bool>{}, std::forward<TCallable>(callable), std::forward<Args>(args)...);
+}
+
+template<typename TGroupCallable, typename TEntryCallable, bool kIsConst, bool kVisitGroups, bool kVisitEntries>
+bool Group::walk(bool includeSelf, TGroupCallable&& groupVisitor, TEntryCallable&& entryVisitor) const
+{
+    using GroupType = typename std::conditional<kIsConst,const Group, Group>::type;
+    QList<Group*> groupsToVisit;
+    if (includeSelf) {
+        groupsToVisit.append(const_cast<Group*>(this));
+    } else {
+        groupsToVisit.append(m_children);
+    }
+    while (!groupsToVisit.isEmpty()) {
+        GroupType* group = groupsToVisit.takeLast(); // right-to-left
+        if constexpr (kVisitGroups) {
+            if (visitorPredicate<false>(groupVisitor, group)) {
+                return true;
+            }
+        }
+        if constexpr (kVisitEntries) {
+            for (auto* entry : group->m_entries) {
+                if (visitorPredicate<false>(entryVisitor, entry)) {
+                    return true;
+                }
+            }
+        }
+        groupsToVisit.append(group->m_children);
+    }
+    return false;
+}
 
 #endif // KEEPASSX_GROUP_H

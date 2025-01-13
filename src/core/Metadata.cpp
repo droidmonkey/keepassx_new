@@ -419,14 +419,21 @@ QUuid Metadata::findCustomIcon(const QByteArray& candidate)
     return m_customIconsHashes.value(hash, QUuid());
 }
 
+void Metadata::copyCustomIcon(const QUuid& iconUuid, const Metadata* otherMetadata)
+{
+    if (iconUuid.isNull()) { 
+        return;
+    }
+    Q_ASSERT(otherMetadata->hasCustomIcon(iconUuid));
+    if (!hasCustomIcon(iconUuid) && otherMetadata->hasCustomIcon(iconUuid)) {
+        addCustomIcon(iconUuid, otherMetadata->customIcon(iconUuid));
+    }
+}
+
 void Metadata::copyCustomIcons(const QSet<QUuid>& iconList, const Metadata* otherMetadata)
 {
     for (const QUuid& uuid : iconList) {
-        Q_ASSERT(otherMetadata->hasCustomIcon(uuid));
-
-        if (!hasCustomIcon(uuid) && otherMetadata->hasCustomIcon(uuid)) {
-            addCustomIcon(uuid, otherMetadata->customIcon(uuid));
-        }
+        copyCustomIcon(uuid, otherMetadata);
     }
 }
 

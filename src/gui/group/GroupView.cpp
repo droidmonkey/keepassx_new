@@ -24,11 +24,15 @@
 #include "core/Config.h"
 #include "core/Group.h"
 #include "gui/group/GroupModel.h"
+#include "gui/entry/EntryView.h"
+#include "gui/DatabaseWidget.h"
 
 GroupView::GroupView(Database* db, QWidget* parent)
     : QTreeView(parent)
     , m_model(new GroupModel(db, this))
     , m_updatingExpanded(false)
+    , m_isDragEventSrcFromOtherDb(false)
+    , m_lastAcceptedDropAction(Qt::IgnoreAction)
 {
     QTreeView::setModel(m_model);
     setHeaderHidden(true);
@@ -96,19 +100,82 @@ void GroupView::changeDatabase(const QSharedPointer<Database>& newDb)
     setColumnWidth(0, sizeHintForColumn(0));
 }
 
-void GroupView::dragMoveEvent(QDragMoveEvent* event)
+void GroupView::dragEnterEvent(QDragEnterEvent *event)
 {
-    if (event->keyboardModifiers() & Qt::ControlModifier) {
-        event->setDropAction(Qt::CopyAction);
-    } else {
-        event->setDropAction(Qt::MoveAction);
+    event->ignore(); // default to ignore
+
+    auto const eventSource = event->source();
+    // ignore events from other processes
+    if (!eventSource) { 
+        return;
     }
 
+    // ignore events with unsupported mime-types
+    auto supportedFormats = m_model->mimeTypes().toSet();
+    if (!supportedFormats.intersects(event->mimeData()->formats().toSet())) {
+        return;
+    }
+
+    auto firstAncestorOfTypeDatabaseWidget = [](QObject* object) -> DatabaseWidget* {
+        if (object) {
+            for (auto parent = object->parent(); parent; parent = parent->parent()) {
+                if (auto dbWidget = qobject_cast<DatabaseWidget*>(parent)) {
+                    return dbWidget;
+                }
+            }
+        }
+        return nullptr;
+    };
+
+    m_isDragEventSrcFromOtherDb = false;
+    if (GroupView* view = qobject_cast<GroupView*>(eventSource)) {
+        m_isDragEventSrcFromOtherDb = view != this;
+    } else if (EntryView* view = qobject_cast<EntryView*>(eventSource)) {
+        auto targetDbWidget = firstAncestorOfTypeDatabaseWidget(this);
+        auto sourceDbWidget = firstAncestorOfTypeDatabaseWidget(view);
+        m_isDragEventSrcFromOtherDb = sourceDbWidget != targetDbWidget;
+    }
+
+    QTreeView::dragEnterEvent(event);
+}
+
+void GroupView::dragMoveEvent(QDragMoveEvent* event)
+{
     QTreeView::dragMoveEvent(event);
 
+    if (!event->isAccepted()) {
+        return;
+    }
+
     // entries may only be dropped on groups
-    if (event->isAccepted() && event->mimeData()->hasFormat("application/x-keepassx-entry")
+    if (event->mimeData()->hasFormat("application/x-keepassx-entry")
         && (dropIndicatorPosition() == AboveItem || dropIndicatorPosition() == BelowItem)) {
+        event->ignore();
+        return;
+    }
+
+    // figure out which dropaction should be used
+    Qt::DropAction dropAction = Qt::MoveAction;
+    if (event->keyboardModifiers() & Qt::ControlModifier) {
+        dropAction = Qt::CopyAction;
+    } else if (event->keyboardModifiers() & Qt::AltModifier) {
+        dropAction = m_isDragEventSrcFromOtherDb ? Qt::LinkAction : Qt::IgnoreAction;
+    }
+
+    if (dropAction != Qt::IgnoreAction && event->possibleActions() & dropAction) {
+        event->setDropAction(dropAction);
+        m_lastAcceptedDropAction = event->dropAction();
+    } else {
+        event->ignore();
+    }
+}
+
+void GroupView::dropEvent(QDropEvent* event)
+{
+    if (m_lastAcceptedDropAction != Qt::IgnoreAction) {
+        event->setDropAction(m_lastAcceptedDropAction);
+        QTreeView::dropEvent(event);
+    } else {
         event->ignore();
     }
 }

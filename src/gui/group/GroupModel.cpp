@@ -25,6 +25,7 @@
 #include "core/Tools.h"
 #include "gui/DatabaseIcons.h"
 #include "gui/Icons.h"
+#include "gui/MainWindow.h"
 #include "keeshare/KeeShare.h"
 
 GroupModel::GroupModel(Database* db, QObject* parent)
@@ -180,7 +181,7 @@ Group* GroupModel::groupFromIndex(const QModelIndex& index) const
 
 Qt::DropActions GroupModel::supportedDropActions() const
 {
-    return Qt::MoveAction | Qt::CopyAction;
+    return Qt::MoveAction | Qt::CopyAction | Qt::LinkAction;
 }
 
 Qt::ItemFlags GroupModel::flags(const QModelIndex& modelIndex) const
@@ -204,9 +205,11 @@ bool GroupModel::dropMimeData(const QMimeData* data,
 
     if (action == Qt::IgnoreAction) {
         return true;
+    } else if (action != Qt::MoveAction && action != Qt::CopyAction && action != ::Qt::LinkAction) {
+        return false;
     }
 
-    if (!data || (action != Qt::MoveAction && action != Qt::CopyAction) || !parent.isValid()) {
+    if (!data || !parent.isValid()) {
         return false;
     }
 
@@ -223,6 +226,12 @@ bool GroupModel::dropMimeData(const QMimeData* data,
         row = rowCount(parent);
     }
 
+    auto showErrorMessage = [](const QString& errorMessage){
+        if(auto dbWidget = getMainWindow()->currentDatabaseWidget()) {
+            dbWidget->showErrorMessage(errorMessage);
+        }
+    };
+
     // decode and insert
     QByteArray encoded = data->data(isGroup ? types.at(0) : types.at(1));
     QDataStream stream(&encoded, QIODevice::ReadOnly);
@@ -234,17 +243,17 @@ bool GroupModel::dropMimeData(const QMimeData* data,
         QUuid groupUuid;
         stream >> dbUuid >> groupUuid;
 
-        Database* db = Database::databaseByUuid(dbUuid);
-        if (!db) {
+        Database* sourceDb = Database::databaseByUuid(dbUuid);
+        if (!sourceDb) {
             return false;
         }
 
-        Group* dragGroup = db->rootGroup()->findGroupByUuid(groupUuid);
-        if (!dragGroup || !db->rootGroup()->findGroupByUuid(dragGroup->uuid()) || dragGroup == db->rootGroup()) {
+        Group* dragGroup = sourceDb->rootGroup()->findGroupByUuid(groupUuid);
+        if (!dragGroup || dragGroup == sourceDb->rootGroup()) {
             return false;
         }
 
-        if (dragGroup == parentGroup || dragGroup->findGroupByUuid(parentGroup->uuid())) {
+        if (dragGroup == parentGroup || parentGroup->isDescendantOf(dragGroup)) {
             return false;
         }
 
@@ -252,21 +261,64 @@ bool GroupModel::dropMimeData(const QMimeData* data,
             row--;
         }
 
-        Database* sourceDb = dragGroup->database();
         Database* targetDb = parentGroup->database();
-
         Group* group = dragGroup;
 
         if (sourceDb != targetDb) {
-            QSet<QUuid> customIcons = group->customIconsRecursive();
-            targetDb->metadata()->copyCustomIcons(customIcons, sourceDb->metadata());
+            if (action == Qt::MoveAction || action == Qt::LinkAction) { // clang-format off
 
-            // Always clone the group across db's to reset UUIDs
-            group = dragGroup->clone(Entry::CloneDefault | Entry::CloneIncludeHistory);
-            if (action == Qt::MoveAction) {
-                // Remove the original group from the sourceDb
+                Group* binGroup = sourceDb->metadata()->recycleBin();
+                if(binGroup && binGroup->uuid() == dragGroup->uuid()) {
+                    showErrorMessage(tr("Move error: \"%1\" group cannot be moved").arg(binGroup->name()));
+                    return true;
+                }
+                
+                // Collect all UUID(s) or short-circuit when UUID is deleted in targetDb
+                QSet<QUuid> uuidSet;
+                bool complexMove = group->walk(true,
+                    [&](const Group* group) {
+                        uuidSet.insert(group->uuid());
+                        return targetDb->containsDeletedObject(group->uuid());
+                    },
+                    [&](const Entry* entry) { 
+                        uuidSet.insert(entry->uuid()); 
+                        return targetDb->containsDeletedObject(entry->uuid());
+                    }
+                );
+
+                // Unable to handle complex moves until the Merger interface supports single group/entry merging
+                if (complexMove || targetDb->rootGroup()->walk(true,
+                    [&](const Group* group)-> bool {
+                        return uuidSet.contains(group->uuid());
+                    },
+                    [&](const Entry* entry) -> bool {
+                        return uuidSet.contains(entry->uuid());
+                    }
+                )) {
+                    showErrorMessage(tr("Move error: the group or one of it's descendants is already present in this database"));
+                    return true;
+                }
+            } // clang-format on
+
+            if (action == Qt::MoveAction) { // -- Tracked move
+
+                // A clone with new UUID but original CreationTime
+                group = dragGroup->clone(Entry::CloneFlags(Entry::CloneCopy & ~Entry::CloneResetCreationTime),
+                                         Group::CloneFlags(Group::CloneCopy & ~Group::CloneResetCreationTime));
+                // Original UUID is marked as deleted to propagate the move to dbs that merge with this one
                 delete dragGroup;
+            } else if (action == Qt::LinkAction) { // -- Untracked move
+
+                QList<DeletedObject> deletedObjects(sourceDb->deletedObjects());
+                group = dragGroup->clone(Entry::CloneExactCopy, Group::CloneExactCopy);
+                delete dragGroup;
+                // Unmark UUID(s) as deleted by restoring the previous list
+                sourceDb->setDeletedObjects(deletedObjects);
+            } else {
+                group = dragGroup->clone(Entry::CloneCopy);
             }
+
+            targetDb->metadata()->copyCustomIcons(group->customIconsRecursive(), sourceDb->metadata());
         } else if (action == Qt::CopyAction) {
             group = dragGroup->clone(Entry::CloneCopy);
         }
@@ -277,42 +329,68 @@ bool GroupModel::dropMimeData(const QMimeData* data,
             return false;
         }
 
+        int entries{0}, entriesNotMoved{0};
         while (!stream.atEnd()) {
             QUuid dbUuid;
             QUuid entryUuid;
             stream >> dbUuid >> entryUuid;
+            ++entries;
 
-            Database* db = Database::databaseByUuid(dbUuid);
-            if (!db) {
+            Database* sourceDb = Database::databaseByUuid(dbUuid);
+            if (!sourceDb) {
                 continue;
             }
 
-            Entry* dragEntry = db->rootGroup()->findEntryByUuid(entryUuid);
-            if (!dragEntry || !db->rootGroup()->findEntryByUuid(dragEntry->uuid())) {
+            Entry* dragEntry = sourceDb->rootGroup()->findEntryByUuid(entryUuid);
+            if (!dragEntry) {
                 continue;
             }
 
-            Database* sourceDb = dragEntry->group()->database();
             Database* targetDb = parentGroup->database();
-
             Entry* entry = dragEntry;
 
             if (sourceDb != targetDb) {
-                QUuid customIcon = entry->iconUuid();
-                if (!customIcon.isNull() && !targetDb->metadata()->hasCustomIcon(customIcon)) {
-                    targetDb->metadata()->addCustomIcon(customIcon, sourceDb->metadata()->customIcon(customIcon).data);
+                if (action == Qt::MoveAction || action == Qt::LinkAction) { // clang-format off
+
+                    // Unable to handle complex moves until the Merger interface supports single group/entry merging
+                    if (targetDb->containsDeletedObject(dragEntry->uuid()) || 
+                        targetDb->rootGroup()->walkEntries([=](const Entry* entry) { 
+                            return dragEntry->uuid() == entry->uuid(); 
+                        }
+                    )) {
+                        ++entriesNotMoved;
+                        continue;
+                    }
+                } // clang-format on
+
+                if (action == Qt::MoveAction) { // -- Tracked move
+
+                    // A clone with new UUID but original CreationTime
+                    entry = dragEntry->clone(Entry::CloneFlags(Entry::CloneCopy & ~Entry::CloneResetCreationTime));
+                    // Original UUID is marked as deleted to propagate the move to dbs that merge with this one
+                    delete dragEntry;
+                } else if (action == Qt::LinkAction) { // -- Untracked move
+
+                    QList<DeletedObject> deletedObjects(sourceDb->deletedObjects());
+                    entry = dragEntry->clone(Entry::CloneExactCopy);
+                    delete dragEntry;
+                    // Unmark UUID as deleted by restoring the previous list
+                    sourceDb->setDeletedObjects(deletedObjects);
+                } else {
+                    entry = dragEntry->clone(Entry::CloneCopy);
                 }
 
-                // Reset the UUID when moving across db boundary
-                entry = dragEntry->clone(Entry::CloneDefault | Entry::CloneIncludeHistory);
-                if (action == Qt::MoveAction) {
-                    delete dragEntry;
-                }
+                targetDb->metadata()->copyCustomIcon(entry->iconUuid(), sourceDb->metadata());
             } else if (action == Qt::CopyAction) {
                 entry = dragEntry->clone(Entry::CloneCopy);
             }
 
             entry->setGroup(parentGroup);
+        }
+
+        if (entriesNotMoved) {
+            showErrorMessage(
+                tr("Move error: %1 of %2 entry(s) are already present in this database").arg(entriesNotMoved).arg(entries));
         }
     }
 

@@ -138,6 +138,7 @@ public:
                        const QString& name = {},
                        const QDateTime& lastModified = {});
     void removeCustomIcon(const QUuid& uuid);
+    void copyCustomIcon(const QUuid& iconUuid, const Metadata* otherMetadata);
     void copyCustomIcons(const QSet<QUuid>& iconList, const Metadata* otherMetadata);
     QUuid findCustomIcon(const QByteArray& candidate);
     void setRecycleBinEnabled(bool value);

@@ -466,7 +466,7 @@ Qt::DropActions EntryModel::supportedDropActions() const
 
 Qt::DropActions EntryModel::supportedDragActions() const
 {
-    return (Qt::MoveAction | Qt::CopyAction);
+    return Qt::MoveAction | Qt::CopyAction | Qt::LinkAction;
 }
 
 Qt::ItemFlags EntryModel::flags(const QModelIndex& modelIndex) const

@@ -20,6 +20,7 @@
 #include "mock/MockClock.h"
 
 #include <QSet>
+#include <QVector>
 #include <QSignalSpy>
 #include <QtTestGui>
 
@@ -382,18 +383,21 @@ void TestGroup::testClone()
     QCOMPARE(clonedGroup->iconNumber(), 42);
     QCOMPARE(clonedGroup->children().size(), 1);
     QCOMPARE(clonedGroup->entries().size(), 1);
+    QCOMPARE(clonedGroup->timeInfo(), originalGroup->timeInfo());
 
     Entry* clonedGroupEntry = clonedGroup->entries().at(0);
     QVERIFY(clonedGroupEntry->uuid() != originalGroupEntry->uuid());
     QCOMPARE(clonedGroupEntry->title(), QString("GroupEntry"));
     QCOMPARE(clonedGroupEntry->iconNumber(), 43);
     QCOMPARE(clonedGroupEntry->historyItems().size(), 0);
+    QCOMPARE(clonedGroupEntry->timeInfo(), originalGroupEntry->timeInfo());
 
     Group* clonedSubGroup = clonedGroup->children().at(0);
     QVERIFY(clonedSubGroup->uuid() != subGroup->uuid());
     QCOMPARE(clonedSubGroup->name(), QString("SubGroup"));
     QCOMPARE(clonedSubGroup->children().size(), 0);
     QCOMPARE(clonedSubGroup->entries().size(), 1);
+    QCOMPARE(clonedSubGroup->timeInfo(), subGroup->timeInfo());
 
     Entry* clonedSubGroupEntry = clonedSubGroup->entries().at(0);
     QVERIFY(clonedSubGroupEntry->uuid() != subGroupEntry->uuid());
@@ -411,15 +415,17 @@ void TestGroup::testClone()
     QCOMPARE(clonedGroupNewUuid->entries().size(), 0);
     QVERIFY(clonedGroupNewUuid->uuid() != originalGroup->uuid());
 
-    // Making sure the new modification date is not the same.
+    // Verify Timeinfo modifications for CloneResetTimeInfo
     m_clock->advanceSecond(1);
 
     QScopedPointer<Group> clonedGroupResetTimeInfo(
         originalGroup->clone(Entry::CloneNoFlags, Group::CloneNewUuid | Group::CloneResetTimeInfo));
     QCOMPARE(clonedGroupResetTimeInfo->entries().size(), 0);
     QVERIFY(clonedGroupResetTimeInfo->uuid() != originalGroup->uuid());
-    QVERIFY(clonedGroupResetTimeInfo->timeInfo().lastModificationTime()
-            != originalGroup->timeInfo().lastModificationTime());
+    QVERIFY(clonedGroupResetTimeInfo->timeInfo().creationTime() != originalGroup->timeInfo().creationTime());
+    QVERIFY(clonedGroupResetTimeInfo->timeInfo().lastAccessTime() != originalGroup->timeInfo().lastAccessTime());
+    QVERIFY(clonedGroupResetTimeInfo->timeInfo().locationChanged() != originalGroup->timeInfo().locationChanged());
+    QCOMPARE(clonedGroupResetTimeInfo->timeInfo().lastModificationTime(), originalGroup->timeInfo().lastModificationTime());
 }
 
 void TestGroup::testCopyCustomIcons()
@@ -1318,4 +1324,159 @@ void TestGroup::testAutoTypeState()
     QVERIFY(subGroup->autoTypeEnabled() == Group::TriState::Enable);
     QVERIFY(!entry1->groupAutoTypeEnabled());
     QVERIFY(entry2->groupAutoTypeEnabled());
+}
+
+void TestGroup::testTimeinfoChanges()
+{
+    Database db, db2;
+    auto* root = db.rootGroup();
+    auto* subgroup1 = new Group();
+    auto* subgroup2 = new Group();
+    subgroup1->setUuid(QUuid::createUuid());
+    subgroup1->setParent(root);
+    subgroup2->setUuid(QUuid::createUuid());
+    subgroup2->setParent(root);
+    QDateTime startTime = Clock::currentDateTimeUtc();
+    TimeInfo startTimeinfo;
+    startTimeinfo.setCreationTime(startTime);
+    startTimeinfo.setLastModificationTime(startTime);
+    startTimeinfo.setLocationChanged(startTime);
+    startTimeinfo.setLastAccessTime(startTime);
+    m_clock->advanceMinute(1);
+    root->setTimeInfo(startTimeinfo);
+    subgroup1->setTimeInfo(startTimeinfo);
+    subgroup2->setTimeInfo(startTimeinfo);
+
+    subgroup2->setPreviousParentGroup(subgroup1);
+    // setting previous parent group should not affect the LastModificationTime
+    QCOMPARE(subgroup2->timeInfo().lastModificationTime(), startTime);
+    subgroup2->setPreviousParentGroup(nullptr);
+    subgroup2->setParent(subgroup1);
+    QCOMPARE(root->timeInfo(), startTimeinfo);
+    QCOMPARE(subgroup1->timeInfo(), startTimeinfo);
+    // changing group should not affect LastModificationTime, CreationTime
+    QCOMPARE(subgroup2->timeInfo().creationTime(), startTime);
+    QCOMPARE(subgroup2->timeInfo().lastModificationTime(), startTime);
+    // changing group should affect the LocationChanged time
+    QCOMPARE(subgroup2->timeInfo().locationChanged(), Clock::currentDateTimeUtc());
+
+    // cross-db move
+    db2.rootGroup()->setTimeInfo(startTimeinfo);
+    m_clock->advanceMinute(1);
+    subgroup2->setParent(db2.rootGroup());
+    QCOMPARE(subgroup2->timeInfo().creationTime(), startTime);
+    QCOMPARE(subgroup2->timeInfo().lastModificationTime(), startTime);
+    QCOMPARE(subgroup2->timeInfo().locationChanged(), Clock::currentDateTimeUtc());
+    QCOMPARE(db2.rootGroup()->timeInfo(), startTimeinfo);
+
+    QScopedPointer<Entry> entry1(new Entry());
+    entry1->setGroup(subgroup1);
+    // adding/removing an entry should not affect the LastModificationTime
+    QCOMPARE(subgroup1->timeInfo().lastModificationTime(), startTime);
+    entry1.reset(); // delete
+    QCOMPARE(subgroup1->timeInfo().lastModificationTime(), startTime);
+
+    // sorting should not affect the LastModificationTime
+    root->sortChildrenRecursively(true);
+    root->sortChildrenRecursively(false);
+    QCOMPARE(root->timeInfo().lastModificationTime(), startTime);
+    QCOMPARE(subgroup1->timeInfo().lastModificationTime(), startTime);
+}
+
+void TestGroup::testWalk()
+{
+    QScopedPointer<Group> root(new Group());
+    size_t totalGroups{1}, totalEntries{0};
+    for (int i = 0; i < 3; ++i) {
+        Group* subgroup = new Group();
+        subgroup->setParent(root.data());
+        ++totalGroups;
+        int rows = i + 1;
+        int columns = i;
+        QVector<Group*> groupsVec;
+        groupsVec.resize(rows * columns);
+        for (int r = 0; r < rows; ++r) {
+            for (int c = 0; c < columns; ++c) {
+                int index = r * columns + c;
+                Group* group = new Group();
+                groupsVec[index] = group;
+                group->setParent(c > 0 ? groupsVec[index - 1] : subgroup);
+                int entryCount = std::max<int>(1, c + 1 >= columns ? 20 - (i * 3) : c + r);
+                for (int e = 0; e < entryCount; ++e) {
+                    Entry* entry = new Entry();
+                    entry->setGroup(group);
+                }
+                totalEntries += entryCount;
+            }
+        }
+        totalGroups += groupsVec.size();
+    }
+    
+    
+    size_t groupCount{0}, entryCount{0};
+    auto groupCounter = [&](Group* group){ groupCount += 1; };
+    auto entryCounter = [&](const Entry* entry){ entryCount += 1; };
+    bool shouldHaveStopped = false;
+    bool calledAfterStopped = false;
+    auto groupStopHalfway = [&](Group* group) {
+        groupCounter(group);
+        if (groupCount >= totalGroups / 2) {
+            if (shouldHaveStopped) {
+                calledAfterStopped = true;
+            } else {
+                shouldHaveStopped = true;
+                calledAfterStopped = false;
+            }
+            return true;
+        }
+        return false;
+    };
+    auto entryStopHalfWay = [&](Entry* entry) {
+        entryCounter(entry);
+        if (entryCount >= totalEntries / 2) {
+            if (shouldHaveStopped) {
+                calledAfterStopped = true;
+            } else {
+                shouldHaveStopped = true;
+                calledAfterStopped = false;
+            }
+            return true;
+        }
+        return false;
+    };
+
+
+    bool result = root->walk(true, groupCounter, entryCounter);
+    // walk should not stopped
+    QCOMPARE(result, false);
+    // walk should have visited all groups & entries
+    QCOMPARE(groupCount, totalGroups);
+    QCOMPARE(entryCount, totalEntries);
+
+    groupCount = entryCount = 0;
+    result = root->walkGroups(true, groupCounter);
+    QCOMPARE(result, false);
+    QCOMPARE(groupCount, totalGroups);
+    result = const_cast<const Group*>(root.data())->walkEntries(entryCounter);
+    QCOMPARE(result, false);
+    QCOMPARE(entryCount, totalEntries);
+
+    groupCount = entryCount = 0;
+    result = root->walk(false, groupStopHalfway, entryStopHalfWay);
+    // should have stopped
+    QCOMPARE(result, true);
+    // should not have been called after stopped
+    QCOMPARE(calledAfterStopped, false);
+
+    groupCount = entryCount = 0;
+    shouldHaveStopped = false;
+    result = root->walkGroups(false, groupStopHalfway);
+    QCOMPARE(result, true);
+    QCOMPARE(calledAfterStopped, false);
+
+    groupCount = entryCount = 0;
+    shouldHaveStopped = false;
+    result = root->walkEntries(entryStopHalfWay);
+    QCOMPARE(result, true);
+    QCOMPARE(calledAfterStopped, false);
 }

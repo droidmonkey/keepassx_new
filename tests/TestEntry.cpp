@@ -25,12 +25,33 @@
 #include "core/TimeInfo.h"
 #include "crypto/Crypto.h"
 
+#include "mock/MockClock.h"
+
 QTEST_GUILESS_MAIN(TestEntry)
+
+namespace
+{
+    MockClock* m_clock = nullptr;
+}
 
 void TestEntry::initTestCase()
 {
     QVERIFY(Crypto::init());
 }
+
+void TestEntry::init()
+{
+    Q_ASSERT(m_clock == nullptr);
+    m_clock = new MockClock(2010, 5, 5, 10, 30, 10);
+    MockClock::setup(m_clock);
+}
+
+void TestEntry::cleanup()
+{
+    MockClock::teardown();
+    m_clock = nullptr;
+}
+
 
 void TestEntry::testHistoryItemDeletion()
 {
@@ -110,6 +131,8 @@ void TestEntry::testClone()
     QCOMPARE(entryCloneNewUuid->timeInfo().creationTime(), entryOrg->timeInfo().creationTime());
 
     // Reset modification time
+    entryOrgTime.setLastAccessTime(Clock::datetimeUtc(60));
+    entryOrgTime.setLocationChanged(Clock::datetimeUtc(60));
     entryOrgTime.setLastModificationTime(Clock::datetimeUtc(60));
     entryOrg->setTimeInfo(entryOrgTime);
 
@@ -123,7 +146,12 @@ void TestEntry::testClone()
     QCOMPARE(entryCloneResetTime->uuid(), entryOrg->uuid());
     QCOMPARE(entryCloneResetTime->title(), QString("New Title"));
     QCOMPARE(entryCloneResetTime->historyItems().size(), 0);
+    // Cloning with CloneResetTimeInfo should affect the CreationTime, LocationChanged, LastAccessTime
     QVERIFY(entryCloneResetTime->timeInfo().creationTime() != entryOrg->timeInfo().creationTime());
+    QVERIFY(entryCloneResetTime->timeInfo().locationChanged() != entryOrg->timeInfo().locationChanged());
+    QVERIFY(entryCloneResetTime->timeInfo().lastAccessTime() != entryOrg->timeInfo().lastAccessTime());
+    // Cloning with CloneResetTimeInfo should not affect the LastModificationTime
+    QCOMPARE(entryCloneResetTime->timeInfo().lastModificationTime(), entryOrg->timeInfo().lastModificationTime());
 
     // Date back history of original entry
     Entry* firstHistoryItem = entryOrg->historyItems()[0];
@@ -850,4 +878,34 @@ void TestEntry::testPreviousParentGroup()
     entry->setGroup(group2);
     QVERIFY(entry->previousParentGroupUuid() == group1->uuid());
     QVERIFY(entry->previousParentGroup() == group1);
+}
+
+void TestEntry::testTimeinfoChanges()
+{
+    Database db;
+    auto* root = db.rootGroup();
+    auto* subgroup = new Group();
+    subgroup->setUuid(QUuid::createUuid());
+    subgroup->setParent(root);
+    QDateTime startTime = Clock::currentDateTimeUtc();
+    TimeInfo startTimeinfo;
+    startTimeinfo.setCreationTime(startTime);
+    startTimeinfo.setLastModificationTime(startTime);
+    startTimeinfo.setLocationChanged(startTime);
+    startTimeinfo.setLastAccessTime(startTime);
+    m_clock->advanceMinute(1);
+
+    QScopedPointer<Entry> entry(new Entry());
+    entry->setUuid(QUuid::createUuid());
+    entry->setGroup(root);
+    entry->setTimeInfo(startTimeinfo);
+    entry->setPreviousParentGroup(subgroup);
+    // setting previous parent group should not affect the LastModificationTime
+    QCOMPARE(entry->timeInfo().lastModificationTime(), startTime);
+    entry->setGroup(subgroup);
+    // changing group should not affect LastModicationTime, CreationTime
+    QCOMPARE(entry->timeInfo().creationTime(), startTime);
+    QCOMPARE(entry->timeInfo().lastModificationTime(), startTime);
+    // changing group should affect the LocationChanged time
+    QCOMPARE(entry->timeInfo().locationChanged(), Clock::currentDateTimeUtc());
 }
