@@ -145,10 +145,11 @@ bool SSHAgent::isAgentRunning() const
     QFileInfo socketFileInfo(socketPath());
     return !socketFileInfo.path().isEmpty() && socketFileInfo.exists();
 #else
+    const auto pathString = QString::fromLatin1(socketPath().toLatin1());
     if (usePageant() && useOpenSSH()) {
-        return (FindWindowA("Pageant", "Pageant") != nullptr) && WaitNamedPipeA(socketPath().toLatin1().data(), 100);
+        return (FindWindowA("Pageant", "Pageant") != nullptr) && WaitNamedPipe(pathString.toStdWString().c_str(), 100);
     } else if (useOpenSSH()) {
-        return WaitNamedPipeA(socketPath().toLatin1().data(), 100);
+        return WaitNamedPipe(pathString.toStdWString().c_str(), 100);
     } else if (usePageant()) {
         return (FindWindowA("Pageant", "Pageant") != nullptr);
     } else {
