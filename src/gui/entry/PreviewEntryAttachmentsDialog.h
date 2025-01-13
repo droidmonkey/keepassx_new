@@ -50,6 +50,7 @@ private:
     void update();
     void updateTextAttachment(const QByteArray& data);
     void updateImageAttachment(const QByteArray& data);
+    void updatePdfAttachment(const QByteArray& data);
 
     QScopedPointer<Ui::EntryAttachmentsDialog> m_ui;
 

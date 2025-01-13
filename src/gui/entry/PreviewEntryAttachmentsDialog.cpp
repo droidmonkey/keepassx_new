@@ -76,7 +76,15 @@ void PreviewEntryAttachmentsDialog::update()
         updateImageAttachment(m_data);
     } else if (m_type == Tools::MimeType::PlainText) {
         updateTextAttachment(m_data);
+    } else if (m_type == Tools::MimeType::Pdf) {
+        updatePdfAttachment(m_data);
     }
+}
+
+void PreviewEntryAttachmentsDialog::updatePdfAttachment(const QByteArray& data)
+{
+    // To preview a PDF as an image, you need to install the qt5-image-formats-plugin-pdf
+    updateImageAttachment(data);
 }
 
 void PreviewEntryAttachmentsDialog::updateTextAttachment(const QByteArray& data)
@@ -117,7 +125,5 @@ void PreviewEntryAttachmentsDialog::resizeEvent(QResizeEvent* event)
 {
     QDialog::resizeEvent(event);
 
-    if (m_type == Tools::MimeType::Image) {
-        update();
-    }
+    update();
 }

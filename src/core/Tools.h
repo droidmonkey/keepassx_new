@@ -119,6 +119,7 @@ namespace Tools
     {
         Image,
         PlainText,
+        Pdf,
         Unknown
     };
 
