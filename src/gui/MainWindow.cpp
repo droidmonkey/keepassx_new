@@ -939,7 +939,7 @@ void MainWindow::updateMenuActionState()
     m_ui->menuEntryTotp->setEnabled(singleEntrySelected);
     m_ui->menuTags->setEnabled(multiEntrySelected);
     // Handle tear-off tags menu
-    if (m_ui->menuTags->menuAction()->isVisible()) {
+    if (m_ui->menuTags->isTearOffMenuVisible()) {
         if (!databaseUnlocked) {
             m_ui->menuTags->hideTearOffMenu();
         } else {
