@@ -51,6 +51,9 @@ private:
     void updateTextAttachment(const QByteArray& data);
     void updateImageAttachment(const QByteArray& data);
     void updatePdfAttachment(const QByteArray& data);
+    void updateImageAttachment(const QImage& image);
+
+    QSize calcucateImageSize();
 
     QScopedPointer<Ui::EntryAttachmentsDialog> m_ui;
 

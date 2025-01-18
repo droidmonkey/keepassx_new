@@ -388,6 +388,12 @@ target_link_libraries(keepassxc_gui
         ${keeshare_LIB}
         ${sshagent_LIB})
 
+# Find Poppler
+find_package(PkgConfig)
+pkg_check_modules(POPPLER_CPP REQUIRED IMPORTED_TARGET poppler-cpp)
+
+target_link_libraries(keepassxc_gui PkgConfig::POPPLER_CPP)
+
 if(APPLE)
     target_link_libraries(keepassxc_gui "-framework Foundation -framework AppKit -framework Carbon -framework Security -framework LocalAuthentication -framework ScreenCaptureKit")
     if(Qt5MacExtras_FOUND)

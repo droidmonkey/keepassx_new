@@ -24,6 +24,12 @@
 #include <QTextCursor>
 #include <QtDebug>
 
+#include <memory>
+
+#include <poppler-document.h>
+#include <poppler-page-renderer.h>
+#include <poppler-page.h>
+
 PreviewEntryAttachmentsDialog::PreviewEntryAttachmentsDialog(QWidget* parent)
     : QDialog(parent)
     , m_ui(new Ui::EntryAttachmentsDialog)
@@ -84,7 +90,58 @@ void PreviewEntryAttachmentsDialog::update()
 void PreviewEntryAttachmentsDialog::updatePdfAttachment(const QByteArray& data)
 {
     // To preview a PDF as an image, you need to install the qt5-image-formats-plugin-pdf
-    updateImageAttachment(data);
+    poppler::byte_array array{std::cbegin(data), std::cend(data)};
+
+    auto doc = std::unique_ptr<poppler::document>(poppler::document::load_from_data(&array));
+    if (!doc) {
+        updateTextAttachment(tr("Failed to load the PDF").toUtf8());
+        return;
+    }
+
+    // Locked PDF files are not supported
+    if (doc->is_locked()) {
+        updateTextAttachment(tr("Failed to read the PDF: The file is locked").toUtf8());
+        return;
+    }
+
+    if (!doc->pages()) {
+        updateTextAttachment(tr("Failed to read the PDF: No pages found").toUtf8());
+        return;
+    }
+
+    // Preview the first page of the document.
+    auto page = std::unique_ptr<poppler::page>(doc->create_page(0));
+    if (!page) {
+        updateTextAttachment(tr("Failed to read the PDF: Unable to create a page").toUtf8());
+        return;
+    }
+
+    poppler::page_renderer renderer{};
+    auto popplerImage = renderer.render_page(page.get());
+
+    QImage image(reinterpret_cast<const uchar*>(popplerImage.const_data()),
+                 popplerImage.width(),
+                 popplerImage.height(),
+                 popplerImage.bytes_per_row(),
+                 QImage::Format_ARGB32);
+
+    if (image.isNull()) {
+        updateTextAttachment(tr("Failed to render the PDF page").toUtf8());
+        return;
+    }
+
+    updateImageAttachment(image);
+}
+
+QSize PreviewEntryAttachmentsDialog::calcucateImageSize()
+{
+    // Scale the image to the contents rect minus another set of margins to avoid scrollbars
+    auto margins = m_ui->attachmentTextEdit->contentsMargins();
+    auto size = m_ui->attachmentTextEdit->contentsRect().size();
+    size.setWidth(size.width() - margins.left() - margins.right());
+    size.setHeight(size.height() - margins.top() - margins.bottom());
+
+    return size;
 }
 
 void PreviewEntryAttachmentsDialog::updateTextAttachment(const QByteArray& data)
@@ -100,17 +157,15 @@ void PreviewEntryAttachmentsDialog::updateImageAttachment(const QByteArray& data
         return;
     }
 
+    updateImageAttachment(image);
+}
+
+void PreviewEntryAttachmentsDialog::updateImageAttachment(const QImage& image)
+{
     m_ui->attachmentTextEdit->clear();
     auto cursor = m_ui->attachmentTextEdit->textCursor();
 
-    // Scale the image to the contents rect minus another set of margins to avoid scrollbars
-    auto margins = m_ui->attachmentTextEdit->contentsMargins();
-    auto size = m_ui->attachmentTextEdit->contentsRect().size();
-    size.setWidth(size.width() - margins.left() - margins.right());
-    size.setHeight(size.height() - margins.top() - margins.bottom());
-    image = image.scaled(size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
-    cursor.insertImage(image);
+    cursor.insertImage(image.scaled(calcucateImageSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 Tools::MimeType PreviewEntryAttachmentsDialog::attachmentType(const QByteArray& data) const
