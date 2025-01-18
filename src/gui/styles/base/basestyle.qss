@@ -72,10 +72,6 @@ QPlainTextEdit, QTextEdit {
     padding-left: 4px;
 }
 
-QStatusBar {
-    background-color: palette(window);
-}
-
 *[title="true"] {
     font-weight: bold;
 }
