@@ -29,6 +29,7 @@
 #include <QFile>
 #include <QHeaderView>
 #include <QListView>
+#include <QMenuBar>
 #include <QPainter>
 #include <QPainterPath>
 #include <QPoint>
@@ -4680,7 +4681,15 @@ int BaseStyle::styleHint(StyleHint hint,
     case SH_WindowFrame_Mask:
         return 0;
     case SH_UnderlineShortcut: {
-        return false;
+#if defined(Q_OS_WIN) or defined (Q_OS_LINUX)
+        // Only show underline shortcuts if the user focused with ALT (Win/Linux only)
+        auto mb = qobject_cast<const QMenuBar*>(widget);
+        if (mb && !mb->hasFocus()) {
+            return 0;
+        }
+#endif
+        // Let Qt handle this for platform specific behavior
+        break;
     }
     case SH_Widget_Animate:
         return 1;
