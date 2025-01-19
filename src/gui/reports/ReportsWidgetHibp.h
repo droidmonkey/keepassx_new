@@ -58,6 +58,8 @@ public slots:
     void fetchFailed(const QString& error);
     void makeHibpTable();
     void customMenuRequested(QPoint);
+    QList<Entry*> getSelectedEntries();
+    void expireSelectedEntries();
     void deleteSelectedEntries();
 
 private:

@@ -5837,10 +5837,6 @@ We recommend you use the AppImage available on our downloads page.</source>
         </translation>
     </message>
     <message>
-        <source>Copy Password and TOTP</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>&amp;XML File…</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5869,15 +5865,15 @@ We recommend you use the AppImage available on our downloads page.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Toggle Show Menubar</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Remove Passkey From Entry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Empty Recycle Bin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toggle Show Menubar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5890,6 +5886,14 @@ We recommend you use the AppImage available on our downloads page.</source>
     </message>
     <message>
         <source>Password Generator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>E&amp;xpire Entry…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copy Password and TOTP</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -8833,6 +8837,13 @@ This option is deprecated, use --set-key-file instead.</source>
         <source>Exclude from reports</source>
         <translation type="unfinished"></translation>
     </message>
+    <message numerus="yes">
+        <source>Expire Entry(s)…</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
     <message>
         <source>Only show entries that have a URL</source>
         <translation type="unfinished"></translation>
@@ -8859,6 +8870,14 @@ This option is deprecated, use --set-key-file instead.</source>
 </context>
 <context>
     <name>ReportsWidgetHealthcheck</name>
+    <message>
+        <source>Show expired entries</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> (Expired)</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>Hover over reason to show additional details. Double-click entries to edit.</source>
         <translation type="unfinished"></translation>
@@ -8922,16 +8941,15 @@ This option is deprecated, use --set-key-file instead.</source>
         <source>Exclude from reports</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Show expired entries</source>
-        <translation type="unfinished"></translation>
+    <message numerus="yes">
+        <source>Expire Entry(s)…</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
     <message>
         <source>Show entries that have been excluded from reports</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source> (Expired)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -9031,6 +9049,13 @@ This option is deprecated, use --set-key-file instead.</source>
     <message>
         <source>Exclude from reports</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Expire Entry(s)…</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>

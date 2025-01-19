@@ -40,6 +40,7 @@
         <file>application/scalable/actions/edit-clear-locationbar-rtl.svg</file>
         <file>application/scalable/actions/entry-clone.svg</file>
         <file>application/scalable/actions/entry-delete.svg</file>
+        <file>application/scalable/actions/entry-expire.svg</file>
         <file>application/scalable/actions/entry-restore.svg</file>
         <file>application/scalable/actions/entry-edit.svg</file>
         <file>application/scalable/actions/entry-new.svg</file>

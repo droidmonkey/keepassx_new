@@ -167,6 +167,7 @@ public slots:
     void replaceDatabase(QSharedPointer<Database> db);
     void createEntry();
     void cloneEntry();
+    void expireSelectedEntries();
     void deleteSelectedEntries();
     void restoreSelectedEntries();
     void deleteEntries(QList<Entry*> entries, bool confirm = true);

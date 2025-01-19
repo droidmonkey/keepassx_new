@@ -564,6 +564,17 @@ void DatabaseWidget::setupTotp()
     setupTotpDialog->open();
 }
 
+void DatabaseWidget::expireSelectedEntries()
+{
+    const QModelIndexList selected = m_entryView->selectionModel()->selectedRows();
+    for (const auto& index : selected) {
+        auto entry = m_entryView->entryFromIndex(index);
+        if (entry) {
+            entry->expireNow();
+        }
+    }
+}
+
 void DatabaseWidget::deleteSelectedEntries()
 {
     const QModelIndexList selected = m_entryView->selectionModel()->selectedRows();

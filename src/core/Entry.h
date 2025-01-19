@@ -126,6 +126,7 @@ public:
     bool hasTotp() const;
     bool isExpired() const;
     bool willExpireInDays(int days) const;
+    void expireNow();
     bool isRecycled() const;
     bool isAttributeReference(const QString& key) const;
     bool isAttributeReferenceOf(const QString& key, const QUuid& uuid) const;

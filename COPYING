@@ -178,6 +178,7 @@ Files: share/icons/application/scalable/actions/application-exit.svg
        share/icons/application/scalable/actions/entry-delete.svg
        share/icons/application/scalable/actions/entry-restore.svg
        share/icons/application/scalable/actions/entry-edit.svg
+       share/icons/application/scalable/actions/entry-expire.svg
        share/icons/application/scalable/actions/entry-new.svg
        share/icons/application/scalable/actions/favicon-download.svg
        share/icons/application/scalable/actions/fingerprint.svg

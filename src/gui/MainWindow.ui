@@ -314,6 +314,7 @@
     <addaction name="separator"/>
     <addaction name="actionEntryNew"/>
     <addaction name="actionEntryEdit"/>
+    <addaction name="actionEntryExpire"/>
     <addaction name="actionEntryClone"/>
     <addaction name="actionEntryDelete"/>
     <addaction name="separator"/>
@@ -505,6 +506,14 @@
    </property>
    <property name="toolTip">
     <string>View or edit entry</string>
+   </property>
+  </action>
+  <action name="actionEntryExpire">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>E&amp;xpire Entry…</string>
    </property>
   </action>
   <action name="actionEntryDelete">
