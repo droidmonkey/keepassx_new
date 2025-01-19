@@ -301,10 +301,13 @@ void TestTools::testMimeTypes()
         "image/svg+xml" // SVG images
     };
 
+    const QStringList pdfMimeType = {
+        "application/pdf", // PDF documents
+    };
+
     const QStringList UnknownMimeTypes = {
         "audio/mpeg", // MPEG audio files
         "video/mp4", // MP4 video files
-        "application/pdf", // PDF documents
         "application/zip", // ZIP archives
         "application/x-tar", // TAR archives
         "application/x-rar-compressed", // RAR archives
@@ -327,15 +330,15 @@ void TestTools::testMimeTypes()
         "application/x-shellscript", // Shell scripts
     };
 
-    for (const auto& mime : TextMimeTypes) {
-        QCOMPARE(Tools::toMimeType(mime), Tools::MimeType::PlainText);
-    }
+    auto compare = [](const QStringList& mimeList, Tools::MimeType exptectedType) {
+        for (const auto& mime : mimeList) {
+            QCOMPARE(Tools::toMimeType(mime), exptectedType);
+        }
+    };
 
-    for (const auto& mime : ImageMimeTypes) {
-        QCOMPARE(Tools::toMimeType(mime), Tools::MimeType::Image);
-    }
+    compare(TextMimeTypes, Tools::MimeType::PlainText);
+    compare(ImageMimeTypes, Tools::MimeType::Image);
+    compare(pdfMimeType, Tools::MimeType::Pdf);
 
-    for (const auto& mime : UnknownMimeTypes) {
-        QCOMPARE(Tools::toMimeType(mime), Tools::MimeType::Unknown);
-    }
+    compare(UnknownMimeTypes, Tools::MimeType::Unknown);
 }

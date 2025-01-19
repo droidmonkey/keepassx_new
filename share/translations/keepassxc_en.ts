@@ -7178,6 +7178,26 @@ Do you want to overwrite it?</source>
         <source>Image format not supported</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Failed to load the PDF</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to render the PDF page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The file is locked and cannot be processed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The document contains no pages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unable to create the first page of the document</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QMessageBox</name>

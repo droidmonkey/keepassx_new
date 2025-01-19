@@ -76,6 +76,10 @@
     {
       "name": "zlib",
       "version>=": "1.3"
+    },
+    {
+      "name": "poppler",
+      "version>=": "23.1.0"
     }
   ]
 }

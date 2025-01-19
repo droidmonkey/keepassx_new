@@ -486,7 +486,9 @@ namespace Tools
             "application/x-yaml",
             "application/protobuf",
         };
+
         static QStringList imageFormats = {"image/"};
+        static QStringList pdfFormats = {"application/pdf"};
 
         static auto isCompatible = [](const QString& format, const QStringList& list) {
             return std::any_of(
@@ -499,6 +501,10 @@ namespace Tools
 
         if (isCompatible(mimeName, textFormats)) {
             return MimeType::PlainText;
+        }
+
+        if (isCompatible(mimeName, pdfFormats)) {
+            return MimeType::Pdf;
         }
 
         return MimeType::Unknown;
