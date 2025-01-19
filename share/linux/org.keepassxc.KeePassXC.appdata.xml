@@ -52,6 +52,41 @@
     </screenshots>
 
     <releases>
+        <release version="2.8.0" date="2025-01-01">
+            <description>
+                <ul>
+                    <li>Placeholder for future release notes</li>
+                </ul>
+            </description>
+        </release>
+        <release version="2.7.9" date="2024-06-19">
+            <description>
+                <ul>
+                    <li>Passkeys: Ability to easily remove a passkey from an entry [#10777]</li>
+                    <li>Snap: Use new desktop portal for native messaging integration [#10906]</li>
+                    <li>Improve entry placeholder/reference feature [#10846]</li>
+                    <li>Improve CSV importing when title field isn't specified [#10843]</li>
+                    <li>Improve encrypted Bitwarden importing [#10800]</li>
+                    <li>Improve database settings UX [#10821]</li>
+                    <li>Improve handling of clipboard actions from entry preview [#10810]</li>
+                    <li>Improve group/entry view resize behavior and set sensible defaults [#10641]</li>
+                    <li>Passkeys: Fix incorrect username fill [#10874]</li>
+                    <li>Passkeys: Return additional data to the extension [#10857]</li>
+                    <li>Fix password clear timer inconsistency on unlock view [#10708]</li>
+                    <li>Fix portability check [#10760]</li>
+                    <li>Fix page overflow on HTML exports [#10735]</li>
+                    <li>Fix broken builds when using system provided zxcvbn [#10717]</li>
+                    <li>Fix copy password button when text is selected [#10853]</li>
+                    <li>Fix tab ordering on application settings pages [#10907]</li>
+                    <li>SSH Agent: Fix broken decrypt button [#10638]</li>
+                    <li>Windows: Fix ALT Auto-Type modifier [#10795]</li>
+                    <li>Windows: Fix wrong DACL memory size allocation [#10712]</li>
+                    <li>macOS: Fix monospace font sizing [#10739]</li>
+                    <li>Flatpak: Fix configuration settings off-by-one error [#10688]</li>
+                    <li>BSD: Fix compiling with libusb implementation [#10736]</li>
+                </ul>
+            </description>
+        </release>
         <release version="2.7.8" date="2024-05-05">
             <description>
                 <ul>
@@ -194,7 +229,7 @@
                     <li>Browser: Revert code causing connection problems [#8665]</li>
                     <li>Browser: Fix socket file symbolic link on Linux [#8656]</li>
                     <li>Flatpak: Fix launching browser proxy service [#8680]</li>
-                    <li>SSH Agent: Fix pageant support on Windows [#8619]</li>
+                    <li>SSH Agent: Fix paegent support on Windows [#8619]</li>
                 </ul>
             </description>
         </release>
@@ -1064,7 +1099,7 @@
                     <li>Compare window title to entry URLs [#556]</li>
                     <li>Implemented inline error messages [#162]</li>
                     <li>Ignore group expansion and other minor changes when making database "dirty" [#464]</li>
-                    <li>Updated license and copyright information on source files [#632]</li>
+                    <li>Updated license and copyright information on souce files [#632]</li>
                     <li>Added contributors list to about dialog [#629]</li>
                 </ul>
             </description>
