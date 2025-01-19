@@ -7183,19 +7183,19 @@ Do you want to overwrite it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Failed to read the PDF: The file is locked</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Failed to read the PDF: No pages found</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Failed to read the PDF: Unable to create a page</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Failed to render the PDF page</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The file is locked and cannot be processed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The document contains no pages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unable to create the first page of the document</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

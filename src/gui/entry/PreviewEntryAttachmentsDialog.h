@@ -60,4 +60,6 @@ private:
     QString m_name;
     QByteArray m_data;
     Tools::MimeType m_type{Tools::MimeType::Unknown};
+
+    QHash<QByteArray, QImage> m_hashedImage{};
 };

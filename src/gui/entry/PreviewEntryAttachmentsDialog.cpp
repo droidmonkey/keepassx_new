@@ -27,6 +27,7 @@
 #include <memory>
 
 #include <poppler-document.h>
+#include <poppler-image.h>
 #include <poppler-page-renderer.h>
 #include <poppler-page.h>
 
@@ -89,48 +90,60 @@ void PreviewEntryAttachmentsDialog::update()
 
 void PreviewEntryAttachmentsDialog::updatePdfAttachment(const QByteArray& data)
 {
-    // To preview a PDF as an image, you need to install the qt5-image-formats-plugin-pdf
-    poppler::byte_array array{std::cbegin(data), std::cend(data)};
+    if (!m_hashedImage.contains(data)) {
+        poppler::byte_array array{std::cbegin(data), std::cend(data)};
 
-    auto doc = std::unique_ptr<poppler::document>(poppler::document::load_from_data(&array));
-    if (!doc) {
-        updateTextAttachment(tr("Failed to load the PDF").toUtf8());
-        return;
+        auto doc = std::unique_ptr<poppler::document>(poppler::document::load_from_data(&array));
+        if (!doc) {
+            updateTextAttachment(tr("Failed to load the PDF").toUtf8());
+            return;
+        }
+
+        // Locked PDF files are not supported
+        if (doc->is_locked()) {
+            updateTextAttachment(tr("The file is locked and cannot be processed").toUtf8());
+            return;
+        }
+
+        if (!doc->pages()) {
+            updateTextAttachment(tr("The document contains no pages").toUtf8());
+            return;
+        }
+
+        // Preview the first page of the document.
+        auto page = std::unique_ptr<poppler::page>(doc->create_page(0));
+        if (!page) {
+            updateTextAttachment(tr("Unable to create the first page of the document").toUtf8());
+            return;
+        }
+
+        poppler::page_renderer renderer{};
+        renderer.set_image_format(poppler::image::format_argb32);
+
+        // Use a resolution of 150 DPI for the preview.
+        constexpr int Dpi = 150;
+        auto popplerImage = renderer.render_page(page.get(), Dpi, Dpi);
+        if (!popplerImage.is_valid()) {
+            updateTextAttachment(tr("Failed to render the PDF page").toUtf8());
+            return;
+        }
+
+        QImage image(reinterpret_cast<const uchar*>(popplerImage.const_data()),
+                     popplerImage.width(),
+                     popplerImage.height(),
+                     popplerImage.bytes_per_row(),
+                     QImage::Format_ARGB32);
+
+        if (image.isNull()) {
+            updateTextAttachment(tr("Failed to render the PDF page").toUtf8());
+            return;
+        }
+
+        // Make a copy of the image to prevent data corruption once the Poppler image is destroyed.
+        m_hashedImage.insert(data, image.copy());
     }
 
-    // Locked PDF files are not supported
-    if (doc->is_locked()) {
-        updateTextAttachment(tr("Failed to read the PDF: The file is locked").toUtf8());
-        return;
-    }
-
-    if (!doc->pages()) {
-        updateTextAttachment(tr("Failed to read the PDF: No pages found").toUtf8());
-        return;
-    }
-
-    // Preview the first page of the document.
-    auto page = std::unique_ptr<poppler::page>(doc->create_page(0));
-    if (!page) {
-        updateTextAttachment(tr("Failed to read the PDF: Unable to create a page").toUtf8());
-        return;
-    }
-
-    poppler::page_renderer renderer{};
-    auto popplerImage = renderer.render_page(page.get());
-
-    QImage image(reinterpret_cast<const uchar*>(popplerImage.const_data()),
-                 popplerImage.width(),
-                 popplerImage.height(),
-                 popplerImage.bytes_per_row(),
-                 QImage::Format_ARGB32);
-
-    if (image.isNull()) {
-        updateTextAttachment(tr("Failed to render the PDF page").toUtf8());
-        return;
-    }
-
-    updateImageAttachment(image);
+    updateImageAttachment(m_hashedImage.value(data));
 }
 
 QSize PreviewEntryAttachmentsDialog::calcucateImageSize()
@@ -151,13 +164,18 @@ void PreviewEntryAttachmentsDialog::updateTextAttachment(const QByteArray& data)
 
 void PreviewEntryAttachmentsDialog::updateImageAttachment(const QByteArray& data)
 {
-    QImage image{};
-    if (!image.loadFromData(data)) {
-        updateTextAttachment(tr("Image format not supported").toUtf8());
-        return;
+    if (!m_hashedImage.contains(data)) {
+
+        QImage image{};
+        if (!image.loadFromData(data)) {
+            updateTextAttachment(tr("Image format not supported").toUtf8());
+            return;
+        }
+
+        m_hashedImage.insert(data, std::move(image));
     }
 
-    updateImageAttachment(image);
+    updateImageAttachment(m_hashedImage.value(data));
 }
 
 void PreviewEntryAttachmentsDialog::updateImageAttachment(const QImage& image)
