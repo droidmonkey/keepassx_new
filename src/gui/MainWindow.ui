@@ -314,6 +314,9 @@
      <addaction name="actionEntrySetupTotp"/>
     </widget>
     <widget class="QMenu" name="menuTags">
+     <property name="tearOffEnabled">
+      <bool>true</bool>
+     </property>
      <property name="title">
       <string>Tags</string>
      </property>
