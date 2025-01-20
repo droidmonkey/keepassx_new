@@ -305,6 +305,12 @@ bool SSHAgent::addIdentity(OpenSSHKey& key, const KeeAgentSettings& settings, co
         request.writeString(securityKeyProvider());
     }
 
+    if (settings.useDestinationConstraintsWhenAdding()) {
+        request.write(SSH_AGENT_CONSTRAIN_EXTENSION);
+        request.writeString(QString("restrict-destination-v00@openssh.com"));
+        encodeDestinationConstraints(settings.destinationConstraints(), request);
+    }
+
     QByteArray responseData;
     if (!sendMessage(requestData, responseData)) {
         return false;
@@ -322,6 +328,10 @@ bool SSHAgent::addIdentity(OpenSSHKey& key, const KeeAgentSettings& settings, co
             m_error += "\n" + tr("A confirmation request is not supported by the agent (check options).");
         }
 
+        if (settings.useDestinationConstraintsWhenAdding()) {
+            m_error += "\n" + tr("Destination constraints are invalid or not supported by the agent (check options).");
+        }
+
         if (isSecurityKey) {
             m_error +=
                 "\n" + tr("Security keys are not supported by the agent or the security key provider is unavailable.");
@@ -333,6 +343,54 @@ bool SSHAgent::addIdentity(OpenSSHKey& key, const KeeAgentSettings& settings, co
     OpenSSHKey keyCopy = key;
     keyCopy.clearPrivate();
     m_addedKeys[keyCopy] = qMakePair(databaseUuid, settings.removeAtDatabaseClose());
+    return true;
+}
+
+bool SSHAgent::encodeDestinationConstraints(const QList<KeeAgentSettings::DestinationConstraint>& constraints,
+                                            BinaryStream& out)
+{
+    QByteArray data;
+    BinaryStream stream(&data);
+
+    foreach (const auto& constraint, constraints) {
+        encodeDestinationConstraint(constraint, stream);
+    }
+
+    out.writeString(data);
+    return true;
+}
+
+bool SSHAgent::encodeDestinationConstraint(const KeeAgentSettings::DestinationConstraint& constraint, BinaryStream& out)
+{
+    QByteArray data;
+    BinaryStream stream(&data);
+
+    encodeDestinationConstraintHost("", constraint.fromHost, constraint.fromHostKeys, stream);
+    encodeDestinationConstraintHost(constraint.toUser, constraint.toHost, constraint.toHostKeys, stream);
+    stream.writeString(QString("")); // reserved
+
+    out.writeString(data);
+    return true;
+}
+
+bool SSHAgent::encodeDestinationConstraintHost(const QString user,
+                                               const QString hostname,
+                                               const QList<KeeAgentSettings::KeySpec>& keys,
+                                               BinaryStream& out)
+{
+    QByteArray data;
+    BinaryStream stream(&data);
+
+    stream.writeString(user);
+    stream.writeString(hostname);
+    stream.writeString(QString("")); // reserved
+
+    foreach (const auto& key, keys) {
+        stream.writeString(key.getKeyBlob());
+        stream.write(static_cast<quint8>(key.isCertificateAuthority));
+    }
+
+    out.writeString(data);
     return true;
 }
 

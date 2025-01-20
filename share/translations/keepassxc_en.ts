@@ -3352,6 +3352,42 @@ Would you like to correct it?</source>
         <source> seconds</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Enable destination constraints</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Destination contraints</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>-</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Origin host:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Origin host keys:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Destination user:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Destination host:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Destination host keys:</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>EditGroupWidget</name>
@@ -9753,6 +9789,10 @@ This option is deprecated, use --set-key-file instead.</source>
         <source>No agent running, cannot list identities.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Destination constraints are invalid or not supported by the agent (check options).</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SearchHelpWidget</name>
@@ -10329,11 +10369,11 @@ Example: JBSWY3DPEHPK3PXP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Refresh hardware keys</source>
+        <source>&lt;p&gt;If you own a &lt;a href=&quot;https://www.yubico.com/&quot;&gt;YubiKey&lt;/a&gt; or &lt;a href=&quot;https://onlykey.io&quot;&gt;OnlyKey&lt;/a&gt;, you can use it for additional security.&lt;/p&gt;&lt;p&gt;The key requires one of its slots to be programmed with &lt;a href=&quot;https://keepassxc.org/docs/#faq-yubikey-howto&quot;&gt;Challenge-Response&lt;/a&gt;.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;p&gt;If you own a &lt;a href=&quot;https://www.yubico.com/&quot;&gt;YubiKey&lt;/a&gt; or &lt;a href=&quot;https://onlykey.io&quot;&gt;OnlyKey&lt;/a&gt;, you can use it for additional security.&lt;/p&gt;&lt;p&gt;The key requires one of its slots to be programmed with &lt;a href=&quot;https://keepassxc.org/docs/#faq-yubikey-howto&quot;&gt;Challenge-Response&lt;/a&gt;.&lt;/p&gt;</source>
+        <source>Refresh hardware keys</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

@@ -30,10 +30,12 @@ class TestSSHAgent : public QObject
 private slots:
     void initTestCase();
     void testConfiguration();
+    void testKeeAgentSettings();
     void testIdentity();
     void testRemoveOnClose();
     void testLifetimeConstraint();
     void testConfirmConstraint();
+    void testDestinationConstraints();
     void testToOpenSSHKey();
     void testKeyGenRSA();
     void testKeyGenECDSA();

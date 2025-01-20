@@ -21,9 +21,9 @@
 
 #include <QHash>
 
+#include "KeeAgentSettings.h"
 #include "OpenSSHKey.h"
 
-class KeeAgentSettings;
 class Database;
 
 class SSHAgent : public QObject
@@ -87,6 +87,14 @@ private:
     const quint32 AGENT_MAX_MSGLEN = 8192;
     const quint32 AGENT_COPYDATA_ID = 0x804e50ba;
 #endif
+
+    bool encodeDestinationConstraints(const QList<KeeAgentSettings::DestinationConstraint>& constraints,
+                                      BinaryStream& out);
+    bool encodeDestinationConstraint(const KeeAgentSettings::DestinationConstraint& constraint, BinaryStream& out);
+    bool encodeDestinationConstraintHost(const QString user,
+                                         const QString hostname,
+                                         const QList<KeeAgentSettings::KeySpec>& keys,
+                                         BinaryStream& out);
 
     QHash<OpenSSHKey, QPair<QUuid, bool>> m_addedKeys;
     QString m_error;

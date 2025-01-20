@@ -29,6 +29,27 @@ class QXmlStreamReader;
 class KeeAgentSettings
 {
 public:
+    struct KeySpec
+    {
+        QString key;
+        bool isCertificateAuthority;
+
+        bool operator==(const KeySpec& other) const;
+
+        QByteArray getKeyBlob() const;
+    };
+
+    struct DestinationConstraint
+    {
+        QString fromHost;
+        QList<KeySpec> fromHostKeys;
+        QString toUser;
+        QString toHost;
+        QList<KeySpec> toHostKeys;
+
+        bool operator==(const DestinationConstraint& other) const;
+    };
+
     KeeAgentSettings();
     bool operator==(const KeeAgentSettings& other) const;
     bool operator!=(const KeeAgentSettings& other) const;
@@ -58,6 +79,8 @@ public:
     bool useConfirmConstraintWhenAdding() const;
     bool useLifetimeConstraintWhenAdding() const;
     int lifetimeConstraintDuration() const;
+    bool useDestinationConstraintsWhenAdding() const;
+    QList<DestinationConstraint> destinationConstraints() const;
 
     const QString selectedType() const;
     const QString attachmentName() const;
@@ -71,6 +94,8 @@ public:
     void setUseConfirmConstraintWhenAdding(bool useConfirmConstraintWhenAdding);
     void setUseLifetimeConstraintWhenAdding(bool useLifetimeConstraintWhenAdding);
     void setLifetimeConstraintDuration(int lifetimeConstraintDuration);
+    void setUseDestinationConstraintsWhenAdding(bool useDestinationConstraintsWhenAdding);
+    void setDestinationConstraints(const QList<DestinationConstraint>& destinationConstraints);
 
     void setSelectedType(const QString& type);
     void setAttachmentName(const QString& attachmentName);
@@ -87,6 +112,8 @@ private:
     bool m_useConfirmConstraintWhenAdding;
     bool m_useLifetimeConstraintWhenAdding;
     int m_lifetimeConstraintDuration;
+    bool m_useDestinationConstraintsWhenAdding;
+    QList<DestinationConstraint> m_destinationConstraints;
 
     // location
     QString m_selectedType;

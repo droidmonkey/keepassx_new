@@ -533,6 +533,8 @@ void EditEntryWidget::setupEntryUpdate()
         connect(m_sshAgentUi->requireUserConfirmationCheckBox, SIGNAL(stateChanged(int)), this, SLOT(setModified()));
         connect(m_sshAgentUi->lifetimeCheckBox, SIGNAL(stateChanged(int)), this, SLOT(setModified()));
         connect(m_sshAgentUi->lifetimeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setModified()));
+        connect(
+            m_sshAgentUi->enableDestinationConstraintsCheckBox, SIGNAL(stateChanged(int)), this, SLOT(setModified()));
     }
 #endif
 
@@ -594,6 +596,8 @@ void EditEntryWidget::setupSSHAgent()
     m_sshAgentUi->fingerprintTextLabel->setFont(fixedFont);
     m_sshAgentUi->commentTextLabel->setFont(fixedFont);
     m_sshAgentUi->publicKeyEdit->setFont(fixedFont);
+    m_sshAgentUi->originHostKeysEdit->setFont(fixedFont);
+    m_sshAgentUi->destinationHostKeysEdit->setFont(fixedFont);
 
     // clang-format off
     connect(m_sshAgentUi->attachmentRadioButton, &QRadioButton::clicked,
@@ -624,10 +628,20 @@ void EditEntryWidget::setSSHAgentSettings()
     m_sshAgentUi->requireUserConfirmationCheckBox->setChecked(m_sshAgentSettings.useConfirmConstraintWhenAdding());
     m_sshAgentUi->lifetimeCheckBox->setChecked(m_sshAgentSettings.useLifetimeConstraintWhenAdding());
     m_sshAgentUi->lifetimeSpinBox->setValue(m_sshAgentSettings.lifetimeConstraintDuration());
+    m_sshAgentUi->enableDestinationConstraintsCheckBox->setChecked(
+        m_sshAgentSettings.useDestinationConstraintsWhenAdding());
     m_sshAgentUi->attachmentComboBox->clear();
     m_sshAgentUi->addToAgentButton->setEnabled(false);
     m_sshAgentUi->removeFromAgentButton->setEnabled(false);
     m_sshAgentUi->copyToClipboardButton->setEnabled(false);
+    m_sshAgentUi->destinationConstraintsView->reset();
+    m_sshAgentUi->destinationConstraintAddButton->setEnabled(false);
+    m_sshAgentUi->destinationConstraintRemoveButton->setEnabled(false);
+    m_sshAgentUi->originHostEdit->setEnabled(false);
+    m_sshAgentUi->originHostKeysEdit->setEnabled(false);
+    m_sshAgentUi->destinationUserEdit->setEnabled(false);
+    m_sshAgentUi->destinationHostEdit->setEnabled(false);
+    m_sshAgentUi->destinationHostKeysEdit->setEnabled(false);
 }
 
 void EditEntryWidget::updateSSHAgent()
@@ -643,6 +657,7 @@ void EditEntryWidget::updateSSHAgent()
     }
 
     updateSSHAgentAttachments();
+    updateSSHAgentDestinationConstraints();
 }
 
 void EditEntryWidget::updateSSHAgentAttachment()
@@ -722,6 +737,34 @@ void EditEntryWidget::updateSSHAgentKeyInfo()
 
         sshAgent()->setAutoRemoveOnLock(key, m_sshAgentUi->removeKeyFromAgentCheckBox->isChecked());
     }
+}
+
+void EditEntryWidget::updateSSHAgentDestinationConstraints()
+{
+    // m_sshAgentUi->destinationConstraintsView->reset();
+    //
+    // foreach (const auto& constraint, m_sshAgentSettings.destinationConstraints()) {
+    //     QString title
+    // }
+    //
+    // for (const QString& fileName : m_attachments->keys()) {
+    //     if (fileName == "KeeAgent.settings") {
+    //         continue;
+    //     }
+    //
+    //     m_sshAgentUi->attachmentComboBox->addItem(fileName);
+    // }
+    //
+    // m_sshAgentUi->attachmentComboBox->setCurrentText(m_sshAgentSettings.attachmentName());
+    // m_sshAgentUi->externalFileEdit->setText(m_sshAgentSettings.fileName());
+    //
+    // if (m_sshAgentSettings.selectedType() == "attachment") {
+    //     m_sshAgentUi->attachmentRadioButton->setChecked(true);
+    // } else {
+    //     m_sshAgentUi->externalFileRadioButton->setChecked(true);
+    // }
+    //
+    // updateSSHAgentKeyInfo();
 }
 
 void EditEntryWidget::toKeeAgentSettings(KeeAgentSettings& settings) const
