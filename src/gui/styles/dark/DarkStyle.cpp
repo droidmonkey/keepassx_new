@@ -113,7 +113,7 @@ QString DarkStyle::getAppStyleSheet() const
 void DarkStyle::polish(QWidget* widget)
 {
     if (qobject_cast<QMainWindow*>(widget) || qobject_cast<QDialog*>(widget) || qobject_cast<QMenuBar*>(widget)
-        || qobject_cast<QToolBar*>(widget) || qobject_cast<QStatusBar*>(widget)) {
+        || qobject_cast<QToolBar*>(widget)) {
         auto palette = widget->palette();
 #if defined(Q_OS_MACOS)
         if (!osUtils->isDarkMode()) {
