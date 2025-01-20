@@ -84,7 +84,7 @@ DatabaseOpenWidget::DatabaseOpenWidget(QWidget* parent)
     okBtn->setText(tr("Unlock"));
     okBtn->setDefault(true);
     connect(m_ui->buttonBox, SIGNAL(accepted()), SLOT(openDatabase()));
-    connect(m_ui->buttonBox, SIGNAL(rejected()), SLOT(reject()));
+    connect(m_ui->buttonBox, SIGNAL(rejected()), SLOT(closeDatabase()));
 
     connect(m_ui->addKeyFileLinkLabel, &QLabel::linkActivated, this, &DatabaseOpenWidget::browseKeyFile);
     connect(m_ui->keyFileLineEdit, &PasswordWidget::textChanged, this, [&](const QString& text) {
@@ -481,6 +481,16 @@ QSharedPointer<CompositeKey> DatabaseOpenWidget::buildDatabaseKey()
 #endif
 
     return databaseKey;
+}
+
+void DatabaseOpenWidget::closeDatabase()
+{
+    if (m_escPressedOnce) {
+        reject();
+    } else {
+        m_escPressedOnce = true;
+        m_ui->messageWidget->showMessage(tr("Press ESC again to close this database."), MessageWidget::Information);
+    }
 }
 
 void DatabaseOpenWidget::reject()

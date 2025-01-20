@@ -74,10 +74,11 @@ protected:
 
 protected slots:
     virtual void openDatabase();
-    void reject();
 
 private slots:
     bool browseKeyFile();
+    void closeDatabase();
+    void reject();
     void toggleHardwareKeyComponent(bool state);
     void pollHardwareKey(bool manualTrigger = false, int delay = 0);
     void hardwareKeyResponse(bool found);
@@ -90,6 +91,7 @@ private:
     bool m_manualHardwareKeyRefresh = false;
     bool m_blockQuickUnlock = false;
     bool m_unlockingDatabase = false;
+    bool m_escPressedOnce = false;
     QTimer m_hideTimer;
     QTimer m_hideNoHardwareKeysFoundTimer;
 
