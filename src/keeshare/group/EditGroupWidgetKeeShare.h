@@ -48,6 +48,7 @@ private slots:
     void selectPassword();
     void launchPathSelectionDialog();
     void selectPath();
+    void recurseIntoGroupsToggled(bool);
 
 private:
     QScopedPointer<Ui::EditGroupWidgetKeeShare> m_ui;

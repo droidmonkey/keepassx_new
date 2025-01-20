@@ -126,6 +126,7 @@ namespace KeeShareSettings
         QUuid uuid;
         QString path;
         QString password;
+        bool recurse;
 
         Reference();
         bool isNull() const;

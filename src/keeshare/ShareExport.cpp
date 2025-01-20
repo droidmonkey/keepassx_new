@@ -62,6 +62,39 @@ namespace
         }
     }
 
+    void cloneIcon(Metadata* targetMetadata, const Database* sourceDb, const QUuid& iconUuid)
+    {
+        if (!iconUuid.isNull() && !targetMetadata->hasCustomIcon(iconUuid)) {
+            targetMetadata->addCustomIcon(iconUuid, sourceDb->metadata()->customIcon(iconUuid));
+        }
+    }
+
+    void cloneEntries(Metadata* targetMetadata, const Group* sourceGroup, Group* targetGroup)
+    {
+        for (const Entry* sourceEntry : sourceGroup->entries()) {
+            auto* targetEntry = sourceEntry->clone(Entry::CloneIncludeHistory);
+            const bool updateTimeinfoEntry = targetEntry->canUpdateTimeinfo();
+            targetEntry->setUpdateTimeinfo(false);
+            targetEntry->setGroup(targetGroup);
+            targetEntry->setUpdateTimeinfo(updateTimeinfoEntry);
+            cloneIcon(targetMetadata, sourceEntry->database(), targetEntry->iconUuid());
+        }
+    }
+
+    void cloneChildren(Metadata* targetMetadata, const Group* sourceRoot, Group* targetRoot)
+    {
+        for (const Group* sourceGroup : sourceRoot->children()) {
+            auto* targetGroup = sourceGroup->clone(Entry::CloneNoFlags, Group::CloneNoFlags);
+            const bool updateTimeinfo = targetGroup->canUpdateTimeinfo();
+            targetGroup->setUpdateTimeinfo(false);
+            targetGroup->setParent(targetRoot);
+            targetGroup->setUpdateTimeinfo(updateTimeinfo);
+            cloneIcon(targetMetadata, sourceRoot->database(), targetGroup->iconUuid());
+            cloneEntries(targetMetadata, sourceGroup, targetGroup);
+            cloneChildren(targetMetadata, sourceGroup, targetGroup);
+        }
+    }
+
     Database* extractIntoDatabase(const KeeShareSettings::Reference& reference, const Group* sourceRoot)
     {
         const auto* sourceDb = sourceRoot->database();
@@ -75,17 +108,10 @@ namespace
         targetRoot->setUpdateTimeinfo(false);
         KeeShare::setReferenceTo(targetRoot, KeeShareSettings::Reference());
         targetRoot->setUpdateTimeinfo(updateTimeinfo);
-        const auto sourceEntries = sourceRoot->entriesRecursive(false);
-        for (const Entry* sourceEntry : sourceEntries) {
-            auto* targetEntry = sourceEntry->clone(Entry::CloneIncludeHistory);
-            const bool updateTimeinfoEntry = targetEntry->canUpdateTimeinfo();
-            targetEntry->setUpdateTimeinfo(false);
-            targetEntry->setGroup(targetRoot);
-            targetEntry->setUpdateTimeinfo(updateTimeinfoEntry);
-            const auto iconUuid = targetEntry->iconUuid();
-            if (!iconUuid.isNull() && !targetMetadata->hasCustomIcon(iconUuid)) {
-                targetMetadata->addCustomIcon(iconUuid, sourceEntry->database()->metadata()->customIcon(iconUuid));
-            }
+        cloneIcon(targetMetadata, sourceRoot->database(), targetRoot->iconUuid());
+        cloneEntries(targetMetadata, sourceRoot, targetRoot);
+        if (reference.recurse) {
+            cloneChildren(targetMetadata, sourceRoot, targetRoot);
         }
 
         auto key = QSharedPointer<CompositeKey>::create();

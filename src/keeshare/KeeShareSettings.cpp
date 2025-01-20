@@ -320,6 +320,9 @@ namespace KeeShareSettings
             writer.writeStartElement("Password");
             writer.writeCharacters(reference.password.toUtf8().toBase64());
             writer.writeEndElement();
+            writer.writeStartElement("Recurse");
+            writer.writeCharacters(reference.recurse ? "True" : "False");
+            writer.writeEndElement();
         });
     }
 
@@ -346,6 +349,8 @@ namespace KeeShareSettings
                     reference.path = QString::fromUtf8(QByteArray::fromBase64(reader.readElementText().toLatin1()));
                 } else if (reader.name() == "Password") {
                     reference.password = QString::fromUtf8(QByteArray::fromBase64(reader.readElementText().toLatin1()));
+                } else if (reader.name() == "Recurse") {
+                    reference.recurse = reader.readElementText().compare("True") == 0;
                 } else {
                     qWarning("Unknown Reference element %s", qPrintable(reader.name().toString()));
                     reader.skipCurrentElement();

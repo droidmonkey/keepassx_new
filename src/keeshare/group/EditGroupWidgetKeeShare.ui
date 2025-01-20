@@ -138,7 +138,7 @@
        </item>
       </layout>
      </item>
-     <item row="3" column="1">
+     <item row="4" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <spacer name="horizontalSpacer">
@@ -171,7 +171,7 @@
        </item>
       </layout>
      </item>
-     <item row="4" column="0">
+     <item row="5" column="0">
       <spacer name="verticalSpacer_2">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -183,6 +183,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item row="3" column="1">
+      <widget class="QCheckBox" name="recurseIntoGroupsCheckbox">
+       <property name="text">
+        <string>Share recursively</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

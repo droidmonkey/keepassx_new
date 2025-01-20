@@ -3559,6 +3559,10 @@ Supported extensions are: %1.</source>
         <source>Select import/export file</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Share recursively</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>EditGroupWidgetMain</name>
