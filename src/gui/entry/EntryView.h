@@ -62,6 +62,7 @@ protected:
     void focusInEvent(QFocusEvent* event) override;
     void showEvent(QShowEvent* event) override;
     void startDrag(Qt::DropActions supportedActions) override;
+    void wheelEvent(QWheelEvent* event) override;
 
 private slots:
     void emitEntryActivated(const QModelIndex& index);

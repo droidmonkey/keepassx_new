@@ -26,6 +26,7 @@
 #include <QMenu>
 #include <QPainter>
 #include <QScreen>
+#include <QScrollBar>
 #include <QShortcut>
 #include <QStyledItemDelegate>
 #include <QWindow>
@@ -594,4 +595,13 @@ void EntryView::startDrag(Qt::DropActions supportedActions)
 bool EntryView::isColumnHidden(int logicalIndex)
 {
     return header()->isSectionHidden(logicalIndex) || header()->sectionSize(logicalIndex) == 0;
+}
+
+void EntryView::wheelEvent(QWheelEvent* event)
+{
+    if (event->modifiers() & Qt::ShiftModifier) {
+        horizontalScrollBar()->event(event);
+    } else {
+        QAbstractScrollArea::wheelEvent(event);
+    }
 }
