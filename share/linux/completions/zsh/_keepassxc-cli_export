@@ -1,0 +1,13 @@
+#compdef keepassxc-cli export
+
+_message -r "Usage: keepassxc-cli export [options] database"
+_message -r "Exports the content of a database to standard output in the specified format."
+
+_arguments -s \
+  '(-q --quiet)'{-q,--quiet}'[Silence password prompt and other secondary outputs.]' \
+  '(-k --key-file)'{-k,--key-file}'[Key file of the database.]:path:_files' \
+  '--no-password[Deactivate password key for the database.]' \
+  '(-y --yubikey)'{-y,--yubikey}'[Yubikey slot and optional serial used to access the database (e.g., 1:7370001)]:slot[:serial]' \
+  '(-f --format)'{-f,--format}'[Format to use when exporting. Choices are xml or csv (defaults to xml)]:format:(xml csv)' \
+  '(-h --help)'{-h,--help}'[Display help information.]' \
+  '1:db:_files'

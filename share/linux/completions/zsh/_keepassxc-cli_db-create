@@ -1,0 +1,13 @@
+#compdef keepassxc-cli db-create
+
+_message -r "Usage: keepassxc-cli db-create [options] database"
+_message -r "Create a new database."
+
+_arguments -s \
+  '(-q --quiet)'{-q,--quiet}'[Silence password prompt and other secondary outputs.]' \
+  '--set-key-file[Set the key file for the database.]:path:_files' \
+  '-k[Set the key file for the database (deprecated, use --set-key-file instead).]:path:_files' \
+  '(-p --set-password)'{-p,--set-password}'[Set a password for the database.]' \
+  '(-t --decryption-time)'{-t,--decryption-time}'[Target decryption time in milliseconds for the database.]:time' \
+  '(-h --help)'{-h,--help}'[Display help information.]' \
+  '1:db:_files'

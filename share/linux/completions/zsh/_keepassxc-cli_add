@@ -1,0 +1,28 @@
+#compdef keepassxc-cli add
+
+_message -r "Usage: keepassxc-cli add [options] database entry"
+_message -r "Add a new entry to a database."
+
+_arguments -s \
+  '(-q --quiet)'{-q,--quiet}'[Silence password prompt and other secondary outputs.]' \
+  '(-k --key-file)'{-k,--key-file}'[Key file of the database.]:path:_files' \
+  '--no-password[Deactivate password key for the database.]' \
+  '(-y --yubikey)'{-y,--yubikey}'[Yubikey slot and optional serial used to access the database (e.g., 1:7370001)]:slot[:serial]' \
+  '(-u --username)'{-u,--username}'[Username for the entry.]:username' \
+  '--url[URL for the entry.]:URL' \
+  '--notes[Notes for the entry.]:Notes' \
+  '(-p --password-prompt)'{-p,--password-prompt}'[Prompt for the entry’s password.]' \
+  '(-g --generate)'{-g,--generate}'[Generate a password for the entry.]' \
+  '(-L --length)'{-L,--length}'[Length of the generated password.]:length' \
+  '(-l --lower)'{-l,--lower}'[Use lowercase characters in the generated password.]' \
+  '(-U --upper)'{-U,--upper}'[Use uppercase characters in the generated password.]' \
+  '(-n --numeric)'{-n,--numeric}'[Use numbers in the generated password.]' \
+  '(-s --special)'{-s,--special}'[Use special characters in the generated password.]' \
+  '(-e --extended)'{-e,--extended}'[Use extended ASCII characters in the generated password.]' \
+  '(-x --exclude)'{-x,--exclude}'[Exclude specific characters from the password.]:chars' \
+  '--exclude-similar[Exclude similar-looking characters from the password.]' \
+  '--every-group[Include characters from every selected group in the password.]' \
+  '(-c --custom)'{-c,--custom}'[Use a custom character set for the password.]:chars' \
+  '(-h --help)'{-h,--help}'[Display help information.]' \
+  '1:db:_files' \
+  '2:entry'

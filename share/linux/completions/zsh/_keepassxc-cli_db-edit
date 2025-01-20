@@ -1,0 +1,16 @@
+#compdef keepassxc-cli db-edit
+
+_message -r "Usage: keepassxc-cli db-edit [options] database"
+_message -r "Edit a database."
+
+_arguments -s \
+  '(-q --quiet)'{-q,--quiet}'[Silence password prompt and other secondary outputs.]' \
+  '(-k --key-file)'{-k,--key-file}'[Key file of the database.]:path:_files' \
+  '--no-password[Deactivate password key for the database.]' \
+  '(-y --yubikey)'{-y,--yubikey}'[Yubikey slot and optional serial used to access the database (e.g., 1:7370001)]:slot[:serial]' \
+  '--set-key-file[Set the key file for the database.]:path:_files' \
+  '(-p --set-password)'{-p,--set-password}'[Set a password for the database.]' \
+  '--unset-key-file[Unset the key file for the database.]' \
+  '--unset-password[Unset the password for the database.]' \
+  '(-h --help)'{-h,--help}'[Display help information.]' \
+  '1:db:_files'

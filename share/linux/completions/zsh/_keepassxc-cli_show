@@ -1,0 +1,18 @@
+#compdef keepassxc-cli show
+
+_message -r "Usage: keepassxc-cli show [options] database entry"
+_message -r "Show an entry's information."
+
+_arguments -s \
+  '(-q --quiet)'{-q,--quiet}'[Silence password prompt and other secondary outputs.]' \
+  '(-k --key-file)'{-k,--key-file}'[Key file of the database.]:path:_files' \
+  '--no-password[Deactivate password key for the database.]' \
+  '(-y --yubikey)'{-y,--yubikey}'[Yubikey slot and optional serial used to access the database (e.g., 1:7370001)]:slot[:serial]' \
+  '(-t --totp)'{-t,--totp}'[Show the entry’s current TOTP.]' \
+  '(-a --attributes)'{-a,--attributes}'[Specify an attribute to show. This option can be specified multiple times.]:attribute' \
+  '(-s --show-protected)'{-s,--show-protected}'[Show protected attributes in clear text.]' \
+  '--all[Show all attributes of the entry.]' \
+  '--show-attachments[Show attachments of the entry.]' \
+  '(-h --help)'{-h,--help}'[Display help information.]' \
+  '1:database path:_files' \
+  '2:entry name'

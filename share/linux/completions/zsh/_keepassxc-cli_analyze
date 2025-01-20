@@ -1,0 +1,14 @@
+#compdef keepassxc-cli analyze
+
+_message -r "Usage: keepassxc-cli analyze [options] database"
+_message -r "Analyze passwords for weaknesses and problems."
+
+_arguments -s \
+  '(-q --quiet)'{-q,--quiet}'[Silence password prompt and other secondary outputs.]' \
+  '(-k --keyfile)'{-k,--key-file}'[Key file of the database.]:path:_files' \
+  '--no-password[Deactivate password key for the database.]' \
+  '(-y --yubikey)'{-y,--yubikey}'[Yubikey slot and optional serial used to access the database (e.g., 1:7370001)]:slot[:serial]' \
+  '(-H --hibp)'{-H,--hibp}'[Check if any passwords have been publicly leaked using a file of SHA-1 hashes in HIBP format.]:FILENAME:_files' \
+  '--okon[Path to okon-cli to search a formatted HIBP file]:okon-cli:_files' \
+  '(-h --help)'{-h,--help}'[Display help information.]' \
+  '1:db:_files'

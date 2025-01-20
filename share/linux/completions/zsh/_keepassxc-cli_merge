@@ -1,0 +1,18 @@
+#compdef keepassxc-cli merge
+
+_message -r "Usage: keepassxc-cli merge [options] database database2"
+_message -r "Merge two databases."
+
+_arguments -s \
+  '(-q --quiet)'{-q,--quiet}'[Silence password prompt and other secondary outputs.]' \
+  '(-k --key-file)'{-k,--key-file}'[Key file of the database.]:path:_files' \
+  '--no-password[Deactivate password key for the database.]' \
+  '(-y --yubikey)'{-y,--yubikey}'[Yubikey slot and optional serial used to access the database (e.g., 1:7370001)]:slot[:serial]' \
+  '(-s --same-credentials)'{-s,--same-credentials}'[Use the same credentials for both database files.]' \
+  '--key-file-from[Key file of the database to merge from.]:path:_files' \
+  '--no-password-from[Deactivate password key for the database to merge from.]' \
+  '--dry-run[Only print the changes detected by the merge operation.]' \
+  '--yubikey-from[Yubikey slot for the second database.]:slot' \
+  '(-h --help)'{-h,--help}'[Display help information.]' \
+  '1:db1:_files' \
+  '2:db2:_files'
