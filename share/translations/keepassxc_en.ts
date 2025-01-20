@@ -1485,6 +1485,10 @@ Backup database located at %2</source>
         <source>Recycle Bin</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Database file read error.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DatabaseOpenDialog</name>
@@ -2656,24 +2660,6 @@ Save changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The database file has changed. Do you want to load the changes?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Merge Request</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The database file has changed and you have unsaved changes.
-Do you want to merge your changes?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not open the new database file while attempting to autoreload.
-Error: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Disable safe saves?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2757,6 +2743,78 @@ Disable safe saves and try again?</source>
     </message>
     <message>
         <source>Do you want to remove the passkey from this entry?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The database file &quot;%1&quot; was modified externally</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Do you want to load the changes?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reloading database...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reload aborted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reload OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reload database</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>How to proceed with your unsaved changes?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Merge all changes together</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Discard your changes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ignore the changes in the file on disk</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>merged</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>discarded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Changes are %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error: failed to open the database file for reload</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unlock to reload</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot save because the</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>database file &quot;%1&quot; was modified externally</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -192,9 +192,32 @@ void DatabaseOpenDialog::clearForms()
     m_tabBar->blockSignals(false);
 }
 
+void DatabaseOpenDialog::showMessage(const QString& text, MessageWidget::MessageType type, int autoHideTimeout)
+{
+    m_view->showMessage(text, type, autoHideTimeout);
+}
+
 QSharedPointer<Database> DatabaseOpenDialog::database() const
 {
     return m_db;
+}
+
+void DatabaseOpenDialog::done(int result)
+{
+    hide();
+
+    emit dialogFinished(result == QDialog::Accepted, m_currentDbWidget);
+    clearForms();
+
+    QDialog::done(result);
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 3, 0)
+    // CDialogs are not really closed, just hidden, pre Qt 6.3?
+    if (testAttribute(Qt::WA_DeleteOnClose)) {
+        setAttribute(Qt::WA_DeleteOnClose, false);
+        deleteLater();
+    }
+#endif
 }
 
 void DatabaseOpenDialog::complete(bool accepted)
@@ -210,9 +233,6 @@ void DatabaseOpenDialog::complete(bool accepted)
     } else {
         reject();
     }
-
-    emit dialogFinished(accepted, m_currentDbWidget);
-    clearForms();
 }
 
 void DatabaseOpenDialog::closeEvent(QCloseEvent* e)

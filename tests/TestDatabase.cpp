@@ -164,7 +164,7 @@ void TestDatabase::testSignals()
     // Short delay to allow file system settling to reduce test failures
     Tools::wait(100);
 
-    QSignalSpy spyFileChanged(db.data(), SIGNAL(databaseFileChanged()));
+    QSignalSpy spyFileChanged(db.data(), &Database::databaseFileChanged);
     QVERIFY(tempFile.copyFromFile(dbFileName));
     QTRY_COMPARE(spyFileChanged.count(), 1);
     QTRY_VERIFY(!db->isModified());
@@ -267,4 +267,42 @@ void TestDatabase::testCustomIcons()
     QCOMPARE(iconData.data, icon2);
     QCOMPARE(iconData.name, QString("Test"));
     QCOMPARE(iconData.lastModified, date);
+}
+
+void TestDatabase::testExternallyModified()
+{
+    TemporaryFile tempFile;
+    QVERIFY(tempFile.copyFromFile(dbFileName));
+
+    auto db = QSharedPointer<Database>::create();
+    auto key = QSharedPointer<CompositeKey>::create();
+    key->addKey(QSharedPointer<PasswordKey>::create("a"));
+
+    QString error;
+    QVERIFY(db->open(tempFile.fileName(), key, &error) == true);
+    db->metadata()->setName("test2");
+    QVERIFY(db->save(Database::Atomic, {}, &error));
+
+    QSignalSpy spyFileChanged(db.data(), &Database::databaseFileChanged);
+    QVERIFY(tempFile.copyFromFile(dbFileName));
+    QTRY_COMPARE(spyFileChanged.count(), 1);
+    // the first argument of the databaseFileChanged signal (triggeredBySave) should be false
+    QVERIFY(spyFileChanged.at(0).length() == 1);
+    QVERIFY(spyFileChanged.at(0).at(0).type() == QVariant::Bool);
+    QVERIFY(spyFileChanged.at(0).at(0).toBool() == false);
+    spyFileChanged.clear();
+    // shouldn't be able to save due to external changes
+    QVERIFY(db->save(Database::Atomic, {}, &error) == false);
+    QApplication::processEvents();
+    // save should have triggered another databaseFileChanged signal
+    QVERIFY(spyFileChanged.count() >= 1);
+    // the first argument of the databaseFileChanged signal (triggeredBySave) should be true
+    QVERIFY(spyFileChanged.at(0).at(0).type() == QVariant::Bool);
+    QVERIFY(spyFileChanged.at(0).at(0).toBool() == true);
+
+    // should be able to overwrite externally modified changes when explicitly requested
+    db->setIgnoreFileChangesUntilSaved(true);
+    QVERIFY(db->save(Database::Atomic, {}, &error));
+    // ignoreFileChangesUntilSaved should reset after save
+    QVERIFY(db->ignoreFileChangesUntilSaved() == false);
 }

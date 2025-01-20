@@ -170,6 +170,8 @@ signals:
     void clearSearch();
     void requestGlobalAutoType(const QString& search);
     void requestSearch(const QString& search);
+    void reloadBegin();
+    void reloadEnd();
 
 public slots:
     bool lock();
@@ -287,7 +289,7 @@ private slots:
     void finishSync(const RemoteParams* params, RemoteHandler::RemoteResult result);
     void emitCurrentModeChanged();
     // Database autoreload slots
-    void reloadDatabaseFile();
+    void reloadDatabaseFile(bool triggeredBySave);
     void restoreGroupEntryFocus(const QUuid& groupUuid, const QUuid& EntryUuid);
     void onConfigChanged(Config::ConfigKey key);
 
@@ -338,6 +340,7 @@ private:
 
     // Autoreload
     bool m_blockAutoSave;
+    bool m_reloading;
 
     // Autosave delay
     QPointer<QTimer> m_autosaveTimer;

@@ -25,6 +25,7 @@
 
 #include "config-keepassx.h"
 #include "gui/DialogyWidget.h"
+#include "gui/MessageWidget.h"
 #ifdef WITH_XC_YUBIKEY
 #include "osutils/DeviceListener.h"
 #endif
@@ -51,6 +52,7 @@ public:
     void enterKey(const QString& pw, const QString& keyFile);
     QSharedPointer<Database> database();
     bool unlockingDatabase();
+    void showMessage(const QString& text, MessageWidget::MessageType type, int autoHideTimeout);
 
     // Quick Unlock helper functions
     bool canPerformQuickUnlock() const;

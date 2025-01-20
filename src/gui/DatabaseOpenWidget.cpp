@@ -220,6 +220,11 @@ bool DatabaseOpenWidget::unlockingDatabase()
     return m_unlockingDatabase;
 }
 
+void DatabaseOpenWidget::showMessage(const QString& text, MessageWidget::MessageType type, int autoHideTimeout)
+{
+    m_ui->messageWidget->showMessage(text, type, autoHideTimeout);
+}
+
 void DatabaseOpenWidget::load(const QString& filename)
 {
     clearForms();
