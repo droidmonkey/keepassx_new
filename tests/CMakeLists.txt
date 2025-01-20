@@ -168,7 +168,7 @@ if(WITH_XC_SSHAGENT)
 endif()
 
 add_unit_test(NAME testentry SOURCES TestEntry.cpp
-        LIBS ${TEST_LIBRARIES})
+        LIBS testsupport ${TEST_LIBRARIES})
 
 add_unit_test(NAME testmerge SOURCES TestMerge.cpp
         LIBS testsupport ${TEST_LIBRARIES})

@@ -243,6 +243,30 @@ const QSharedPointer<PasswordHealth> Entry::passwordHealth() const
     return m_data.passwordHealth;
 }
 
+int Entry::passwordAgeSeconds() const
+{
+    QListIterator<Entry*> i(m_history);
+    i.toBack();
+    const Entry* curr = nullptr;
+    const Entry* previous = this;
+
+    while (i.hasPrevious()) {
+        curr = previous;
+        previous = i.previous();
+        if (previous->password() != curr->password()) {
+            // Found last change in history
+            return curr->timeInfo().lastModificationTime().secsTo(Clock::currentDateTime());
+        }
+    }
+    if (previous != this) {
+        // If no change in history, password is from oldest history entry.
+        // Not using creation time here because that changes when an entry is cloned
+        return previous->timeInfo().lastModificationTime().secsTo(Clock::currentDateTime());
+    }
+    // If no history, creation time is when the password appeared
+    return this->timeInfo().creationTime().secsTo(Clock::currentDateTime());
+}
+
 bool Entry::excludeFromReports() const
 {
     return m_data.excludeFromReports
