@@ -201,6 +201,9 @@ void TestEntryModel::testAttributesModel()
 
     // make sure these don't generate messages
     entryAttributes->set("Title", "test");
+    entryAttributes->set("UserName", "test");
+    entryAttributes->set("Password", "test");
+    entryAttributes->set("URL", "test");
     entryAttributes->set("Notes", "test");
 
     QCOMPARE(spyDataChanged.count(), 1);
@@ -214,6 +217,16 @@ void TestEntryModel::testAttributesModel()
     entryAttributes->set("2nd", value, true);
     QVERIFY(entryAttributes->isProtected("2nd"));
     QCOMPARE(entryAttributes->value("2nd"), value);
+    entryAttributes->clear();
+
+    // test attribute sorting
+    entryAttributes->set("Test1", "1");
+    entryAttributes->set("Test11", "11");
+    entryAttributes->set("Test2", "2");
+    QCOMPARE(model->rowCount(), 3);
+    QCOMPARE(model->data(model->index(0, 0)).toString(), QString("Test1"));
+    QCOMPARE(model->data(model->index(1, 0)).toString(), QString("Test2"));
+    QCOMPARE(model->data(model->index(2, 0)).toString(), QString("Test11"));
 
     QSignalSpy spyReset(model, SIGNAL(modelReset()));
     entryAttributes->clear();

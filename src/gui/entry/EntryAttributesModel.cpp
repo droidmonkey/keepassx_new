@@ -19,6 +19,18 @@
 
 #include "core/EntryAttributes.h"
 
+#include <QCollator>
+
+namespace
+{
+    void sortLocaleAware(QList<QString>& strings)
+    {
+        QCollator collator;
+        collator.setNumericMode(true);
+        std::sort(strings.begin(), strings.end(), collator);
+    }
+} // namespace
+
 EntryAttributesModel::EntryAttributesModel(QObject* parent)
     : QAbstractListModel(parent)
     , m_entryAttributes(nullptr)
@@ -150,7 +162,7 @@ void EntryAttributesModel::attributeAboutToAdd(const QString& key)
 {
     QList<QString> rows = m_attributes;
     rows.append(key);
-    std::sort(rows.begin(), rows.end());
+    sortLocaleAware(rows);
     int row = rows.indexOf(key);
     beginInsertRows(QModelIndex(), row, row);
 }
@@ -180,7 +192,7 @@ void EntryAttributesModel::attributeAboutToRename(const QString& oldKey, const Q
     QList<QString> rows = m_attributes;
     rows.removeOne(oldKey);
     rows.append(newKey);
-    std::sort(rows.begin(), rows.end());
+    sortLocaleAware(rows);
     int newRow = rows.indexOf(newKey);
     if (newRow > oldRow) {
         newRow++;
@@ -232,4 +244,5 @@ void EntryAttributesModel::updateAttributes()
             m_attributes.append(key);
         }
     }
+    sortLocaleAware(m_attributes);
 }
