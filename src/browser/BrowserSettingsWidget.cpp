@@ -178,7 +178,7 @@ void BrowserSettingsWidget::loadSettings()
 QString BrowserSettingsWidget::resolveCustomProxyLocation()
 {
     auto settings = browserSettings();
-    auto proxyLocation = m_ui->customProxyLocation->text();
+    auto proxyLocation = m_ui->customProxyLocation->text().trimmed();
     proxyLocation = settings->replaceTildeHomePath(proxyLocation);
     return proxyLocation;
 }

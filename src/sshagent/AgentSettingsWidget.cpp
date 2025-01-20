@@ -90,9 +90,9 @@ void AgentSettingsWidget::loadSettings()
 
 void AgentSettingsWidget::saveSettings()
 {
-    auto sshAuthSockOverride = m_ui->sshAuthSockOverrideEdit->text();
+    auto sshAuthSockOverride = m_ui->sshAuthSockOverrideEdit->text().trimmed();
     sshAgent()->setAuthSockOverride(sshAuthSockOverride);
-    auto sshSecurityKeyProviderOverride = m_ui->sshSecurityKeyProviderOverrideEdit->text();
+    auto sshSecurityKeyProviderOverride = m_ui->sshSecurityKeyProviderOverrideEdit->text().trimmed();
     sshAgent()->setSecurityKeyProviderOverride(sshSecurityKeyProviderOverride);
 #ifdef Q_OS_WIN
     sshAgent()->setUsePageant(m_ui->usePageantRadioButton->isChecked() || m_ui->useBothRadioButton->isChecked());
