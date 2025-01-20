@@ -292,21 +292,34 @@ image::edit_entry_history.png[]
 
 NOTE: Restoring an old history item will store the current entry settings as a new history item.
 
-== Automatic Database Opening
-You can setup one or more databases to open automatically when you unlock a single database. This is done by *(1)* defining a special group named `AutoOpen` with *(2)* entries that contain the file path and credentials for each database that should be opened. There is no limit to the number of databases that can be opened.
+== Automatic Opening
+You can setup either databases to open or commands to execute automatically when you unlock a single database. This is done by *(1)* defining a special group named `AutoOpen` with *(2)* entries that contain the file path and credentials for each database that should be opened or a command in the URL field starting with `cmd://`. There is no limit to the number of entries that trigger databases or commands.
 
 TIP: Case matters with auto open, the group name must be exactly `AutoOpen` and it must be a child of the root group.
 
-.AutoOpen Group and Entries
+.AutoOpen Database Group and Entries
 image::autoopen.png[]
 
-To setup an entry for auto open perform the following steps:
+To setup an entry for auto opening of a database perform the following steps:
 
 1. Create a new entry and give it any title you wish.
 2. If your database has a key file, enter its absolute or relative path in the `username` field.
 3. If your database has a password, enter it in the `password` field
 4. Enter the absolute or relative path to the database file in the `url` field. You can also use the `{DB_DIR}` placeholder to reference the absolute path of the current database file.
-5. To restrict auto open to particular devices, go to the advanced category and enter the following:
+
+NOTE: You can setup an entry to open on double click of the URL field by prepending `kdbx://` to the relative or absolute path to the database file. You may also have to add `file://` to access network shares (e.g., `kdbx://file://share/database.kdbx`).
+
+.AutoOpen Command Group and Entries
+image::autoopen_cmd.png[]
+
+To setup a command that should be executed on opening a database performe the following steps:
+
+1. Create a new entry and give it any title you wish.
+2. Enter the command you would like to run prepending `cmd://`
+
+NOTE: The command will be executed as if you double clicked the URL field. You may be prompted if you want to execute the command.
+
+To restrict auto open (both databases and commands) to particular devices, go to the advanced category and enter the following:
   a. Create a new attribute named `IfDevice`.
   b. Enter hostnames in a comma separated list to define computers that will open this database.
   c. Prepend an exclamation mark (`!`) to explicitly exclude a device.
@@ -314,8 +327,6 @@ To setup an entry for auto open perform the following steps:
 
 .Auto open IfDevice example
 image::autoopen_ifdevice.png[]
-
-NOTE: You can setup an entry to open on double click of the URL field by prepending `kdbx://` to the relative or absolute path to the database file. You may also have to add `file://` to access network shares (e.g., `kdbx://file://share/database.kdbx`).
 
 == Database Settings
 At any point of time, you can change the settings for your database. To make changes to the general settings, perform the following steps:
