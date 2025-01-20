@@ -2190,6 +2190,15 @@ bool MainWindowEventFilter::eventFilter(QObject* watched, QEvent* event)
 #endif
     } else if (eventType == QEvent::KeyRelease && watched == mainWindow) {
         auto keyEvent = dynamic_cast<QKeyEvent*>(event);
+#ifdef Q_OS_WIN
+        // Windows translates AltGr into CTRL + ALT, this breaks using AltGr when the menubar is hidden
+        // Prevent this by activating the ALT cooldown to ignore the next key event which will be an ALT key
+        if (keyEvent->key() == Qt::Key_Control && keyEvent->modifiers() == Qt::AltModifier
+            && config()->get(Config::GUI_HideMenubar).toBool()) {
+            m_altCoolDown.start();
+            return false;
+        }
+#endif
         if (keyEvent->key() == Qt::Key_Alt && !keyEvent->modifiers() && config()->get(Config::GUI_HideMenubar).toBool()
             && !m_altCoolDown.isActive()) {
             auto menubar = mainWindow->m_ui->menubar;
