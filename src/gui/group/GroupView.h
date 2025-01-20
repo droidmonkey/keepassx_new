@@ -51,10 +51,12 @@ private slots:
 
 protected:
     void dragMoveEvent(QDragMoveEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
     void focusInEvent(QFocusEvent* event) override;
 
 private:
     void recInitExpanded(Group* group);
+    void fixDropAction(QDropEvent* event);
 
     GroupModel* const m_model;
     bool m_updatingExpanded;

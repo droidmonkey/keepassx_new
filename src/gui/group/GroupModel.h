@@ -29,6 +29,10 @@ class GroupModel : public QAbstractItemModel
 
 public:
     explicit GroupModel(Database* db, QObject* parent = nullptr);
+    const Database* database() const
+    {
+        return m_db;
+    }
     void changeDatabase(Database* newDb);
     QModelIndex index(Group* group) const;
     Group* groupFromIndex(const QModelIndex& index) const;

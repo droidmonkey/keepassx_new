@@ -98,19 +98,27 @@ void GroupView::changeDatabase(const QSharedPointer<Database>& newDb)
 
 void GroupView::dragMoveEvent(QDragMoveEvent* event)
 {
-    if (event->keyboardModifiers() & Qt::ControlModifier) {
-        event->setDropAction(Qt::CopyAction);
-    } else {
-        event->setDropAction(Qt::MoveAction);
-    }
-
     QTreeView::dragMoveEvent(event);
 
-    // entries may only be dropped on groups
-    if (event->isAccepted() && event->mimeData()->hasFormat("application/x-keepassx-entry")
-        && (dropIndicatorPosition() == AboveItem || dropIndicatorPosition() == BelowItem)) {
-        event->ignore();
+    if (event->isAccepted()) {
+        // we need to fix the drop action to have the correct cursor icon
+        fixDropAction(event);
+        if (event->dropAction() != event->proposedAction()) {
+            event->accept();
+        }
+
+        // entries may only be dropped on groups
+        if (event->mimeData()->hasFormat("application/x-keepassx-entry")
+            && (dropIndicatorPosition() == AboveItem || dropIndicatorPosition() == BelowItem)) {
+            event->ignore();
+        }
     }
+}
+
+void GroupView::dropEvent(QDropEvent* event)
+{
+    fixDropAction(event);
+    QTreeView::dropEvent(event);
 }
 
 void GroupView::focusInEvent(QFocusEvent* event)
@@ -148,6 +156,39 @@ void GroupView::recInitExpanded(Group* group)
     const QList<Group*> children = group->children();
     for (Group* child : children) {
         recInitExpanded(child);
+    }
+}
+
+void GroupView::fixDropAction(QDropEvent* event)
+{
+    if (event->keyboardModifiers().testFlag(Qt::ControlModifier) && event->possibleActions().testFlag(Qt::CopyAction)) {
+        event->setDropAction(Qt::CopyAction);
+    } else if (event->keyboardModifiers().testFlag(Qt::ShiftModifier)
+               && event->possibleActions().testFlag(Qt::MoveAction)) {
+        event->setDropAction(Qt::MoveAction);
+    } else {
+        static const QString groupMimeDataType = "application/x-keepassx-group";
+        static const QString entryMimeDataType = "application/x-keepassx-entry";
+
+        bool isGroup = event->mimeData()->hasFormat(groupMimeDataType);
+        bool isEntry = event->mimeData()->hasFormat(entryMimeDataType);
+
+        if (isGroup || isEntry) {
+            QByteArray encoded = event->mimeData()->data(isGroup ? groupMimeDataType : entryMimeDataType);
+            QDataStream stream(&encoded, QIODevice::ReadOnly);
+
+            QUuid dbUuid;
+            QUuid itemUuid;
+            stream >> dbUuid >> itemUuid;
+
+            if (dbUuid != m_model->database()->uuid()) {
+                if (event->possibleActions().testFlag(Qt::CopyAction)) {
+                    event->setDropAction(Qt::CopyAction);
+                } else if (event->possibleActions().testFlag(Qt::MoveAction)) {
+                    event->setDropAction(Qt::MoveAction);
+                }
+            }
+        }
     }
 }
 
