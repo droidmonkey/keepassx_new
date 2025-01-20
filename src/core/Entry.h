@@ -180,13 +180,18 @@ public:
     {
         CloneNoFlags = 0,
         CloneNewUuid = 1, // generate a random uuid for the clone
-        CloneResetTimeInfo = 2, // set all TimeInfo attributes to the current time
-        CloneIncludeHistory = 4, // clone the history items
+        CloneResetCreationTime = 2, // set timeInfo.CreationTime to the current time
+        CloneResetLastAccessTime = 4, // set timeInfo.LastAccessTime to the current time
+        CloneResetLocationChangedTime = 8, // set timeInfo.LocationChangedTime to the current time
+        CloneIncludeHistory = 16, // clone the history items
+        CloneRenameTitle = 32, // add "-Clone" after the original title
+        CloneUserAsRef = 64, // Add the user as a reference to the original entry
+        ClonePassAsRef = 128, // Add the password as a reference to the original entry
+
+        CloneResetTimeInfo = CloneResetCreationTime | CloneResetLastAccessTime | CloneResetLocationChangedTime,
+        CloneExactCopy = CloneIncludeHistory,
+        CloneCopy = CloneExactCopy | CloneNewUuid | CloneResetTimeInfo,
         CloneDefault = CloneNewUuid | CloneResetTimeInfo,
-        CloneCopy = CloneNewUuid | CloneResetTimeInfo | CloneIncludeHistory,
-        CloneRenameTitle = 8, // add "-Clone" after the original title
-        CloneUserAsRef = 16, // Add the user as a reference to the original entry
-        ClonePassAsRef = 32, // Add the password as a reference to the original entry
     };
     Q_DECLARE_FLAGS(CloneFlags, CloneFlag)
 

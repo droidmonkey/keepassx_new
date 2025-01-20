@@ -47,10 +47,16 @@ public:
     {
         CloneNoFlags = 0,
         CloneNewUuid = 1, // generate a random uuid for the clone
-        CloneResetTimeInfo = 2, // set all TimeInfo attributes to the current time
-        CloneIncludeEntries = 4, // clone the group entries
-        CloneDefault = CloneNewUuid | CloneResetTimeInfo | CloneIncludeEntries,
-        CloneRenameTitle = 8, // add "- Clone" after the original title
+        CloneResetCreationTime = 2, // set timeInfo.CreationTime to the current time
+        CloneResetLastAccessTime = 4, // set timeInfo.LastAccessTime to the current time
+        CloneResetLocationChangedTime = 8, // set timeInfo.LocationChangedTime to the current time
+        CloneIncludeEntries = 16, // clone the group entries
+        CloneRenameTitle = 32, // add "- Clone" after the original title
+
+        CloneResetTimeInfo = CloneResetCreationTime | CloneResetLastAccessTime | CloneResetLocationChangedTime,
+        CloneExactCopy = CloneIncludeEntries,
+        CloneCopy = CloneExactCopy | CloneNewUuid | CloneResetTimeInfo,
+        CloneDefault = CloneCopy,
     };
     Q_DECLARE_FLAGS(CloneFlags, CloneFlag)
 
@@ -204,8 +210,9 @@ private slots:
     void updateTimeinfo();
 
 private:
-    template <class P, class V> bool set(P& property, const V& value);
+    template <class P, class V> bool set(P& property, const V& value, bool preserveTimeinfo = false);
 
+    void emitModifiedEx(bool preserveTimeinfo);
     void setParent(Database* db);
 
     void connectDatabaseSignalsRecursive(Database* db);

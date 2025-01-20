@@ -258,14 +258,16 @@ bool GroupModel::dropMimeData(const QMimeData* data,
         Group* group = dragGroup;
 
         if (sourceDb != targetDb) {
-            QSet<QUuid> customIcons = group->customIconsRecursive();
-            targetDb->metadata()->copyCustomIcons(customIcons, sourceDb->metadata());
+            targetDb->metadata()->copyCustomIcons(group->customIconsRecursive(), sourceDb->metadata());
 
-            // Always clone the group across db's to reset UUIDs
-            group = dragGroup->clone(Entry::CloneDefault | Entry::CloneIncludeHistory);
             if (action == Qt::MoveAction) {
-                // Remove the original group from the sourceDb
+                // For cross-db moves use a clone with new UUID but original CreationTime
+                group = dragGroup->clone(Entry::CloneFlags(Entry::CloneCopy & ~Entry::CloneResetCreationTime),
+                                         Group::CloneFlags(Group::CloneCopy & ~Group::CloneResetCreationTime));
+                // Remove the original from the sourceDb to allow this change to sync to other dbs
                 delete dragGroup;
+            } else {
+                group = dragGroup->clone(Entry::CloneCopy);
             }
         } else if (action == Qt::CopyAction) {
             group = dragGroup->clone(Entry::CloneCopy);
@@ -298,15 +300,16 @@ bool GroupModel::dropMimeData(const QMimeData* data,
             Entry* entry = dragEntry;
 
             if (sourceDb != targetDb) {
-                QUuid customIcon = entry->iconUuid();
-                if (!customIcon.isNull() && !targetDb->metadata()->hasCustomIcon(customIcon)) {
-                    targetDb->metadata()->addCustomIcon(customIcon, sourceDb->metadata()->customIcon(customIcon).data);
-                }
+                targetDb->metadata()->copyCustomIcon(entry->iconUuid(), sourceDb->metadata());
 
                 // Reset the UUID when moving across db boundary
-                entry = dragEntry->clone(Entry::CloneDefault | Entry::CloneIncludeHistory);
                 if (action == Qt::MoveAction) {
+                    // For cross-db moves use a clone with new UUID but original CreationTime
+                    entry = dragEntry->clone(Entry::CloneFlags(Entry::CloneCopy & ~Entry::CloneResetCreationTime));
+                    // Remove the original from the sourceDb to allow this change to sync to other dbs
                     delete dragEntry;
+                } else {
+                    entry = dragEntry->clone(Entry::CloneCopy);
                 }
             } else if (action == Qt::CopyAction) {
                 entry = dragEntry->clone(Entry::CloneCopy);
