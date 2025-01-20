@@ -44,6 +44,8 @@ public:
     bool isUrlValid(const QString& urlField) const;
     bool domainHasIllegalCharacters(const QString& domain) const;
 
+    static const QString URL_WILDCARD;
+
 private:
     QUrl convertVariantToUrl(const QVariant& var) const;
 

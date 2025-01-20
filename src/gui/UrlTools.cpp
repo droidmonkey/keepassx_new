@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2023 KeePassXC Team <team@keepassxc.org>
+ *  Copyright (C) 2024 KeePassXC Team <team@keepassxc.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #endif
 #include <QRegularExpression>
 #include <QUrl>
+
+const QString UrlTools::URL_WILDCARD = "1kpxcwc1";
 
 Q_GLOBAL_STATIC(UrlTools, s_urlTools)
 
@@ -137,8 +139,9 @@ bool UrlTools::isUrlIdentical(const QString& first, const QString& second) const
         return false;
     }
 
-    const auto firstUrl = trimUrl(first);
-    const auto secondUrl = trimUrl(second);
+    // Replace URL wildcards for comparison if found
+    const auto firstUrl = trimUrl(QString(first).replace("*", UrlTools::URL_WILDCARD));
+    const auto secondUrl = trimUrl(QString(second).replace("*", UrlTools::URL_WILDCARD));
     if (firstUrl == secondUrl) {
         return true;
     }
