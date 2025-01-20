@@ -92,6 +92,7 @@ DatabaseWidget::DatabaseWidget(QSharedPointer<Database> db, QWidget* parent)
     , m_tagView(new TagView(this))
     , m_saveAttempts(0)
     , m_remoteSettings(new RemoteSettings(m_db, this))
+    , m_remoteHandler(nullptr)
     , m_entrySearcher(new EntrySearcher(false))
 {
     Q_ASSERT(m_db);
@@ -1133,7 +1134,7 @@ void DatabaseWidget::syncWithRemote(const RemoteParams* params)
     setDisabled(true);
     emit databaseSyncInProgress();
 
-    QScopedPointer<RemoteHandler> remoteHandler(new RemoteHandler(this));
+    m_remoteHandler.reset(new RemoteHandler(this));
     RemoteHandler::RemoteResult result;
     result.success = false;
     result.errorMessage = tr("Remote Sync did not contain any download or upload commands.");
@@ -1142,7 +1143,7 @@ void DatabaseWidget::syncWithRemote(const RemoteParams* params)
     if (!params->downloadCommand.isEmpty()) {
         emit updateSyncProgress(25, tr("Downloading..."));
         // Start a download first then merge and upload in the callback
-        result = remoteHandler->download(params);
+        result = m_remoteHandler->download(params);
         if (result.success) {
             QString error;
             QSharedPointer<Database> remoteDb = QSharedPointer<Database>::create();
@@ -1182,10 +1183,12 @@ void DatabaseWidget::syncDatabaseWithLockedDatabase(const QString& filePath, con
 
 void DatabaseWidget::uploadAndFinishSync(const RemoteParams* params, RemoteHandler::RemoteResult result)
 {
-    QScopedPointer<RemoteHandler> remoteHandler(new RemoteHandler(this));
-    if (result.success && !params->uploadCommand.isEmpty()) {
+    if (!m_remoteHandler) {
+        result.success = false;
+        result.errorMessage = tr("Could not upload the database. Remote handler was not initialized.");
+    } else if (result.success && !params->uploadCommand.isEmpty()) {
         emit updateSyncProgress(75, tr("Uploading..."));
-        result = remoteHandler->upload(result.filePath, params);
+        result = m_remoteHandler->upload(params);
     }
 
     finishSync(params, result);
@@ -1193,6 +1196,7 @@ void DatabaseWidget::uploadAndFinishSync(const RemoteParams* params, RemoteHandl
 
 void DatabaseWidget::finishSync(const RemoteParams* params, RemoteHandler::RemoteResult result)
 {
+    m_remoteHandler.reset();
     setDisabled(false);
     emit updateSyncProgress(-1, "");
     if (result.success) {

@@ -17,7 +17,6 @@
 
 #include "RemoteProcess.h"
 
-#include <QTemporaryDir>
 #include <QUuid>
 
 RemoteProcess::RemoteProcess(QObject* parent)

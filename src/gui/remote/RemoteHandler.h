@@ -30,7 +30,7 @@ class RemoteHandler : public QObject
 
 public:
     explicit RemoteHandler(QObject* parent = nullptr);
-    ~RemoteHandler() override = default;
+    ~RemoteHandler() override;
 
     struct RemoteResult
     {
@@ -42,14 +42,18 @@ public:
     };
 
     RemoteResult download(const RemoteParams* params);
-    RemoteResult upload(const QString& filePath, const RemoteParams* params);
+    RemoteResult upload(const RemoteParams* params);
 
     // Used for testing only
     static void setRemoteProcessFunc(std::function<QScopedPointer<RemoteProcess>(QObject*)> func);
 
 private:
+    QString m_tempFileLocation;
+
+    static QString getTempFileLocation(QString* error);
+
     static std::function<QScopedPointer<RemoteProcess>(QObject*)> m_createRemoteProcess;
-    static QString m_tempFileLocation;
+    inline static const QString PREFIX = "KPXC-Sync-";
 
     Q_DISABLE_COPY(RemoteHandler)
 };

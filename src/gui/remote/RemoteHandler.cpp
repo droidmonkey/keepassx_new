@@ -23,16 +23,6 @@
 #include "core/AsyncTask.h"
 #include "core/Database.h"
 
-namespace
-{
-    QString getTempFileLocation()
-    {
-        QString uuid = QUuid::createUuid().toString().remove(0, 1);
-        uuid.chop(1);
-        return QDir::toNativeSeparators(QDir::temp().absoluteFilePath("RemoteDatabase-" + uuid + ".kdbx"));
-    }
-} // namespace
-
 std::function<QScopedPointer<RemoteProcess>(QObject*)> RemoteHandler::m_createRemoteProcess([](QObject* parent) {
     return QScopedPointer<RemoteProcess>(new RemoteProcess(parent));
 });
@@ -42,6 +32,14 @@ RemoteHandler::RemoteHandler(QObject* parent)
 {
 }
 
+RemoteHandler::~RemoteHandler()
+{
+    QFileInfo file(m_tempFileLocation);
+    if (file.absoluteDir().exists() && file.absoluteDir().dirName().startsWith(PREFIX)) {
+        file.absoluteDir().removeRecursively();
+    }
+}
+
 void RemoteHandler::setRemoteProcessFunc(std::function<QScopedPointer<RemoteProcess>(QObject*)> func)
 {
     m_createRemoteProcess = std::move(func);
@@ -49,7 +47,7 @@ void RemoteHandler::setRemoteProcessFunc(std::function<QScopedPointer<RemoteProc
 
 RemoteHandler::RemoteResult RemoteHandler::download(const RemoteParams* params)
 {
-    return AsyncTask::runAndWaitForFuture([params] {
+    return AsyncTask::runAndWaitForFuture([this, params] {
         RemoteResult result;
         if (!params) {
             result.success = false;
@@ -57,9 +55,17 @@ RemoteHandler::RemoteResult RemoteHandler::download(const RemoteParams* params)
             return result;
         }
 
-        auto filePath = getTempFileLocation();
+        QString error;
+        m_tempFileLocation = getTempFileLocation(&error);
+        result.filePath = m_tempFileLocation;
+        if (!error.isEmpty()) {
+            result.success = false;
+            result.errorMessage = error;
+            return result;
+        }
+
         auto remoteProcess = m_createRemoteProcess(nullptr); // use nullptr parent, otherwise there is a warning
-        remoteProcess->setTempFileLocation(filePath);
+        remoteProcess->setTempFileLocation(m_tempFileLocation);
         remoteProcess->start(params->downloadCommand);
         if (!params->downloadInput.isEmpty()) {
             remoteProcess->write(params->downloadInput + "\n");
@@ -76,13 +82,12 @@ RemoteHandler::RemoteResult RemoteHandler::download(const RemoteParams* params)
 
         if (finished && statusCode == 0) {
             // Check if the file actually downloaded
-            QFileInfo fileInfo(filePath);
+            QFileInfo fileInfo(m_tempFileLocation);
             if (!fileInfo.exists() || fileInfo.size() == 0) {
                 result.success = false;
                 result.errorMessage = tr("Command `%1` failed to download database.").arg(params->downloadCommand);
             } else {
                 result.success = true;
-                result.filePath = filePath;
             }
         } else if (finished) {
             result.success = false;
@@ -99,10 +104,11 @@ RemoteHandler::RemoteResult RemoteHandler::download(const RemoteParams* params)
     });
 }
 
-RemoteHandler::RemoteResult RemoteHandler::upload(const QString& filePath, const RemoteParams* params)
+RemoteHandler::RemoteResult RemoteHandler::upload(const RemoteParams* params)
 {
-    return AsyncTask::runAndWaitForFuture([filePath, params] {
+    return AsyncTask::runAndWaitForFuture([this, params] {
         RemoteResult result;
+        result.filePath = m_tempFileLocation;
         if (!params) {
             result.success = false;
             result.errorMessage = tr("Invalid database pointer or upload parameters provided.");
@@ -110,7 +116,7 @@ RemoteHandler::RemoteResult RemoteHandler::upload(const QString& filePath, const
         }
 
         auto remoteProcess = m_createRemoteProcess(nullptr); // use nullptr parent, otherwise there is a warning
-        remoteProcess->setTempFileLocation(filePath);
+        remoteProcess->setTempFileLocation(m_tempFileLocation);
         remoteProcess->start(params->uploadCommand);
         if (!params->uploadInput.isEmpty()) {
             remoteProcess->write(params->uploadInput + "\n");
@@ -142,4 +148,32 @@ RemoteHandler::RemoteResult RemoteHandler::upload(const QString& filePath, const
 
         return result;
     });
+}
+
+QString RemoteHandler::getTempFileLocation(QString* error)
+{
+    QString uuid = QUuid::createUuid().toString().remove(0, 1);
+    uuid.chop(1);
+    QString writableLocation = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
+    if (writableLocation.isEmpty()) {
+        writableLocation = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    }
+
+    QString tempDirLocation = QDir(writableLocation).absoluteFilePath(PREFIX + uuid);
+    QString tempFileLocation =
+        QDir::toNativeSeparators(QDir(tempDirLocation).absoluteFilePath("RemoteDatabase-" + uuid + ".kdbx"));
+
+    if (!QDir().mkdir(tempDirLocation)) {
+        *error = tr("Could not create temporary directory '%1'").arg(tempDirLocation);
+        return "";
+    }
+
+    if (!QFile::setPermissions(tempDirLocation,
+                               QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner)) {
+        QDir(tempDirLocation).removeRecursively();
+        *error = tr("Could not change permissions of temporary directory '%1' to owner").arg(tempDirLocation);
+        return "";
+    }
+
+    return tempFileLocation;
 }
