@@ -21,6 +21,8 @@
 #include "ReportsPageHealthcheck.h"
 #include "ReportsPageHibp.h"
 #include "ReportsPageStatistics.h"
+#include "ReportsPage2FA.h"
+
 #ifdef WITH_XC_BROWSER
 #include "ReportsPageBrowserStatistics.h"
 #include "ReportsWidgetBrowserStatistics.h"
@@ -63,6 +65,7 @@ ReportsDialog::ReportsDialog(QWidget* parent)
     , m_healthPage(new ReportsPageHealthcheck())
     , m_hibpPage(new ReportsPageHibp())
     , m_statPage(new ReportsPageStatistics())
+    , m_2faPage(new ReportsPage2FA())
 #ifdef WITH_XC_BROWSER
     , m_browserStatPage(new ReportsPageBrowserStatistics())
 #endif
@@ -83,6 +86,7 @@ ReportsDialog::ReportsDialog(QWidget* parent)
     addPage(m_browserStatPage);
 #endif
     addPage(m_hibpPage);
+    addPage(m_2faPage);
 
     m_ui->stackedWidget->setCurrentIndex(0);
 
@@ -94,6 +98,8 @@ ReportsDialog::ReportsDialog(QWidget* parent)
     connect(m_ui->categoryList, SIGNAL(categoryChanged(int)), m_ui->stackedWidget, SLOT(setCurrentIndex(int)));
     connect(m_healthPage->m_healthWidget, SIGNAL(entryActivated(Entry*)), SLOT(entryActivationSignalReceived(Entry*)));
     connect(m_hibpPage->m_hibpWidget, SIGNAL(entryActivated(Entry*)), SLOT(entryActivationSignalReceived(Entry*)));
+    connect(m_2faPage->m_2faWidget, SIGNAL(entryActivated(Entry*)), SLOT(entryActivationSignalReceived(Entry*)));
+
 #ifdef WITH_XC_BROWSER
     connect(m_browserStatPage->m_browserWidget,
             SIGNAL(entryActivated(Entry*)),

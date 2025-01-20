@@ -29,6 +29,7 @@ class QTabWidget;
 class ReportsPageHealthcheck;
 class ReportsPageHibp;
 class ReportsPageStatistics;
+class ReportsPage2FA;
 #ifdef WITH_XC_BROWSER
 class ReportsPageBrowserStatistics;
 #endif
@@ -80,6 +81,7 @@ private:
     const QSharedPointer<ReportsPageHealthcheck> m_healthPage;
     const QSharedPointer<ReportsPageHibp> m_hibpPage;
     const QSharedPointer<ReportsPageStatistics> m_statPage;
+    const QSharedPointer<ReportsPage2FA> m_2faPage;
 #ifdef WITH_XC_BROWSER
     const QSharedPointer<ReportsPageBrowserStatistics> m_browserStatPage;
 #endif
