@@ -1640,6 +1640,8 @@ void MainWindow::applySettingsChanges()
     }
 
     updateTrayIcon();
+
+    kpxcApp->applyFontSize();
 }
 
 void MainWindow::setAllowScreenCapture(bool state)

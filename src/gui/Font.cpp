@@ -28,19 +28,21 @@ QFont Font::defaultFont()
 QFont Font::fixedFont()
 {
     auto fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    fixedFont.setPointSize(defaultFont().pointSize());
 
 #ifdef Q_OS_WIN
     // try to use Consolas on Windows, because the default Courier New has too many similar characters
-    auto consolasFont = QFontDatabase().font("Consolas", fixedFont.styleName(), fixedFont.pointSize());
+    auto consolasFont = QFontDatabase().font("Consolas", fixedFont.styleName(), defaultFont().pointSize());
     if (consolasFont.family().contains("consolas", Qt::CaseInsensitive)) {
         fixedFont = consolasFont;
-        // Bump up the font size by one point to match the default font
-        fixedFont.setPointSize(fixedFont.pointSize() + 1);
+        // Bump up the font size by one point to better match the default font on Windows
+        fixedFont.setPointSize(defaultFont().pointSize() + 1);
     }
 #endif
 #ifdef Q_OS_MACOS
     // Qt doesn't choose a monospace font correctly on macOS
-    fixedFont = QFontDatabase().font("Menlo", fixedFont.styleName(), qApp->font().pointSize());
+    fixedFont = QFontDatabase().font("Menlo", fixedFont.styleName(), defaultFont().pointSize());
+    fixedFont.setPointSize(defaultFont().pointSize());
 #endif
     return fixedFont;
 }

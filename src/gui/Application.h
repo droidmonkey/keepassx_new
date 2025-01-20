@@ -42,6 +42,7 @@ public:
     ~Application() override;
 
     static void bootstrap(const QString& uiLanguage = "system");
+    static void applyFontSize();
 
     void applyTheme();
 

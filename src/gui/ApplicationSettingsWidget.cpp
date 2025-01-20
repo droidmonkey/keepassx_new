@@ -170,6 +170,7 @@ ApplicationSettingsWidget::ApplicationSettingsWidget(QWidget* parent)
     m_generalUi->toolButtonStyleComboBox->installEventFilter(mouseWheelFilter);
     m_generalUi->languageComboBox->installEventFilter(mouseWheelFilter);
     m_generalUi->trayIconAppearance->installEventFilter(mouseWheelFilter);
+    m_generalUi->fontSizeComboBox->installEventFilter(mouseWheelFilter);
 
 #ifdef WITH_XC_UPDATECHECK
     connect(m_generalUi->checkForUpdatesOnStartupCheckBox, SIGNAL(toggled(bool)), SLOT(checkUpdatesToggled(bool)));
@@ -265,8 +266,23 @@ void ApplicationSettingsWidget::loadSettings()
     m_generalUi->toolButtonStyleComboBox->addItem(tr("Follow style"), Qt::ToolButtonFollowStyle);
     int toolButtonStyleIndex =
         m_generalUi->toolButtonStyleComboBox->findData(config()->get(Config::GUI_ToolButtonStyle));
-    if (toolButtonStyleIndex > 0) {
+    if (toolButtonStyleIndex >= 0) {
         m_generalUi->toolButtonStyleComboBox->setCurrentIndex(toolButtonStyleIndex);
+    }
+
+    m_generalUi->fontSizeComboBox->clear();
+    m_generalUi->fontSizeComboBox->addItem(tr("Small"), -1);
+    m_generalUi->fontSizeComboBox->addItem(tr("Normal"), 0);
+    m_generalUi->fontSizeComboBox->addItem(tr("Medium"), 1);
+    m_generalUi->fontSizeComboBox->addItem(tr("Large"), 2);
+
+    int fontSizeIndex = m_generalUi->fontSizeComboBox->findData(config()->get(Config::GUI_FontSizeOffset));
+    if (fontSizeIndex >= 0) {
+        m_generalUi->fontSizeComboBox->setCurrentIndex(fontSizeIndex);
+    } else {
+        // Custom value entered into config file, add it to the list and select it
+        m_generalUi->fontSizeComboBox->addItem(tr("Custom"), config()->get(Config::GUI_FontSizeOffset).toInt());
+        m_generalUi->fontSizeComboBox->setCurrentIndex(m_generalUi->fontSizeComboBox->count() - 1);
     }
 
     m_generalUi->systrayShowCheckBox->setChecked(config()->get(Config::GUI_ShowTrayIcon).toBool());
@@ -412,6 +428,7 @@ void ApplicationSettingsWidget::saveSettings()
     config()->set(Config::GUI_ColorPasswords, m_generalUi->colorPasswordsCheckBox->isChecked());
 
     config()->set(Config::GUI_ToolButtonStyle, m_generalUi->toolButtonStyleComboBox->currentData().toString());
+    config()->set(Config::GUI_FontSizeOffset, m_generalUi->fontSizeComboBox->currentData().toInt());
 
     config()->set(Config::GUI_ShowTrayIcon, m_generalUi->systrayShowCheckBox->isChecked());
     config()->set(Config::GUI_TrayIconAppearance, m_generalUi->trayIconAppearance->currentData().toString());

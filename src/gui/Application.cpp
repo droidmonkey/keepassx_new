@@ -44,6 +44,7 @@ namespace
 {
     constexpr int WaitTimeoutMSec = 150;
     const char BlockSizeProperty[] = "blockSize";
+    int g_OriginalFontSize = 0;
 } // namespace
 
 Application::Application(int& argc, char** argv)
@@ -151,12 +152,7 @@ void Application::bootstrap(const QString& uiLanguage)
 {
     Bootstrap::bootstrap(uiLanguage);
 
-#ifdef Q_OS_WIN
-    // Qt on Windows uses "MS Shell Dlg 2" as the default font for many widgets, which resolves
-    // to Tahoma 8pt, whereas the correct font would be "Segoe UI" 9pt.
-    // Apparently, some widgets are already using the correct font. Thanks, MuseScore for this neat fix!
-    QApplication::setFont(QApplication::font("QMessageBox"));
-#endif
+    applyFontSize();
 
     osUtils->registerNativeEventFilter();
     MessageBox::initializeButtonDefs();
@@ -203,6 +199,28 @@ void Application::applyTheme()
             stylesheetFile.close();
         }
     }
+}
+
+void Application::applyFontSize()
+{
+    auto font = QApplication::font();
+
+    // Store the original font size on first call
+    if (g_OriginalFontSize <= 0) {
+#ifdef Q_OS_WIN
+        // Qt on Windows uses "MS Shell Dlg 2" as the default font for many widgets, which resolves
+        // to Tahoma 8pt, whereas the correct font would be "Segoe UI" 9pt.
+        // Apparently, some widgets are already using the correct font. Thanks, MuseScore for this neat fix!
+        font = QApplication::font("QMessageBox");
+#endif
+        g_OriginalFontSize = font.pointSize();
+    }
+
+    // Adjust application wide default font size
+    auto newSize = g_OriginalFontSize + qBound(-2, config()->get(Config::GUI_FontSizeOffset).toInt(), 4);
+    font.setPointSize(newSize);
+    QApplication::setFont(font);
+    QApplication::setFont(font, "QWidget");
 }
 
 bool Application::event(QEvent* event)
